@@ -49,6 +49,6 @@ function tabbarChange({ value }: { value: string }) {
   padding: 0 10rpx;
 }
 .global-page-color {
-  background-color: red;
+  background-color: #fff;
 }
 </style>

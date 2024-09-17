@@ -31,37 +31,72 @@
     <view class="content-center">
       <view class="content-center-title">赛道中心</view>
       <view class="home-content-list">
-        <wd-card>
-          <template #title>
-            <view class="title">
-              <view>2020-02-03服务到期</view>
-              <view class="title-tip">
-                <wd-icon name="warning" size="14px" custom-style="vertical-align: bottom" />
-                您可以去电脑上使用该服务
-              </view>
-            </view>
-          </template>
-          <view style="height: 40px" class="content">
+        <wd-card title="职场工作">
+          <view class="content">
             <image
               src="https://img11.360buyimg.com/imagetools/jfs/t1/143248/37/5695/265818/5f3a8546E98d998a4/745897ca9c9e474b.jpg"
-              width="40"
-              height="40"
               alt="joy"
-              style="margin-right: 12px; border-radius: 4px; width: 40px; height: 40px"
+              style="width: 70px; height: 70px; margin-right: 12px; border-radius: 4px"
             />
             <view>
-              <view style=" font-size: 16 px ;c olor: rgba(0,0,0,0.85)">智催评营销</view>
-              <view style=" font-size: 12 px ;c olor: rgba(0,0,0,0.25)">
-                高级版-快速吸粉 | 周期一年
-              </view>
+              <view>职场工作说的是...</view>
+              <view>剩余：10件</view>
+              <view>热门指数：⭐⭐⭐⭐⭐</view>
             </view>
           </view>
-
           <template #footer>
+            <wd-button size="small" plain>查看详情</wd-button>
+          </template>
+        </wd-card>
+        <wd-card title="情感生活">
+          <view class="content">
+            <image
+              src="https://img11.360buyimg.com/imagetools/jfs/t1/143248/37/5695/265818/5f3a8546E98d998a4/745897ca9c9e474b.jpg"
+              alt="joy"
+              style="width: 70px; height: 70px; margin-right: 12px; border-radius: 4px"
+            />
             <view>
-              <wd-button size="small" style="margin-right: 8px">评价</wd-button>
-              <wd-button size="small" plain>立即使用</wd-button>
+              <view>情感生活说的是...</view>
+              <view>剩余：700件</view>
+              <view>热门指数：⭐⭐⭐</view>
             </view>
+          </view>
+          <template #footer>
+            <wd-button size="small" plain>查看详情</wd-button>
+          </template>
+        </wd-card>
+        <wd-card title="职场工作">
+          <view class="content">
+            <image
+              src="https://img11.360buyimg.com/imagetools/jfs/t1/143248/37/5695/265818/5f3a8546E98d998a4/745897ca9c9e474b.jpg"
+              alt="joy"
+              style="width: 70px; height: 70px; margin-right: 12px; border-radius: 4px"
+            />
+            <view>
+              <view>职场工作说的是...</view>
+              <view>剩余：10件</view>
+              <view>热门指数：⭐⭐⭐⭐⭐</view>
+            </view>
+          </view>
+          <template #footer>
+            <wd-button size="small" plain>查看详情</wd-button>
+          </template>
+        </wd-card>
+        <wd-card title="情感生活">
+          <view class="content">
+            <image
+              src="https://img11.360buyimg.com/imagetools/jfs/t1/143248/37/5695/265818/5f3a8546E98d998a4/745897ca9c9e474b.jpg"
+              alt="joy"
+              style="width: 70px; height: 70px; margin-right: 12px; border-radius: 4px"
+            />
+            <view>
+              <view>情感生活说的是...</view>
+              <view>剩余：700件</view>
+              <view>热门指数：⭐⭐⭐</view>
+            </view>
+          </view>
+          <template #footer>
+            <wd-button size="small" plain>查看详情</wd-button>
           </template>
         </wd-card>
       </view>
@@ -92,7 +127,10 @@ function navToSearchPage(value: any) {
 }
 
 //   ----------   赛道中心  -------------------
-const contentCenterList = ref([{ title: '111' }, { title: '222' }])
+const contentCenterList = ref([
+  { title: '职场工作', count: 128, info: '职场工作说的是。。。。', hot: '⭐⭐⭐⭐⭐' },
+  { title: '情感生活', count: 222, info: '情感生活说的是。。。。', hot: '⭐⭐⭐⭐' },
+])
 </script>
 
 <style lang="scss" scoped>
@@ -105,9 +143,8 @@ const contentCenterList = ref([{ title: '111' }, { title: '222' }])
     margin-bottom: 20rpx;
     :deep(.custom-search) {
       padding: 0;
-    }
-    .wd-search {
       background-color: transparent;
+      border-radius: 38rpx;
     }
   }
 }
@@ -135,11 +172,19 @@ const contentCenterList = ref([{ title: '111' }, { title: '222' }])
 }
 
 .content-center {
-  background-color: #d14328;
+  padding: 20rpx 0;
+  margin-top: 20rpx;
+  background-color: #f5f5f5;
+  border-radius: 20rpx;
 }
 
 .content-center .content-center-title {
-  font-size: 20rpx;
-  margin: 10rpx 20rpx;
+  padding-bottom: 20rpx;
+  margin: 10rpx 30rpx;
+  font-size: 40rpx;
+  font-weight: 1000;
+}
+.wd-card {
+  background-color: red;
 }
 </style>
