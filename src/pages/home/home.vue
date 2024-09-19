@@ -1,5 +1,5 @@
 <!-- 使用 type="home" 属性设置首页，其他页面不需要设置，默认为page；推荐使用json5，更强大，且允许注释 -->
-<route lang="json5" type="home">
+<route lang="json5">
 {
   layout: 'tabbar',
   style: {
@@ -31,74 +31,25 @@
     <view class="content-center">
       <view class="content-center-title">赛道中心</view>
       <view class="home-content-list">
-        <wd-card title="职场工作">
-          <view class="content">
-            <image
-              src="https://img11.360buyimg.com/imagetools/jfs/t1/143248/37/5695/265818/5f3a8546E98d998a4/745897ca9c9e474b.jpg"
-              alt="joy"
-              style="width: 70px; height: 70px; margin-right: 12px; border-radius: 4px"
-            />
-            <view>
-              <view>职场工作说的是...</view>
-              <view>剩余：10件</view>
-              <view>热门指数：⭐⭐⭐⭐⭐</view>
+        <view v-for="(item, index) in contentCenterList" :key="index">
+          <wd-card :title="item.title">
+            <view class="content">
+              <image
+                src="https://img11.360buyimg.com/imagetools/jfs/t1/143248/37/5695/265818/5f3a8546E98d998a4/745897ca9c9e474b.jpg"
+                alt="joy"
+                style="width: 70px; height: 70px; margin-right: 12px; border-radius: 4px"
+              />
+              <view>
+                <view>{{ item.info }}</view>
+                <view>剩余：{{ item.count }}件</view>
+                <view>热门指数：{{ item.hot }}</view>
+              </view>
             </view>
-          </view>
-          <template #footer>
-            <wd-button size="small" plain>查看详情</wd-button>
-          </template>
-        </wd-card>
-        <wd-card title="情感生活">
-          <view class="content">
-            <image
-              src="https://img11.360buyimg.com/imagetools/jfs/t1/143248/37/5695/265818/5f3a8546E98d998a4/745897ca9c9e474b.jpg"
-              alt="joy"
-              style="width: 70px; height: 70px; margin-right: 12px; border-radius: 4px"
-            />
-            <view>
-              <view>情感生活说的是...</view>
-              <view>剩余：700件</view>
-              <view>热门指数：⭐⭐⭐</view>
-            </view>
-          </view>
-          <template #footer>
-            <wd-button size="small" plain>查看详情</wd-button>
-          </template>
-        </wd-card>
-        <wd-card title="职场工作">
-          <view class="content">
-            <image
-              src="https://img11.360buyimg.com/imagetools/jfs/t1/143248/37/5695/265818/5f3a8546E98d998a4/745897ca9c9e474b.jpg"
-              alt="joy"
-              style="width: 70px; height: 70px; margin-right: 12px; border-radius: 4px"
-            />
-            <view>
-              <view>职场工作说的是...</view>
-              <view>剩余：10件</view>
-              <view>热门指数：⭐⭐⭐⭐⭐</view>
-            </view>
-          </view>
-          <template #footer>
-            <wd-button size="small" plain>查看详情</wd-button>
-          </template>
-        </wd-card>
-        <wd-card title="情感生活">
-          <view class="content">
-            <image
-              src="https://img11.360buyimg.com/imagetools/jfs/t1/143248/37/5695/265818/5f3a8546E98d998a4/745897ca9c9e474b.jpg"
-              alt="joy"
-              style="width: 70px; height: 70px; margin-right: 12px; border-radius: 4px"
-            />
-            <view>
-              <view>情感生活说的是...</view>
-              <view>剩余：700件</view>
-              <view>热门指数：⭐⭐⭐</view>
-            </view>
-          </view>
-          <template #footer>
-            <wd-button size="small" plain>查看详情</wd-button>
-          </template>
-        </wd-card>
+            <template #footer>
+              <wd-button size="small" plain>查看详情</wd-button>
+            </template>
+          </wd-card>
+        </view>
       </view>
     </view>
   </view>
@@ -129,7 +80,9 @@ function navToSearchPage(value: any) {
 //   ----------   赛道中心  -------------------
 const contentCenterList = ref([
   { title: '职场工作', count: 128, info: '职场工作说的是。。。。', hot: '⭐⭐⭐⭐⭐' },
-  { title: '情感生活', count: 222, info: '情感生活说的是。。。。', hot: '⭐⭐⭐⭐' },
+  { title: '情感故事', count: 222, info: '情感生活说的是。。。。', hot: '⭐⭐⭐⭐' },
+  { title: '汽车资讯', count: 222, info: '情感生活说的是。。。。', hot: '⭐⭐⭐⭐⭐' },
+  { title: '教育高考', count: 222, info: '情感生活说的是。。。。', hot: '⭐⭐⭐' },
 ])
 </script>
 
@@ -183,8 +136,5 @@ const contentCenterList = ref([
   margin: 10rpx 30rpx;
   font-size: 40rpx;
   font-weight: 1000;
-}
-.wd-card {
-  background-color: red;
 }
 </style>
