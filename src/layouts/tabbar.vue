@@ -1,5 +1,5 @@
 <template>
-  <view class="p-3">
+  <view class="global-page p-3">
     <wd-config-provider theme="light">
       <slot />
       <view>
@@ -47,5 +47,12 @@ function tabbarChange({ value }: { value: string }) {
 <style scoped>
 .main-view {
   padding: 0 10rpx;
+}
+
+.global-page {
+  box-sizing: border-box;
+  width: 100vw;
+  height: 100vh;
+  background-color: #f5f5f5;
 }
 </style>

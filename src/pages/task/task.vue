@@ -8,19 +8,16 @@
 }
 </route>
 <template>
-  <view class="task">我的任务</view>
   <myTask />
+  <myCountList />
 </template>
 
 <script lang="ts" setup>
+import myCountList from './components/my_count_list/my_count_list.vue'
 import myTask from './components/my_task/my_task.vue'
 </script>
 
 <style lang="scss" scoped>
-page {
-  background-color: #f5f5f5;
-}
-
 .task {
   width: 100%;
   background-color: red;

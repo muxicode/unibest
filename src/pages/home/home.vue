@@ -45,9 +45,9 @@
                 <view>热门指数：{{ item.hot }}</view>
               </view>
             </view>
-            <template #footer>
+            <!-- <template #footer>
               <wd-button size="small" plain>查看详情</wd-button>
-            </template>
+            </template> -->
           </wd-card>
         </view>
       </view>
@@ -96,8 +96,10 @@ const contentCenterList = ref([
     margin-bottom: 20rpx;
     :deep(.custom-search) {
       padding: 0;
-      background-color: transparent;
       border-radius: 38rpx;
+    }
+    :deep(.wd-search__block) {
+      background-color: #fff;
     }
   }
 }
@@ -108,6 +110,7 @@ const contentCenterList = ref([
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
+  font-size: 24rpx;
 }
 .content {
   justify-content: flex-start;
@@ -127,14 +130,19 @@ const contentCenterList = ref([
 .content-center {
   padding: 20rpx 0;
   margin-top: 20rpx;
-  background-color: #f5f5f5;
+  background-color: #fff;
   border-radius: 20rpx;
+  :deep(.wd-card) {
+    background-color: #f5f5f5;
+  }
+  :deep(.wd-card__title-content) {
+    padding: 20rpx;
+  }
 }
 
 .content-center .content-center-title {
-  padding-bottom: 20rpx;
+  padding-bottom: 10rpx;
   margin: 10rpx 30rpx;
-  font-size: 40rpx;
-  font-weight: 1000;
+  font-size: 30rpx;
 }
 </style>

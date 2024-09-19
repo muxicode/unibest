@@ -11,7 +11,7 @@
         @click="() => onClickItem(item)"
       >
         <view class="mb-2 w-56rpx h-56rpx relative">
-          <wd-badge :model-value="item.orderNum" :max="99" color="#FF4646">
+          <wd-badge :model-value="item.orderNum" :max="99" :type="item.type">
             <wd-icon
               :name="item.iconName"
               size="56rpx"
@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, toRefs } from 'vue'
+import { ref } from 'vue'
 
 const props = defineProps({
   orderTagInfos: {
@@ -35,11 +35,11 @@ const props = defineProps({
   },
   title: {
     type: String,
-    default: '我的订单',
+    default: '我的任务',
   },
   desc: {
     type: String,
-    default: '全部订单',
+    default: '详细信息',
   },
   isTop: {
     type: Boolean,
@@ -53,9 +53,22 @@ const titleRef = ref(props.title)
 const descRef = ref(props.desc)
 const isTopRef = ref(props.isTop)
 orderTagInfosRef.value.push({
-  orderNum: 10,
-  iconName: '',
-  title: '111',
+  orderNum: 3,
+  iconName: 'list',
+  title: '待发表',
+  type: 'warning',
+})
+orderTagInfosRef.value.push({
+  orderNum: 64,
+  iconName: 'check-bold',
+  title: '已完成',
+  type: 'success',
+})
+orderTagInfosRef.value.push({
+  orderNum: 5,
+  iconName: 'close-bold',
+  title: '已拒绝',
+  type: 'danger',
 })
 
 const emit = defineEmits(['onClickTop', 'onClickItem'])
