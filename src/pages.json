@@ -54,6 +54,14 @@
       }
     },
     {
+      "path": "pages/articles/articles",
+      "type": "page",
+      "layout": "page",
+      "style": {
+        "navigationBarTitleText": "文章列表"
+      }
+    },
+    {
       "path": "pages/home/home",
       "type": "page",
       "layout": "tabbar",

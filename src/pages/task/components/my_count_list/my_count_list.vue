@@ -11,11 +11,16 @@
               style="width: 70px; height: 70px; margin-right: 12px; border-radius: 4px"
             />
             <view>
-              <view>{{ item.info }}</view>
-              <view>剩余：{{ item.count }}件</view>
-              <view>热门指数：{{ item.hot }}</view>
+              <view>我的赛道：{{ item.info }}</view>
+              <view>运营天数：{{ +item.days }}</view>
+              <view>总收入：￥{{ +item.totalMoney }}</view>
+              <view>今日待领取文章：{{ +item.articleNum }}</view>
+              <view>数据上报：{{ item.report ? '已完成' : '待完成' }}</view>
             </view>
           </view>
+          <template #footer>
+            <wd-button @click="getArticles" size="small">领取文章</wd-button>
+          </template>
         </wd-card>
       </view>
     </view>
@@ -26,8 +31,20 @@
 import { ref } from 'vue'
 
 const countList = ref([
-  { title: '公众号名称', count: 128, info: '公众号名称简介', hot: '⭐⭐⭐⭐⭐' },
+  {
+    title: '公众号名称',
+    info: '职场情感',
+    days: 50,
+    articleNum: 5,
+    report: true,
+    totalMoney: 12504,
+  },
 ])
+
+const getArticles = function () {
+  console.log('getArticles')
+  uni.navigateTo({ url: '/pages/articles/articles' })
+}
 </script>
 
 <style lang="scss" scoped>
