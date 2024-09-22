@@ -4,7 +4,9 @@
   </view>
 </template>
 
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import { ref } from 'vue'
+</script>
 
 <style scoped>
 .global-page {

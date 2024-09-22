@@ -11,7 +11,8 @@ interface NavigateToOptions {
        "/pages/index/index" |
        "/pages/profile/profile" |
        "/pages/settlement/settlement" |
-       "/pages/tarbar-view/tarbar";
+       "/pages/tarbar-view/tarbar" |
+       "/pages/upload/upload";
 }
 interface RedirectToOptions extends NavigateToOptions {}
 
