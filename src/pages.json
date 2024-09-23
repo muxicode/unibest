@@ -39,11 +39,11 @@
   },
   "pages": [
     {
-      "path": "pages/task/task",
+      "path": "pages/upload/upload",
       "type": "home",
-      "layout": "tabbar",
+      "layout": "page",
       "style": {
-        "navigationBarTitleText": "任务"
+        "navigationBarTitleText": "每日上报"
       }
     },
     {
@@ -102,11 +102,11 @@
       }
     },
     {
-      "path": "pages/upload/upload",
+      "path": "pages/task/task",
       "type": "page",
-      "layout": "page",
+      "layout": "tabbar",
       "style": {
-        "navigationBarTitleText": "每日上报"
+        "navigationBarTitleText": "任务"
       }
     }
   ],
