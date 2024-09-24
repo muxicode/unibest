@@ -1,5 +1,5 @@
 <!-- 使用 type="home" 属性设置首页，其他页面不需要设置，默认为page；推荐使用json5，更强大，且允许注释 -->
-<route lang="json5" type="home">
+<route lang="json5">
 {
   layout: 'page',
   style: {
@@ -10,42 +10,56 @@
 <template>
   <view class="upload">
     <wd-form ref="form" :model="model">
-      <wd-cell-group border>
-        <view class="p-4 bg-opacity-100">账号名称xxxx</view>
+      <view class="head"></view>
+      <wd-cell-group custom-class="group" title="职场小精英" border>
         <wd-input
           label="昨日账号阅读"
           label-width="100px"
-          prop="value1"
+          :maxlength="20"
+          show-word-limit
+          prop="couponName"
+          required
+          suffix-icon="warn-bold"
           clearable
-          v-model="model.value1"
-          placeholder="请输入用户名"
-          :rules="[{ required: true, message: '请填写用户名' }]"
+          v-model="model.couponName"
+          placeholder="填写昨日账号阅读"
+          @clicksuffixicon="handleIconClick"
         />
         <wd-input
           label="昨日账号收益"
           label-width="100px"
-          prop="value1"
+          :maxlength="20"
+          show-word-limit
+          prop="couponName"
+          required
+          suffix-icon="warn-bold"
           clearable
-          v-model="model.value1"
-          placeholder="请输入用户名"
-          :rules="[{ required: true, message: '请填写用户名' }]"
+          v-model="model.couponName"
+          placeholder="填写昨日账号收益"
+          @clicksuffixicon="handleIconClick"
         />
         <wd-input
           label="本月账号收益"
           label-width="100px"
-          prop="value1"
+          :maxlength="20"
+          show-word-limit
+          prop="couponName"
+          required
+          suffix-icon="warn-bold"
           clearable
-          v-model="model.value1"
-          placeholder="请输入用户名"
-          :rules="[{ required: true, message: '请填写用户名' }]"
+          v-model="model.couponName"
+          placeholder="填写本月账号收益"
+          @clicksuffixicon="handleIconClick"
         />
+        <wd-cell title="数据截图" prop="fileList" required>
+          <wd-upload
+            style="display: inline-block"
+            :file-list="model.fileList"
+            action="https://ftf.jd.com/api/uploadImg"
+            @change="handleFileChange"
+          ></wd-upload>
+        </wd-cell>
       </wd-cell-group>
-      <wd-upload
-        :file-list="fileList1"
-        image-mode="aspectFill"
-        :action="action"
-        @change="handleChange1"
-      ></wd-upload>
       <view class="footer">
         <wd-button type="primary" size="large" @click="handleSubmit" block>提交</wd-button>
       </view>
@@ -109,7 +123,17 @@ function handleChange({ fileList: files }) {
   border-radius: 20rpx;
 }
 
+.head {
+  height: 20rpx;
+}
+
 .footer {
   padding: 12px;
+}
+
+.upload {
+  :deep(.wd-cell__left) {
+    flex: 0.44;
+  }
 }
 </style>
