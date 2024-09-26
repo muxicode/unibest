@@ -1,5 +1,5 @@
 <!-- 使用 type="home" 属性设置首页，其他页面不需要设置，默认为page；推荐使用json5，更强大，且允许注释 -->
-<route lang="json5">
+<route lang="json5" type="home">
 {
   layout: 'page',
   style: {
@@ -15,7 +15,7 @@
         <view style="display: inline-block; margin: 0 10rpx">
           <wd-button size="small">复制标题</wd-button>
         </view>
-        <wd-button size="small">点击下载</wd-button>
+        <wd-button size="small" @click="clickDownload(item)">点击下载</wd-button>
       </template>
     </wd-card>
   </view>
@@ -23,6 +23,11 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
+
+interface article {
+  title: string
+  id: string
+}
 
 const articles = ref([
   {
@@ -39,6 +44,89 @@ const articles = ref([
     id: '3',
   },
 ])
+
+let clickDownload = function (article: article) {
+  uni.showLoading({ title: '文件获取中...' })
+
+  const fileContent = '打桩文件内容' // 获取txt文件内容
+
+  uni.hideLoading()
+
+  onShareFile(fileContent)
+  console.log('clickDownload', article.title)
+}
+
+// 弹窗提示并分享文件
+const onShareFile = (content) => {
+  uni.showModal({
+    title: '提示',
+    content: '请分享到文件传输助手',
+    success: (res) => {
+      if (res.confirm) {
+        prepareFileToShare(content)
+      }
+    },
+  })
+}
+
+// 准备文件分享
+const prepareFileToShare = (content) => {
+  const filePath = `${wx.env.USER_DATA_PATH}/file.txt`
+  console.log('prepareFileToShare', filePath)
+  // 将文件内容写入本地文件系统
+  uni.getFileSystemManager().writeFile({
+    filePath: filePath,
+    data: content,
+    encoding: 'utf8',
+    success: () => {
+      console.log('writeFile success', filePath)
+      //   shareFile(filePath)
+      uni.shareFileMessage({
+        filePath: filePath,
+        success(res) {
+          console.log('shareFileMessage成功', res)
+        },
+        fail(res) {
+          console.log('shareFileMessage失败', res)
+        },
+      })
+    },
+    fail: () => {
+      uni.showToast({ title: '文件保存失败', icon: 'none' })
+    },
+  })
+}
+
+// 打开文件并调用分享
+const shareFile = (filePath) => {
+  //   uni.openDocument({
+  //     filePath: filePath,
+  //     fileType: 'txt',
+  //     success: () => {
+  //       // 打开微信分享菜单
+  //       uni.showShareMenu({
+  //         withShareTicket: true,
+  //         success: () => {
+  //           console.log('分享菜单已打开')
+  //         },
+  //         fail: (err) => {
+  //           console.error('分享菜单打开失败', err)
+  //         },
+  //       })
+  //     },
+  //     fail: (err) => {
+  //       console.error('文件打开失败', err)
+  //     },
+  //   })
+}
+// const let download = uni.downloadFile({
+//     url: '',
+//     success: (result)=>{
+
+//     },
+//     fail: ()=>{},
+//     complete: ()=>{}
+// });
 </script>
 
 <style lang="scss" scoped>
