@@ -1,7 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-const initState = { nickname: '', avatar: '' }
+const initState = {
+  nickname: '',
+  avatar: '',
+  avatarUrl:
+    'https://cdn-we-retail.ym.tencent.com/miniapp/usercenter/icon-user-center-avatar@2x.png',
+}
 
 export const useUserStore = defineStore(
   'user',
@@ -20,12 +25,16 @@ export const useUserStore = defineStore(
       userInfo.value = { ...initState }
     }
     const isLogined = computed(() => !!userInfo.value.token)
+    const currAuthStep = computed(() => (userInfo.value.token ? 2 : 1))
+    const isNeedGetUserInfo = computed(() => !userInfo.value.token)
 
     return {
       userInfo,
       setUserInfo,
       clearUserInfo,
       isLogined,
+      currAuthStep,
+      isNeedGetUserInfo,
       reset,
     }
   },

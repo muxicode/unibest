@@ -71,6 +71,14 @@
 </template>
 
 <script lang="ts" setup>
+import { useUserStore } from '@/store'
+const userStore = useUserStore()
+
+console.log('userStore.userInfo', userStore.userInfo)
+console.log('userStore.isNeedGetUserInfo', userStore.isNeedGetUserInfo)
+console.log('userStore.currAuthStep', userStore.currAuthStep)
+console.log('userStore.isLogined', userStore.isLogined)
+
 const menuData = ref([
   [
     {
