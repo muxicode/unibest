@@ -39,11 +39,11 @@
   },
   "pages": [
     {
-      "path": "pages/articles/articles",
+      "path": "pages/home/home",
       "type": "home",
-      "layout": "page",
+      "layout": "tabbar",
       "style": {
-        "navigationBarTitleText": "文章列表"
+        "navigationBarTitleText": "首页"
       }
     },
     {
@@ -54,11 +54,19 @@
       }
     },
     {
-      "path": "pages/home/home",
+      "path": "pages/articles/articles",
       "type": "page",
-      "layout": "tabbar",
+      "layout": "page",
       "style": {
-        "navigationBarTitleText": "首页"
+        "navigationBarTitleText": "文章列表"
+      }
+    },
+    {
+      "path": "pages/income/income",
+      "type": "page",
+      "layout": "page",
+      "style": {
+        "navigationBarTitleText": "收益结算"
       }
     },
     {

@@ -26,7 +26,7 @@
           </view>
           <template #footer>
             <wd-button v-if="!item.report" @click="uploadData(item)" size="small">
-              点击回传
+              收益结算
             </wd-button>
           </template>
         </wd-card>
@@ -52,7 +52,7 @@ const countList = ref([
 const uploadData = function (item: any) {
   console.log('uploadData')
   // item.report = trues
-  uni.navigateTo({ url: '/pages/upload/upload' })
+  uni.navigateTo({ url: '/pages/income/income' })
 }
 </script>
 

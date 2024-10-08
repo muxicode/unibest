@@ -19,7 +19,14 @@
             </view>
           </view>
           <template #footer>
-            <wd-button @click="getArticles" size="small">领取文章</wd-button>
+            <view class="buttons">
+              <view>
+                <wd-button @click="dataReport" size="small">每日上报</wd-button>
+              </view>
+              <view>
+                <wd-button @click="getArticles" size="small">领取文章</wd-button>
+              </view>
+            </view>
           </template>
         </wd-card>
       </view>
@@ -45,9 +52,20 @@ const getArticles = function () {
   console.log('getArticles')
   uni.navigateTo({ url: '/pages/articles/articles' })
 }
+
+const dataReport = function () {
+  console.log('dataReport')
+  uni.navigateTo({ url: '/pages/upload/upload' })
+}
 </script>
 
 <style lang="scss" scoped>
+.buttons {
+  display: flex;
+  gap: 10px; /* 按钮之间的间隔 */
+  justify-content: flex-end; /* 按钮从右往左排列 */
+}
+
 .content,
 .title {
   display: flex;
