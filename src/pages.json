@@ -39,9 +39,9 @@
   },
   "pages": [
     {
-      "path": "pages/home/home",
+      "path": "pages/formdemo/formdemo",
       "type": "home",
-      "layout": "tabbar",
+      "layout": "page",
       "style": {
         "navigationBarTitleText": "首页"
       }
@@ -59,6 +59,14 @@
       "layout": "page",
       "style": {
         "navigationBarTitleText": "文章列表"
+      }
+    },
+    {
+      "path": "pages/home/home",
+      "type": "page",
+      "layout": "tabbar",
+      "style": {
+        "navigationBarTitleText": "首页"
       }
     },
     {

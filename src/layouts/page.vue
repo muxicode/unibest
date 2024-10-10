@@ -12,7 +12,6 @@ import { ref } from 'vue'
 .global-page {
   box-sizing: border-box;
   width: 100vw;
-  height: 100vh;
   background-color: #f5f5f5;
 }
 </style>
