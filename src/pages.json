@@ -39,9 +39,9 @@
   },
   "pages": [
     {
-      "path": "pages/formdemo/formdemo",
+      "path": "pages/home/home",
       "type": "home",
-      "layout": "page",
+      "layout": "tabbar",
       "style": {
         "navigationBarTitleText": "首页"
       }
@@ -62,9 +62,9 @@
       }
     },
     {
-      "path": "pages/home/home",
+      "path": "pages/formdemo/formdemo",
       "type": "page",
-      "layout": "tabbar",
+      "layout": "page",
       "style": {
         "navigationBarTitleText": "首页"
       }
