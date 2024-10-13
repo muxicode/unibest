@@ -52,7 +52,7 @@ const countList = ref([
 const uploadData = function (item: any) {
   console.log('uploadData')
   // item.report = trues
-  uni.navigateTo({ url: '/pages/income/income' })
+  uni.navigateTo({ url: '/pages/settlements/settlements' })
 }
 </script>
 

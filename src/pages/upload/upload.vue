@@ -55,7 +55,14 @@
           />
         </wd-cell-group>
         <wd-cell-group custom-class="group border-rd-lg" title="数据截图" border>
-          <wd-cell title="阅读与收益" title-width="100px" prop="fileList">
+          <wd-cell title="阅读截图" title-width="100px" prop="fileList">
+            <wd-upload
+              :file-list="model.fileList"
+              action="https://ftf.jd.com/api/uploadImg"
+              @change="handleFileChange"
+            ></wd-upload>
+          </wd-cell>
+          <wd-cell title="收益截图" title-width="100px" prop="fileList">
             <wd-upload
               :file-list="model.fileList"
               action="https://ftf.jd.com/api/uploadImg"

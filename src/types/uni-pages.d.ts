@@ -12,6 +12,7 @@ interface NavigateToOptions {
        "/pages/index/index" |
        "/pages/profile/profile" |
        "/pages/settlement/settlement" |
+       "/pages/settlements/settlements" |
        "/pages/tarbar-view/tarbar" |
        "/pages/task/task" |
        "/pages/upload/upload";
