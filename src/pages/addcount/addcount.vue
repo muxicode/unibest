@@ -3,7 +3,7 @@
 {
   layout: 'page',
   style: {
-    navigationBarTitleText: '收益结算',
+    navigationBarTitleText: '添加账号',
   },
 }
 </route>
@@ -13,72 +13,76 @@
       <wd-message-box />
       <wd-toast />
       <wd-form ref="form" :model="model" :rules="rules">
-        <wd-cell-group custom-class="group border-rd-lg" title="职场小精英" border>
+        <wd-cell-group custom-class="group border-rd-lg" border>
           <wd-select-picker
-            label="结算方式"
+            label="选择赛道"
             label-width="100px"
             prop="platform"
             v-model="model.platform"
             :columns="platformList"
-            placeholder="请选择结算方式"
+            placeholder="请选择你的赛道"
           />
+          <wd-select-picker
+            label="选择平台"
+            label-width="100px"
+            prop="platform"
+            v-model="model.platform"
+            :columns="platformList"
+            placeholder="请选择你的平台"
+          />
+        </wd-cell-group>
+        <wd-cell-group custom-class="group border-rd-lg" title="帐号信息" border>
           <wd-input
-            label="转账订单"
+            label="帐号昵称"
             label-width="100px"
             :maxlength="20"
             show-word-limit
-            prop="couponName"
             required
             suffix-icon="warn-bold"
             clearable
             v-model="model.couponName"
-            placeholder="复制粘贴转账订单号"
+            placeholder=""
             @clicksuffixicon="handleIconClick"
           />
           <wd-input
-            label="本期结算收益"
+            label="帐号ID"
             label-width="100px"
             :maxlength="20"
             show-word-limit
-            prop="couponName"
             required
             suffix-icon="warn-bold"
             clearable
             v-model="model.couponName"
-            placeholder="填写本期分成后收益"
+            placeholder=""
             @clicksuffixicon="handleIconClick"
           />
+          <wd-calendar
+            label="帐号注册日期"
+            label-width="100px"
+            placeholder="请选择日期"
+            prop="date"
+            v-model="model.date"
+          />
+          <wd-cell title="是否违规" title-width="100px" prop="switchVal" center>
+            <view style="text-align: left">
+              <wd-switch v-model="model.switchVal" />
+            </view>
+          </wd-cell>
           <wd-input
-            label="本期账号收益"
+            label="注册手机号"
             label-width="100px"
             :maxlength="20"
             show-word-limit
-            prop="couponName"
             required
             suffix-icon="warn-bold"
             clearable
             v-model="model.couponName"
-            placeholder="填写本期账号总收益"
+            placeholder="若忘记，使用自己手机号即可"
+            placeholder=""
             @clicksuffixicon="handleIconClick"
           />
         </wd-cell-group>
-        <wd-cell-group custom-class="group border-rd-lg" title="订单截图" border>
-          <wd-cell title="上传结算单" title-width="100px" prop="fileList">
-            <wd-upload
-              :file-list="model.fileList"
-              action="https://ftf.jd.com/api/uploadImg"
-              @change="handleFileChange"
-            ></wd-upload>
-          </wd-cell>
-          <wd-cell title="上传转账截图(含订单号)" title-width="100px" prop="fileList">
-            <wd-upload
-              :file-list="model.fileList"
-              action="https://ftf.jd.com/api/uploadImg"
-              @change="handleFileChange"
-            ></wd-upload>
-          </wd-cell>
-        </wd-cell-group>
-        <view class="tip">保持平常心，静待花开，早日出爆文~</view>
+        <view class="tip">审核通过后，文章领取权限自动开通～</view>
         <view class="footer">
           <wd-button type="primary" size="large" @click="handleSubmit" block>提交审核</wd-button>
         </view>

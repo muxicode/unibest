@@ -46,7 +46,7 @@
           :title="xitem.title"
           :value="xitem.tit"
           is-link
-          @click="onClickCell"
+          @click="onClickCell(xitem)"
         >
           <template v-if="xitem.icon">
             <wd-icon :name="xitem.icon"></wd-icon>
@@ -60,6 +60,20 @@
 <script lang="ts" setup>
 import { useUserStore } from '@/store'
 const userStore = useUserStore()
+
+interface menuItem {
+  title: string
+  tit: string
+  url: string
+  type: string
+  icon: string
+}
+
+const onClickCell = function (item: menuItem) {
+  if (item.type === 'addCount') {
+    uni.navigateTo({ url: '/pages/addcount/addcount' })
+  }
+}
 
 console.log('userStore.userInfo', userStore.userInfo)
 console.log('userStore.isNeedGetUserInfo', userStore.isNeedGetUserInfo)

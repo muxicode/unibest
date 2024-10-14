@@ -54,6 +54,14 @@
       }
     },
     {
+      "path": "pages/addcount/addcount",
+      "type": "page",
+      "layout": "page",
+      "style": {
+        "navigationBarTitleText": "添加账号"
+      }
+    },
+    {
       "path": "pages/articles/articles",
       "type": "page",
       "layout": "page",
