@@ -18,8 +18,8 @@
             label="选择赛道"
             label-width="100px"
             prop="platform"
-            v-model="model.platform"
-            :columns="platformList"
+            v-model="model.theme"
+            :columns="themeList"
             placeholder="请选择你的赛道"
           />
           <wd-select-picker
@@ -35,8 +35,6 @@
           <wd-input
             label="帐号昵称"
             label-width="100px"
-            :maxlength="20"
-            show-word-limit
             required
             suffix-icon="warn-bold"
             clearable
@@ -47,8 +45,6 @@
           <wd-input
             label="帐号ID"
             label-width="100px"
-            :maxlength="20"
-            show-word-limit
             required
             suffix-icon="warn-bold"
             clearable
@@ -71,14 +67,11 @@
           <wd-input
             label="注册手机号"
             label-width="100px"
-            :maxlength="20"
-            show-word-limit
             required
             suffix-icon="warn-bold"
             clearable
             v-model="model.couponName"
             placeholder="若忘记，使用自己手机号即可"
-            placeholder=""
             @clicksuffixicon="handleIconClick"
           />
         </wd-cell-group>
@@ -102,6 +95,7 @@ import { reactive, ref } from 'vue'
 const model = reactive<{
   couponName: string
   platform: any[]
+  theme: any[]
   promotion: string
   threshold: string
   price: string
@@ -118,6 +112,7 @@ const model = reactive<{
 }>({
   couponName: '',
   platform: [],
+  theme: [],
   promotion: '',
   threshold: '',
   price: '',
@@ -126,7 +121,7 @@ const model = reactive<{
   address: [],
   count: 1,
   content: '',
-  switchVal: true,
+  switchVal: false,
   cardId: '',
   phone: '',
   read: false,
@@ -293,44 +288,25 @@ const rules: FormRules = {
   ],
 }
 
-const platformList = ref<any>([
+const themeList = ref<any>([
   {
     value: '1',
-    label: '京东',
+    label: '情感赛道',
   },
   {
     value: '2',
-    label: '开普勒',
+    label: '职场赛道',
   },
   {
     value: '3',
-    label: '手Q',
-  },
-  {
-    value: '4',
-    label: '微信',
-  },
-  {
-    value: '5',
-    label: '1号店',
-  },
-  {
-    value: '6',
-    label: '十元街',
-  },
-  {
-    value: '7',
-    label: '京东极速版',
+    label: '育儿赛道',
   },
 ])
-const promotionlist = ref<any[]>([
+
+const platformList = ref<any>([
   {
     value: '1',
-    label: '满减',
-  },
-  {
-    value: '2',
-    label: '无门槛',
+    label: '公众号',
   },
 ])
 

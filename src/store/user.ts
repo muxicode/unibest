@@ -26,7 +26,7 @@ export const useUserStore = defineStore(
       userInfo.value = { ...initState }
     }
     const isLogined = computed(() => !!userInfo.value.token)
-    const currAuthStep = computed(() => (userInfo.value.token ? 3 : 2))
+    const currAuthStep = computed(() => (userInfo.value.token ? 1 : 2))
     const isNeedGetUserInfo = computed(() => !userInfo.value.token)
 
     return {
