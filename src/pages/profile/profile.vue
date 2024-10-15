@@ -80,6 +80,15 @@ console.log('userStore.isNeedGetUserInfo', userStore.isNeedGetUserInfo)
 console.log('userStore.currAuthStep', userStore.currAuthStep)
 console.log('userStore.isLogined', userStore.isLogined)
 
+const gotoUserEditPage = function () {
+  console.log('gotoUserEditPage')
+  if (userStore.currAuthStep === 2) {
+    uni.navigateTo({ url: '/pages/usercenter/person-info/index' })
+  } else {
+    uni.navigateTo({ url: '/pages/login/login' })
+  }
+}
+
 const menuData = ref([
   [
     {

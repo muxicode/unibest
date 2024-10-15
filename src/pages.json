@@ -94,6 +94,14 @@
       }
     },
     {
+      "path": "pages/login/login",
+      "type": "page",
+      "layout": "page",
+      "style": {
+        "navigationBarTitleText": "登录"
+      }
+    },
+    {
       "path": "pages/profile/profile",
       "type": "page",
       "layout": "tabbar",

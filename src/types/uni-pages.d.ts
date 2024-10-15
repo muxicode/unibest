@@ -11,6 +11,7 @@ interface NavigateToOptions {
        "/pages/formdemo/formdemo" |
        "/pages/income/income" |
        "/pages/index/index" |
+       "/pages/login/login" |
        "/pages/profile/profile" |
        "/pages/settlement/settlement" |
        "/pages/settlements/settlements" |

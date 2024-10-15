@@ -7,6 +7,7 @@ const initState = {
   avatarUrl:
     'https://cdn-we-retail.ym.tencent.com/miniapp/usercenter/icon-user-center-avatar@2x.png',
   token: '11111',
+  openid: '',
 }
 
 export const useUserStore = defineStore(
@@ -26,7 +27,7 @@ export const useUserStore = defineStore(
       userInfo.value = { ...initState }
     }
     const isLogined = computed(() => !!userInfo.value.token)
-    const currAuthStep = computed(() => (userInfo.value.token ? 1 : 2))
+    const currAuthStep = computed(() => 1)
     const isNeedGetUserInfo = computed(() => !userInfo.value.token)
 
     return {
