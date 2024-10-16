@@ -37,7 +37,7 @@
       </view>
     </block>
   </view>
-  <view class="relative p-x-4 pt-28">
+  <view class="relative p-x-4 mt-28">
     <view v-for="(item, index) in menuData" :key="index" class="rounded-2 overflow-hidden mb-3">
       <wd-cell-group :border="false">
         <wd-cell

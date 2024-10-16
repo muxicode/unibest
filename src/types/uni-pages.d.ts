@@ -8,6 +8,7 @@ interface NavigateToOptions {
        "/pages/about/about" |
        "/pages/addcount/addcount" |
        "/pages/articles/articles" |
+       "/pages/deal/deal" |
        "/pages/formdemo/formdemo" |
        "/pages/income/income" |
        "/pages/index/index" |

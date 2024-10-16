@@ -70,6 +70,14 @@
       }
     },
     {
+      "path": "pages/deal/deal",
+      "type": "page",
+      "layout": "tabbar",
+      "style": {
+        "navigationBarTitleText": "隐私条款"
+      }
+    },
+    {
       "path": "pages/formdemo/formdemo",
       "type": "page",
       "layout": "page",
@@ -98,7 +106,7 @@
       "type": "page",
       "layout": "page",
       "style": {
-        "navigationBarTitleText": "登录"
+        "navigationBarTitleText": "注册登录"
       }
     },
     {
