@@ -13,6 +13,7 @@ interface NavigateToOptions {
        "/pages/income/income" |
        "/pages/index/index" |
        "/pages/login/login" |
+       "/pages/login_old/login" |
        "/pages/profile/profile" |
        "/pages/settlement/settlement" |
        "/pages/settlements/settlements" |

@@ -7,37 +7,58 @@
   },
 }
 </route>
+
 <template>
   <view>
     <wd-message-box />
     <wd-toast />
     <wd-form ref="form" :model="model" :rules="rules">
       <wd-cell-group custom-class="group border-rd-lg" title="欢迎加入杰思云媒" border>
+        <view class="phone-input-wrapper">
+          <wd-input
+            class="phone-input"
+            label="手机号"
+            label-width="100px"
+            :maxlength="11"
+            prop="phone"
+            required
+            clearable
+            v-model="model.phone"
+            placeholder="请填写手机号"
+          />
+          <wd-button
+            size="small"
+            :type="counting ? 'info' : 'primary'"
+            :disabled="counting || !isPhoneValid"
+            custom-class="code-btn"
+            @click="handleGetCode"
+          >
+            {{ counting ? `${countdown}s` : '验证码' }}
+          </wd-button>
+        </view>
         <wd-input
-          label="手机号"
-          label-width="100px"
-          :maxlength="20"
-          show-word-limit
-          prop="couponName"
-          required
-          suffix-icon="warn-bold"
-          clearable
-          v-model="model.couponName"
-          placeholder="请填写手机号"
-          @clicksuffixicon="handleIconClick"
-        />
-        <wd-input
+          class="code-input"
           label="验证码"
           label-width="100px"
-          :maxlength="20"
+          :maxlength="6"
           show-word-limit
           prop="phoneCode"
           required
-          suffix-icon="warn-bold"
           clearable
-          v-model="model.couponName"
+          v-model="model.phoneCode"
           placeholder="填写手机验证码"
-          @clicksuffixicon="handleIconClick"
+        />
+        <wd-input
+          class="code-input"
+          label="邀请码"
+          label-width="100px"
+          :maxlength="4"
+          show-word-limit
+          prop="phoneCode"
+          required
+          clearable
+          v-model="model.phoneCode"
+          placeholder="填写邀请码"
         />
       </wd-cell-group>
       <view class="tip">
@@ -54,90 +75,43 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from 'vue'
-
+import { reactive, ref, computed, onUnmounted } from 'vue'
 import { onLaunch, onShow, onHide } from '@dcloudio/uni-app'
+import { isArray } from '@vue/shared'
+
+interface UploadFileItem {
+  url: string
+  name?: string
+  type?: string
+}
+
+interface FormRules {
+  [key: string]: {
+    required: boolean
+    message: string
+    pattern?: RegExp
+    validator: (value: any) => Promise<void>
+  }[]
+}
+
 const code = ref('')
 const openId = ref('')
-
-onShow(() => {
-  console.log('login on Show')
-  wx.showLoading({
-    title: '登录微信用户',
-    mask: true,
-  })
-  uni.login({
-    success: (res) => {
-      if (res.code) {
-        wx.hideLoading()
-        code.value = res.code
-        // console.log('wx.login获得code成功', res)
-        // vuex中的openId/unionId若存在就直接调用获取token接口
-        if (openId.value) {
-          getAccessToken(openId.value)
-        } else {
-          getOpenId({ code: code.value })
-        }
-      } else {
-        console.log('获取用户登录态失败！' + res.errMsg)
-      }
-    },
-    fail(err) {
-      wx.hideLoading()
-      wx.showToast({
-        title: 'wx.login失败' + err,
-        icon: 'none',
-        duration: 1000,
-      })
-    },
-  })
-})
-
-// 获取openid
-const getOpenId = function (parameter) {
-  uni.showLoading({
-    title: '获取openId',
-    mask: true,
-  })
-  const res = this.$http('getOpenId', parameter)
-  console.log('获取openId', res)
-  wx.hideLoading()
-  if (res.success) {
-    // 生成唯一值
-    this.setOpenId(res.data.openid)
-    // console.log('获取openId---值', res.data.openid)
-    this.getAccessToken(res.data.openid)
-  }
-}
-
-// 获取token
-const getAccessToken = function (openId) {
-  const res = this.$http('getAccessToken', { openid: openId })
-  // console.log('获取token', res)
-  if (res.success) {
-    if (res.data) {
-      this.isShowPhone = false
-      this.setToken(res.data)
-      this.$reLaunch('/pages/tabbarPage/main')
-    } else {
-      // 是否显示 一键登录按钮
-      this.isShowPhone = true
-    }
-  }
-}
-
 const read = ref(false)
+let timer: ReturnType<typeof setInterval> | null = null
+const counting = ref(false)
+const countdown = ref(60)
 
 const showDeal = () => {
-  console.log('showDeal')
-  uni.navigateTo({ url: '/pages/deal/deal' })
+  uni.navigateTo({ url: '/pages/deal/deal?showButtons=false' })
 }
+
 const quickLogin = () => {
   console.log('quickLogin')
 }
 
 const model = reactive<{
-  couponName: string
+  phone: string
+  phoneCode: string
   platform: any[]
   promotion: string
   threshold: string
@@ -149,11 +123,11 @@ const model = reactive<{
   content: string
   switchVal: boolean
   cardId: string
-  phone: string
   read: boolean
   fileList: UploadFileItem[]
 }>({
-  couponName: '',
+  phone: '',
+  phoneCode: '',
   platform: [],
   promotion: '',
   threshold: '',
@@ -165,22 +139,152 @@ const model = reactive<{
   content: '',
   switchVal: true,
   cardId: '',
-  phone: '',
   read: false,
   fileList: [],
 })
 
+// 验证手机号是否有效
+const isPhoneValid = computed(() => {
+  return /^1[3456789]\d{9}$/.test(model.phone)
+})
+
+// 获取验证码
+const handleGetCode = async () => {
+  if (!isPhoneValid.value) {
+    uni.showToast({
+      title: '请输入正确的手机号',
+      icon: 'none',
+    })
+    return
+  }
+
+  try {
+    // TODO: 调用获取验证码接口
+    // const res = await getVerificationCode(model.phone)
+
+    // 开始倒计时
+    counting.value = true
+    countdown.value = 60
+    timer = setInterval(() => {
+      if (countdown.value > 0) {
+        countdown.value--
+      } else {
+        counting.value = false
+        if (timer) {
+          clearInterval(timer)
+          timer = null
+        }
+      }
+    }, 1000)
+  } catch (error) {
+    uni.showToast({
+      title: '获取验证码失败',
+      icon: 'none',
+    })
+  }
+}
+
+// 组件卸载时清除定时器
+onUnmounted(() => {
+  if (timer) {
+    clearInterval(timer)
+    timer = null
+  }
+})
+
+// 初始化登录
+const initLogin = async () => {
+  try {
+    const loginResult = await uni.login()
+
+    if (loginResult.code) {
+      code.value = loginResult.code
+      if (openId.value) {
+        await getAccessToken(openId.value)
+      } else {
+        await getOpenId({ code: code.value })
+      }
+    } else {
+      console.log('获取用户登录态失败！' + loginResult.errMsg)
+      uni.showToast({
+        title: '登录失败',
+        icon: 'none',
+      })
+    }
+  } catch (err) {
+    console.error('登录失败:', err)
+    uni.showToast({
+      title: '登录失败',
+      icon: 'none',
+      duration: 2000,
+    })
+  }
+}
+
+onShow(() => {
+  initLogin()
+})
+
+const getOpenId = async (parameter) => {
+  // try {
+  //   const res = await this.$http('getOpenId', parameter)
+  //   if (res.success) {
+  //     this.setOpenId(res.data.openid)
+  //     await getAccessToken(res.data.openid)
+  //   } else {
+  //     throw new Error('获取openId失败')
+  //   }
+  // } catch (error) {
+  //   console.error('获取openId失败:', error)
+  //   throw error
+  // }
+}
+
+const getAccessToken = async (openId) => {
+  // try {
+  //   const res = await this.$http('getAccessToken', { openid: openId })
+  //   if (res.success) {
+  //     if (res.data) {
+  //       this.isShowPhone = false
+  //       this.setToken(res.data)
+  //       this.$reLaunch('/pages/tabbarPage/main')
+  //     } else {
+  //       this.isShowPhone = true
+  //     }
+  //   } else {
+  //     throw new Error('获取token失败')
+  //   }
+  // } catch (error) {
+  //   console.error('获取token失败:', error)
+  //   throw error
+  // }
+}
+
 const rules: FormRules = {
-  couponName: [
+  phone: [
     {
       required: true,
-      pattern: /\d{6}/,
-      message: '优惠券名称6个字以上',
+      pattern: /^1[3456789]\d{9}$/,
+      message: '请输入正确的手机号',
       validator: (value) => {
-        if (value) {
+        if (value && /^1[3456789]\d{9}$/.test(value)) {
           return Promise.resolve()
         } else {
-          return Promise.reject('请输入优惠券名称')
+          return Promise.reject('请输入正确的手机号')
+        }
+      },
+    },
+  ],
+  phoneCode: [
+    {
+      required: true,
+      pattern: /^\d{6}$/,
+      message: '请输入6位数字验证码',
+      validator: (value) => {
+        if (value && /^\d{6}$/.test(value)) {
+          return Promise.resolve()
+        } else {
+          return Promise.reject('请输入6位数字验证码')
         }
       },
     },
@@ -302,19 +406,6 @@ const rules: FormRules = {
       },
     },
   ],
-  phone: [
-    {
-      required: true,
-      message: '请输入玛卡巴卡',
-      validator: (value) => {
-        if (value) {
-          return Promise.resolve()
-        } else {
-          return Promise.reject()
-        }
-      },
-    },
-  ],
   fileList: [
     {
       required: true,
@@ -347,5 +438,28 @@ const rules: FormRules = {
 :deep(.group) {
   padding: 20rpx 0;
   margin-top: 12px;
+}
+
+.phone-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-right: 12px;
+
+  .phone-input {
+    flex: 1;
+  }
+
+  .code-btn {
+    min-width: 60px;
+    height: 28px;
+    margin-left: -70px;
+    font-size: 12px;
+    line-height: 28px;
+  }
+}
+
+.code-input {
+  margin-top: 10px;
 }
 </style>
