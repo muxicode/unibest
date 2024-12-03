@@ -63,8 +63,10 @@
       </wd-cell-group>
       <view class="tip">
         <wd-checkbox v-model="read" prop="read" custom-label-class="label-class">
-          已阅读并同意
-          <text style="color: #4d80f0" @click="showDeal">《隐私政策条款》</text>
+          我已阅读并同意
+          <text style="color: #4d80f0" @click.stop="showDeal">《隐私政策条款》</text>
+          和
+          <text style="color: #4d80f0" @click.stop="showUserServiceDeal">《用户服务协议》</text>
         </wd-checkbox>
       </view>
       <view class="footer">
@@ -103,6 +105,10 @@ const countdown = ref(60)
 
 const showDeal = () => {
   uni.navigateTo({ url: '/pages/deal/deal?showButtons=false' })
+}
+
+const showUserServiceDeal = () => {
+  uni.navigateTo({ url: '/pages/deal/user_service_deal' })
 }
 
 const quickLogin = () => {
@@ -424,42 +430,45 @@ const rules: FormRules = {
 
 <style lang="scss" scoped>
 .tip {
-  margin: 10px 15px 21px;
-  font-size: 12px;
+  margin: 20rpx 52rpx 42rpx;
+  font-size: 20rpx;
   color: #999;
 }
+
 .footer {
-  padding: 0 25px 21px;
+  padding: 0 50rpx 42rpx;
 }
+
 :deep(.label-class) {
-  font-size: 12px !important;
+  font-size: 22rpx !important;
   color: #999 !important;
 }
+
 :deep(.group) {
   padding: 20rpx 0;
-  margin-top: 12px;
+  margin-top: 24rpx;
 }
 
 .phone-input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
-  margin-right: 12px;
+  margin-right: 24rpx;
 
   .phone-input {
     flex: 1;
   }
 
   .code-btn {
-    min-width: 60px;
-    height: 28px;
-    margin-left: -70px;
-    font-size: 12px;
-    line-height: 28px;
+    min-width: 120rpx;
+    height: 56rpx;
+    margin-left: -140rpx;
+    font-size: 24rpx;
+    line-height: 56rpx;
   }
 }
 
 .code-input {
-  margin-top: 10px;
+  margin-top: 20rpx;
 }
 </style>
