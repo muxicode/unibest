@@ -39,11 +39,11 @@
   },
   "pages": [
     {
-      "path": "pages/home/home",
+      "path": "pages/login/login",
       "type": "home",
-      "layout": "tabbar",
+      "layout": "page",
       "style": {
-        "navigationBarTitleText": "首页"
+        "navigationBarTitleText": "注册登录"
       }
     },
     {
@@ -92,6 +92,14 @@
       }
     },
     {
+      "path": "pages/home/home",
+      "type": "page",
+      "layout": "tabbar",
+      "style": {
+        "navigationBarTitleText": "首页"
+      }
+    },
+    {
       "path": "pages/income/income",
       "type": "page",
       "layout": "page",
@@ -105,14 +113,6 @@
       "style": {
         "navigationStyle": "custom",
         "navigationBarTitleText": "首页"
-      }
-    },
-    {
-      "path": "pages/login/login",
-      "type": "page",
-      "layout": "page",
-      "style": {
-        "navigationBarTitleText": "注册登录"
       }
     },
     {

@@ -1,5 +1,4 @@
-<!-- 使用 type="home" 属性设置首页，其他页面不需要设置，默认为page；推荐使用json5，更强大，且允许注释 -->
-<route lang="json5">
+<route lang="json5" type="home">
 {
   layout: 'page',
   style: {
@@ -9,147 +8,138 @@
 </route>
 
 <template>
-  <view>
+  <view class="py-4 px-6">
     <wd-message-box />
     <wd-toast />
+
+    <!-- 欢迎区域 -->
+    <view class="mt-4 mb-8">
+      <image src="/static/logo.png" alt="" class="w-24 h-24 block mx-auto rounded-3xl shadow-md" />
+      <view class="text-center text-xl font-bold text-gray-800 mt-4">杰思云媒</view>
+      <view class="text-center text-gray-500 mt-1 text-sm">让内容创作更简单</view>
+    </view>
+
     <wd-form ref="form" :model="model" :rules="rules">
-      <wd-cell-group custom-class="group border-rd-lg" title="欢迎加入杰思云媒" border>
-        <view class="phone-input-wrapper">
+      <!-- 表单卡片 -->
+      <view class="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <view class="form-body">
+          <view class="phone-input-wrapper">
+            <wd-input
+              class="flex-1"
+              label="手机号"
+              label-width="140rpx"
+              :maxlength="11"
+              prop="phone"
+              required
+              clearable
+              v-model="model.phone"
+              placeholder="请填写手机号"
+            />
+            <wd-button
+              size="small"
+              :type="counting ? 'info' : 'primary'"
+              :disabled="counting || !isPhoneValid"
+              custom-class="verify-btn"
+              @click="handleGetCode"
+            >
+              {{ counting ? `${countdown}s` : '获取验证码' }}
+            </wd-button>
+          </view>
+
           <wd-input
-            class="phone-input"
-            label="手机号"
-            label-width="100px"
-            :maxlength="11"
-            prop="phone"
+            class="mt-4"
+            label="验证码"
+            label-width="140rpx"
+            :maxlength="6"
+            show-word-limit
+            prop="phoneCode"
             required
             clearable
-            v-model="model.phone"
-            placeholder="请填写手机号"
+            v-model="model.phoneCode"
+            placeholder="填写手机验证码"
           />
-          <wd-button
-            size="small"
-            :type="counting ? 'info' : 'primary'"
-            :disabled="counting || !isPhoneValid"
-            custom-class="code-btn"
-            @click="handleGetCode"
-          >
-            {{ counting ? `${countdown}s` : '验证码' }}
-          </wd-button>
+
+          <wd-input
+            class="mt-4"
+            label="邀请码"
+            label-width="140rpx"
+            :maxlength="6"
+            show-word-limit
+            prop="inviteCode"
+            required
+            clearable
+            v-model="model.inviteCode"
+            placeholder="填写邀请码"
+          />
         </view>
-        <wd-input
-          class="code-input"
-          label="验证码"
-          label-width="100px"
-          :maxlength="6"
-          show-word-limit
-          prop="phoneCode"
-          required
-          clearable
-          v-model="model.phoneCode"
-          placeholder="填写手机验证码"
-        />
-        <wd-input
-          class="code-input"
-          label="邀请码"
-          label-width="100px"
-          :maxlength="4"
-          show-word-limit
-          prop="phoneCode"
-          required
-          clearable
-          v-model="model.phoneCode"
-          placeholder="填写邀请码"
-        />
-      </wd-cell-group>
-      <view class="tip">
-        <wd-checkbox v-model="read" prop="read" custom-label-class="label-class">
-          我已阅读并同意
-          <text style="color: #4d80f0" @click.stop="showDeal">《隐私政策条款》</text>
-          和
-          <text style="color: #4d80f0" @click.stop="showUserServiceDeal">《用户服务协议》</text>
+      </view>
+
+      <!-- 协议 -->
+      <view class="mt-3 flex items-center justify-center agreement-wrapper">
+        <wd-checkbox v-model="read" prop="read" custom-label-class="agreement-text">
+          <view class="agreement-content">
+            <text>我已阅读并同意</text>
+            <text class="text-primary mx-1" @click.stop="showDeal">《隐私政策条款》</text>
+            <text>和</text>
+            <text class="text-primary ml-1" @click.stop="showUserServiceDeal">
+              《用户服务协议》
+            </text>
+          </view>
         </wd-checkbox>
       </view>
-      <view class="footer">
-        <wd-button type="primary" size="large" @click="quickLogin" block>一键登录/注册</wd-button>
+
+      <!-- 按钮 -->
+      <view class="mt-6 px-2">
+        <wd-button
+          type="primary"
+          size="large"
+          :loading="loading"
+          custom-class="submit-btn"
+          @click="handleLogin"
+          block
+        >
+          一键登录/注册
+        </wd-button>
       </view>
     </wd-form>
   </view>
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref, computed, onUnmounted } from 'vue'
-import { onLaunch, onShow, onHide } from '@dcloudio/uni-app'
-import { isArray } from '@vue/shared'
+import { ref, reactive, computed, onUnmounted } from 'vue'
+import {
+  getOpenIdAPI,
+  getAccessTokenAPI,
+  getVerificationCodeAPI,
+  phoneLoginAPI,
+  type PhoneLoginParams,
+} from '@/service/user/login'
+import { onShow } from '@dcloudio/uni-app'
 
-interface UploadFileItem {
-  url: string
-  name?: string
-  type?: string
-}
-
-interface FormRules {
-  [key: string]: {
-    required: boolean
-    message: string
-    pattern?: RegExp
-    validator: (value: any) => Promise<void>
-  }[]
-}
-
-const code = ref('')
-const openId = ref('')
-const read = ref(false)
-let timer: ReturnType<typeof setInterval> | null = null
-const counting = ref(false)
-const countdown = ref(60)
-
-const showDeal = () => {
-  uni.navigateTo({ url: '/pages/deal/deal?showButtons=false' })
-}
-
-const showUserServiceDeal = () => {
-  uni.navigateTo({ url: '/pages/deal/user_service_deal' })
-}
-
-const quickLogin = () => {
-  console.log('quickLogin')
-}
-
-const model = reactive<{
-  phone: string
-  phoneCode: string
-  platform: any[]
-  promotion: string
-  threshold: string
-  price: string
-  time: number | string
-  date: null | number
-  address: string[]
-  count: number
-  content: string
-  switchVal: boolean
-  cardId: string
-  read: boolean
-  fileList: UploadFileItem[]
-}>({
-  phone: '',
-  phoneCode: '',
-  platform: [],
-  promotion: '',
-  threshold: '',
-  price: '',
-  date: null,
-  time: '',
-  address: [],
-  count: 1,
-  content: '',
-  switchVal: true,
-  cardId: '',
-  read: false,
-  fileList: [],
+defineOptions({
+  name: 'Login',
 })
 
-// 验证手机号是否有效
+// 表单数据
+const form = ref()
+const model = reactive({
+  phone: '',
+  phoneCode: '',
+  inviteCode: '',
+})
+
+// 协议阅读状态
+const read = ref(false)
+
+// 验证码倒计时
+const counting = ref(false)
+const countdown = ref(60)
+let timer: ReturnType<typeof setInterval> | null = null
+
+// 加载状态
+const loading = ref(false)
+
+// 计算手机号是否有效
 const isPhoneValid = computed(() => {
   return /^1[3456789]\d{9}$/.test(model.phone)
 })
@@ -165,10 +155,7 @@ const handleGetCode = async () => {
   }
 
   try {
-    // TODO: 调用获取验证码接口
-    // const res = await getVerificationCode(model.phone)
-
-    // 开始倒计时
+    await getVerificationCodeAPI(model.phone)
     counting.value = true
     countdown.value = 60
     timer = setInterval(() => {
@@ -190,95 +177,78 @@ const handleGetCode = async () => {
   }
 }
 
-// 组件卸载时清除定时器
-onUnmounted(() => {
-  if (timer) {
-    clearInterval(timer)
-    timer = null
-  }
-})
-
-// 初始化登录
-const initLogin = async () => {
+// 微信登录
+const wxLogin = async () => {
   try {
-    const loginResult = await uni.login()
-
-    if (loginResult.code) {
-      code.value = loginResult.code
-      if (openId.value) {
-        await getAccessToken(openId.value)
-      } else {
-        await getOpenId({ code: code.value })
-      }
-    } else {
-      console.log('获取用户登录态失败！' + loginResult.errMsg)
-      uni.showToast({
-        title: '登录失败',
-        icon: 'none',
-      })
+    const { code } = await uni.login()
+    if (!code) {
+      throw new Error('获取登录code失败')
     }
-  } catch (err) {
-    console.error('登录失败:', err)
+    console.log('code', code)
+    const { openid } = await getOpenIdAPI({ code })
+    const { token } = await getAccessTokenAPI(openid)
+
+    uni.setStorageSync('token', token)
+    uni.reLaunch({ url: '/pages/index/index' })
+  } catch (error) {
+    console.error('登录失败:', error)
     uni.showToast({
       title: '登录失败',
       icon: 'none',
-      duration: 2000,
     })
   }
 }
 
-onShow(() => {
-  initLogin()
-})
+// 手机号登录
+const handleLogin = async () => {
+  if (!read.value) {
+    uni.showToast({
+      title: '请先阅读并同意协议',
+      icon: 'none',
+    })
+    return
+  }
 
-const getOpenId = async (parameter) => {
-  // try {
-  //   const res = await this.$http('getOpenId', parameter)
-  //   if (res.success) {
-  //     this.setOpenId(res.data.openid)
-  //     await getAccessToken(res.data.openid)
-  //   } else {
-  //     throw new Error('获取openId失败')
-  //   }
-  // } catch (error) {
-  //   console.error('获取openId失败:', error)
-  //   throw error
-  // }
+  try {
+    loading.value = true
+    await form.value.validate()
+
+    const params: PhoneLoginParams = {
+      phone: model.phone,
+      code: model.phoneCode,
+      inviteCode: model.inviteCode,
+    }
+
+    const { token } = await phoneLoginAPI(params)
+    uni.setStorageSync('token', token)
+    uni.reLaunch({ url: '/pages/index/index' })
+  } catch (error) {
+    console.error('登录失败:', error)
+    uni.showToast({
+      title: '登录失败',
+      icon: 'none',
+    })
+  } finally {
+    loading.value = false
+  }
 }
 
-const getAccessToken = async (openId) => {
-  // try {
-  //   const res = await this.$http('getAccessToken', { openid: openId })
-  //   if (res.success) {
-  //     if (res.data) {
-  //       this.isShowPhone = false
-  //       this.setToken(res.data)
-  //       this.$reLaunch('/pages/tabbarPage/main')
-  //     } else {
-  //       this.isShowPhone = true
-  //     }
-  //   } else {
-  //     throw new Error('获取token失败')
-  //   }
-  // } catch (error) {
-  //   console.error('获取token失败:', error)
-  //   throw error
-  // }
+// 显示协议
+const showDeal = () => {
+  uni.navigateTo({ url: '/pages/deal/deal?showButtons=false' })
 }
 
-const rules: FormRules = {
+const showUserServiceDeal = () => {
+  uni.navigateTo({ url: '/pages/deal/user_service_deal' })
+}
+
+// 表单验证规则
+const rules = {
   phone: [
     {
       required: true,
       pattern: /^1[3456789]\d{9}$/,
       message: '请输入正确的手机号',
-      validator: (value) => {
-        if (value && /^1[3456789]\d{9}$/.test(value)) {
-          return Promise.resolve()
-        } else {
-          return Promise.reject('请输入正确的手机号')
-        }
-      },
     },
   ],
   phoneCode: [
@@ -286,189 +256,96 @@ const rules: FormRules = {
       required: true,
       pattern: /^\d{6}$/,
       message: '请输入6位数字验证码',
-      validator: (value) => {
-        if (value && /^\d{6}$/.test(value)) {
-          return Promise.resolve()
-        } else {
-          return Promise.reject('请输入6位数字验证码')
-        }
-      },
     },
   ],
-  content: [
+  inviteCode: [
     {
       required: true,
-      message: '请输入活动细则信息',
-      validator: (value) => {
-        if (value && value.length > 2) {
-          return Promise.resolve()
-        } else {
-          return Promise.reject('请输入活动细则信息')
-        }
-      },
-    },
-  ],
-  threshold: [
-    {
-      required: true,
-      message: '请输入满减金额',
-      validator: (value) => {
-        if (value && model.price) {
-          return Promise.resolve()
-        } else {
-          return Promise.reject()
-        }
-      },
-    },
-  ],
-  platform: [
-    {
-      required: true,
-      message: '请选择推广平台',
-      validator: (value) => {
-        if (value && isArray(value) && value.length) {
-          return Promise.resolve()
-        } else {
-          return Promise.reject('请选择推广平台')
-        }
-      },
-    },
-  ],
-  promotion: [
-    {
-      required: true,
-      message: '请选择推广平台',
-      validator: (value) => {
-        if (value) {
-          return Promise.resolve()
-        } else {
-          return Promise.reject('请选择推广平台')
-        }
-      },
-    },
-  ],
-  time: [
-    {
-      required: true,
-      message: '请选择时间',
-      validator: (value) => {
-        if (value) {
-          return Promise.resolve()
-        } else {
-          return Promise.reject('请选择时间')
-        }
-      },
-    },
-  ],
-  date: [
-    {
-      required: true,
-      message: '请选择日期',
-      validator: (value) => {
-        if (value) {
-          return Promise.resolve()
-        } else {
-          return Promise.reject()
-        }
-      },
-    },
-  ],
-  address: [
-    {
-      required: true,
-      message: '请选择地址',
-      validator: (value) => {
-        if (isArray(value) && value.length) {
-          return Promise.resolve()
-        } else {
-          return Promise.reject('请选择地址')
-        }
-      },
-    },
-  ],
-  count: [
-    {
-      required: true,
-      message: '发货数量需要大于1',
-      validator: (value) => {
-        if (Number(value) > 1) {
-          return Promise.resolve()
-        } else {
-          return Promise.reject('发货数量需要大于1')
-        }
-      },
-    },
-  ],
-  cardId: [
-    {
-      required: true,
-      message: '请输入歪比巴卜',
-      validator: (value) => {
-        if (value) {
-          return Promise.resolve()
-        } else {
-          return Promise.reject('请输入歪比巴卜')
-        }
-      },
-    },
-  ],
-  fileList: [
-    {
-      required: true,
-      message: '请选择活动图片',
-      validator: (value) => {
-        if (isArray(value) && value.length) {
-          return Promise.resolve()
-        } else {
-          return Promise.reject()
-        }
-      },
+      pattern: /^\d{6}$/,
+      message: '请输入6位数字邀请码',
     },
   ],
 }
+
+// 页面显示时自动登录
+onShow(() => {
+  wxLogin()
+})
+
+// 组件卸载时清除定时器
+onUnmounted(() => {
+  if (timer) {
+    clearInterval(timer)
+    timer = null
+  }
+})
 </script>
 
 <style lang="scss" scoped>
-.tip {
-  margin: 20rpx 52rpx 42rpx;
-  font-size: 20rpx;
-  color: #999;
-}
-
-.footer {
-  padding: 0 50rpx 42rpx;
-}
-
-:deep(.label-class) {
-  font-size: 22rpx !important;
-  color: #999 !important;
-}
-
-:deep(.group) {
-  padding: 20rpx 0;
-  margin-top: 24rpx;
+.form-body {
+  padding: 24rpx;
 }
 
 .phone-input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
-  margin-right: 24rpx;
-
-  .phone-input {
-    flex: 1;
-  }
-
-  .code-btn {
-    min-width: 120rpx;
-    height: 56rpx;
-    margin-left: -140rpx;
-    font-size: 24rpx;
-    line-height: 56rpx;
-  }
 }
 
-.code-input {
-  margin-top: 20rpx;
+.verify-btn {
+  min-width: 160rpx;
+  height: 56rpx;
+  margin-left: -180rpx;
+  font-size: 24rpx;
+  line-height: 56rpx;
+  border-radius: 28rpx;
+}
+
+.submit-btn {
+  height: 88rpx;
+  font-size: 32rpx;
+  border-radius: 44rpx;
+}
+
+.agreement-wrapper {
+  min-width: 0;
+  padding: 0 24rpx;
+}
+
+.agreement-content {
+  display: inline-flex;
+  align-items: center;
+  font-size: 20rpx;
+  color: #999;
+  white-space: nowrap;
+}
+
+:deep(.agreement-text) {
+  font-size: 18rpx !important;
+  line-height: 1;
+  color: #999;
+}
+
+:deep(.text-primary) {
+  color: #4d80f0;
+}
+
+:deep(.wd-input) {
+  padding: 0;
+}
+
+:deep(.wd-checkbox) {
+  display: inline-flex;
+  align-items: center;
+}
+
+:deep(.wd-checkbox__shape) {
+  font-size: 24rpx;
+  transform: scale(0.8);
+}
+
+:deep(.wd-checkbox__label) {
+  padding-left: 8rpx;
+  line-height: 1;
 }
 </style>

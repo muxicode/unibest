@@ -22,7 +22,6 @@ type IUserInfo = {
   openid?: string
   token?: string
   avatarUrl?: string
-  nickName?: string
 }
 
 type TabbarInfo = {
