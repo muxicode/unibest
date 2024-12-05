@@ -107,13 +107,7 @@
 
 <script lang="ts" setup>
 import { ref, reactive, computed, onUnmounted } from 'vue'
-import {
-  getOpenIdAPI,
-  getAccessTokenAPI,
-  getVerificationCodeAPI,
-  phoneLoginAPI,
-  type PhoneLoginParams,
-} from '@/service/user/login'
+import { getVerificationCodeAPI, phoneLoginAPI, type PhoneLoginParams } from '@/service/user/login'
 import { onShow } from '@dcloudio/uni-app'
 
 defineOptions({
@@ -121,8 +115,10 @@ defineOptions({
 })
 
 // 表单数据
+const curCode = ref('')
 const form = ref()
 const model = reactive({
+  code: '',
   phone: '',
   phoneCode: '',
   inviteCode: '',
@@ -184,16 +180,10 @@ const wxLogin = async () => {
     if (!code) {
       throw new Error('获取登录code失败')
     }
-    console.log('code', code)
-    const { openid } = await getOpenIdAPI({ code })
-    const { token } = await getAccessTokenAPI(openid)
-
-    uni.setStorageSync('token', token)
-    uni.reLaunch({ url: '/pages/index/index' })
+    model.code = code
   } catch (error) {
-    console.error('登录失败:', error)
     uni.showToast({
-      title: '登录失败',
+      title: '获取登录code失败',
       icon: 'none',
     })
   }
@@ -214,14 +204,14 @@ const handleLogin = async () => {
     await form.value.validate()
 
     const params: PhoneLoginParams = {
+      code: model.code,
       phone: model.phone,
-      code: model.phoneCode,
+      phoneCode: model.phoneCode,
       inviteCode: model.inviteCode,
     }
 
-    const { token } = await phoneLoginAPI(params)
-    uni.setStorageSync('token', token)
-    uni.reLaunch({ url: '/pages/index/index' })
+    const res = await phoneLoginAPI(params)
+    uni.setStorageSync('token', res.data.token)
   } catch (error) {
     console.error('登录失败:', error)
     uni.showToast({

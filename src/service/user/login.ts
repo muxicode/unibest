@@ -10,19 +10,10 @@ export interface CodeLoginParams {
 }
 
 export interface PhoneLoginParams {
-  phone: string
   code: string
+  phone: string
+  phoneCode: string
   inviteCode?: string
-}
-
-/** 通过code获取openId */
-export const getOpenIdAPI = (params: CodeLoginParams) => {
-  return http.get<{ openid: string }>('/wx/openid', params)
-}
-
-/** 通过openId获取token */
-export const getAccessTokenAPI = (openid: string) => {
-  return http.get<LoginResult>('/wx/token', { openid })
 }
 
 /** 获取手机验证码 */
