@@ -1,33 +1,40 @@
-import { pages, subPackages, tabBar } from '@/pages.json'
-const getLastPage = () => {
-  // getCurrentPages() 至少有1个元素，所以不再额外判断
-  // const lastPage = getCurrentPages().at(-1)
-  // 上面那个在低版本安卓中打包回报错，所以改用下面这个【虽然我加了src/interceptions/prototype.ts，但依然报错】
-  const pages = getCurrentPages()
-  return pages[pages.length - 1]
-}
+import pagesJson from '@/pages.json'
+// import { translate as t } from '@/locale/index'
+
+console.log(pagesJson)
 
 /** 判断当前页面是否是tabbar页  */
 export const getIsTabbar = () => {
-  if (!tabBar) {
+  if (!Object.keys(pagesJson).includes('tabBar')) {
     return false
   }
-  if (!tabBar.list.length) {
-    // 通常有tabBar的话，list不能有空，且至少有2个元素，这里其实不用处理
-    return false
-  }
-  const lastPage = getLastPage()
+  const pages = getCurrentPages()
+  const lastPage = getLastItem(pages)
   const currPath = lastPage.route
-  return !!tabBar.list.find((e) => e.pagePath === currPath)
+  return !!pagesJson.tabBar.list.find((e) => e.pagePath === currPath)
 }
 
 /**
- * 获取当前页面路由的 path 路径和 redirectPath 路径
+ * test i18n in not .vue file
+ */
+export const testI18n = () => {
+  console.log(t('app.name'))
+  // 下面同样生效
+  uni.showModal({
+    title: 'i18n 测试',
+    content: t('app.name'),
+  })
+}
+/**
+ * 获取当前页面路由的 path 路劲和 redirectPath 路径
  * path 如 ‘/pages/login/index’
  * redirectPath 如 ‘/pages/demo/base/route-interceptor’
  */
 export const currRoute = () => {
-  const lastPage = getLastPage()
+  const pages = getCurrentPages()
+  console.log('pages:', pages)
+
+  const lastPage = getLastItem(pages)
   const currRoute = (lastPage as any).$page
   // console.log('lastPage.$page:', currRoute)
   // console.log('lastPage.$page.fullpath:', currRoute.fullPath)
@@ -35,7 +42,7 @@ export const currRoute = () => {
   // console.log('lastPage.options:', (lastPage as any).options)
   // 经过多端测试，只有 fullPath 靠谱，其他都不靠谱
   const { fullPath } = currRoute as { fullPath: string }
-  // console.log(fullPath)
+  console.log(fullPath)
   // eg: /pages/login/index?redirect=%2Fpages%2Fdemo%2Fbase%2Froute-interceptor (小程序)
   // eg: /pages/login/index?redirect=%2Fpages%2Froute-interceptor%2Findex%3Fname%3Dfeige%26age%3D30(h5)
   return getUrlObj(fullPath)
@@ -54,18 +61,12 @@ const ensureDecodeURIComponent = (url: string) => {
  */
 export const getUrlObj = (url: string) => {
   const [path, queryStr] = url.split('?')
-  // console.log(path, queryStr)
+  console.log(path, queryStr)
 
-  if (!queryStr) {
-    return {
-      path,
-      query: {},
-    }
-  }
   const query: Record<string, string> = {}
   queryStr.split('&').forEach((item) => {
     const [key, value] = item.split('=')
-    // console.log(key, value)
+    console.log(key, value)
     query[key] = ensureDecodeURIComponent(value) // 这里需要统一 decodeURIComponent 一下，可以兼容h5和微信y
   })
   return { path, query }
@@ -77,8 +78,8 @@ export const getUrlObj = (url: string) => {
  */
 export const getAllPages = (key = 'needLogin') => {
   // 这里处理主包
-  const mainPages = [
-    ...pages
+  const pages = [
+    ...pagesJson.pages
       .filter((page) => !key || page[key])
       .map((page) => ({
         ...page,
@@ -87,7 +88,7 @@ export const getAllPages = (key = 'needLogin') => {
   ]
   // 这里处理分包
   const subPages: any[] = []
-  subPackages.forEach((subPageObj) => {
+  pagesJson.subPackages.forEach((subPageObj) => {
     // console.log(subPageObj)
     const { root } = subPageObj
 
@@ -100,8 +101,8 @@ export const getAllPages = (key = 'needLogin') => {
         })
       })
   })
-  const result = [...mainPages, ...subPages]
-  // console.log(`getAllPages by ${key} result: `, result)
+  const result = [...pages, ...subPages]
+  console.log(`getAllPages by ${key} result: `, result)
   return result
 }
 
@@ -116,3 +117,12 @@ export const getNeedLoginPages = (): string[] => getAllPages('needLogin').map((p
  * 只得到 path 数组
  */
 export const needLoginPages: string[] = getAllPages('needLogin').map((page) => page.path)
+
+/** 主要是处理 arr.at(-1) 在安卓机上运行报错的 兼容性问题 */
+export const getArrElementByIdx = (arr: any[], index: number) => {
+  if (index < 0) return arr[arr.length + index]
+  if (index >= arr.length) return undefined
+  return arr[index]
+}
+
+export const getLastItem = (arr: any[]) => getArrElementByIdx(arr, -1)

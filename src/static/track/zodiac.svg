@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- 外环 -->
+  <circle cx="50" cy="50" r="45" fill="#FFA23A" stroke="#FFB74D" stroke-width="2"/>
+  
+  <!-- 内环装饰 -->
+  <circle cx="50" cy="50" r="35" fill="none" stroke="#FFD180" stroke-width="1"/>
+  
+  <!-- 星座符号装饰 -->
+  <path d="M50 15 L53 25 L63 25 L55 32 L58 42 L50 35 L42 42 L45 32 L37 25 L47 25 Z" fill="#FFD180"/>
+  
+  <!-- 方位刻度 -->
+  <g fill="#FFD180">
+    <rect x="48" y="10" width="4" height="10"/>
+    <rect x="48" y="80" width="4" height="10"/>
+    <rect x="80" y="48" width="10" height="4"/>
+    <rect x="10" y="48" width="10" height="4"/>
+  </g>
+  
+  <!-- 细节纹路 -->
+  <circle cx="50" cy="50" r="25" fill="none" stroke="#FFD180" stroke-width="0.5"/>
+  <circle cx="50" cy="50" r="20" fill="none" stroke="#FFD180" stroke-width="0.5"/>
+</svg>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- 手柄主体 -->
+  <path d="M20 35 C20 25 30 20 50 20 C70 20 80 25 80 35 L80 65 C80 75 70 80 50 80 C30 80 20 75 20 65 Z" fill="#9D92FF"/>
+  
+  <!-- 按钮装饰 -->
+  <circle cx="65" cy="45" r="5" fill="#8677FF"/>
+  <circle cx="75" cy="55" r="5" fill="#8677FF"/>
+  <text x="63" y="47" fill="white" font-size="8">+</text>
+  <circle cx="73" cy="57" r="3" fill="white"/>
+  
+  <!-- 摇杆区域 -->
+  <circle cx="35" cy="50" r="12" fill="#8677FF"/>
+  <circle cx="35" cy="50" r="8" fill="#7A6BF5"/>
+</svg>

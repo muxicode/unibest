@@ -89,6 +89,10 @@
     "watch": true,
     "watchEffect": true,
     "watchPostEffect": true,
-    "watchSyncEffect": true
+    "watchSyncEffect": true,
+    "useAuthGuard": true,
+    "WithAuth": true,
+    "withAuth": true,
+    "useAuth": true
   }
 }

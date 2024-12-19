@@ -1,0 +1,230 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300">
+  <!-- Background gradients -->
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a1220" />
+      <stop offset="100%" style="stop-color:#0f2543" />
+    </linearGradient>
+    
+    <!-- Refined glow effect -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Subtle text glow -->
+    <filter id="text-glow">
+      <feGaussianBlur stdDeviation="1" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <!-- Moving gradient for subtle animation -->
+    <linearGradient id="shine" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4FC3F7;stop-opacity:0" />
+      <stop offset="50%" style="stop-color:#4FC3F7;stop-opacity:0.1" />
+      <stop offset="100%" style="stop-color:#4FC3F7;stop-opacity:0" />
+      <animate attributeName="x1" values="-100%;0%;100%" dur="3s" repeatCount="indefinite" />
+      <animate attributeName="x2" values="0%;100%;200%" dur="3s" repeatCount="indefinite" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="900" height="300" fill="url(#bg-gradient)" />
+  <rect width="900" height="300" fill="url(#shine)" />
+  
+  <!-- Tech grid -->
+  <g stroke="#ffffff08" stroke-width="0.5">
+    <path d="M0 30 L900 30 M0 60 L900 60 M0 90 L900 90 M0 120 L900 120 
+             M0 150 L900 150 M0 180 L900 180 M0 210 L900 210 M0 240 L900 240 
+             M0 270 L900 270" />
+    <path d="M30 0 L30 300 M60 0 L60 300 M90 0 L90 300 M120 0 L120 300 
+             M150 0 L150 300 M180 0 L180 300 ... M840 0 L840 300 M870 0 L870 300" />
+  </g>
+  
+  <!-- Decorative tech elements -->
+  <g stroke="#4FC3F7" stroke-width="1" fill="none">
+    <path d="M100 40 A20 20 0 0 1 120 60 L140 60" opacity="0.3">
+      <animate attributeName="stroke-dashoffset" 
+               values="30;0;30" 
+               dur="3s" 
+               repeatCount="indefinite"/>
+      <animate attributeName="stroke-dasharray" 
+               values="3,3;3,3;3,3" 
+               dur="3s" 
+               repeatCount="indefinite"/>
+    </path>
+    <path d="M760 220 A20 20 0 0 0 780 240 L800 240" opacity="0.3">
+      <animate attributeName="stroke-dashoffset" 
+               values="0;30;0" 
+               dur="3s" 
+               repeatCount="indefinite"/>
+      <animate attributeName="stroke-dasharray" 
+               values="3,3;3,3;3,3" 
+               dur="3s" 
+               repeatCount="indefinite"/>
+    </path>
+    <circle cx="100" cy="40" r="2" fill="#4FC3F7" opacity="0.5">
+      <animate attributeName="r" 
+               values="2;3;2" 
+               dur="2s" 
+               repeatCount="indefinite"/>
+      <animate attributeName="opacity"
+               values="0.5;0.8;0.5"
+               dur="2s"
+               repeatCount="indefinite"/>
+    </circle>
+    <circle cx="800" cy="240" r="2" fill="#4FC3F7" opacity="0.5">
+      <animate attributeName="r" 
+               values="2;3;2" 
+               dur="2s" 
+               repeatCount="indefinite"
+               begin="1s"/>
+      <animate attributeName="opacity"
+               values="0.5;0.8;0.5"
+               dur="2s"
+               repeatCount="indefinite"
+               begin="1s"/>
+    </circle>
+  </g>
+  
+  <!-- Left circuit -->
+  <g stroke="#4FC3F7" stroke-width="1.5" fill="none" filter="url(#glow)">
+    <path d="M50 30 L80 30 L80 60">
+      <animate attributeName="stroke-dashoffset" 
+               values="60;0;60" 
+               dur="4s" 
+               repeatCount="indefinite"/>
+      <animate attributeName="stroke-dasharray" 
+               values="5,5;5,5;5,5" 
+               dur="4s" 
+               repeatCount="indefinite"/>
+    </path>
+    <circle cx="50" cy="30" r="3" fill="#4FC3F7">
+      <animate attributeName="r" 
+               values="3;4;3" 
+               dur="2s" 
+               repeatCount="indefinite"/>
+    </circle>
+    <text x="40" y="20" fill="#4FC3F7" font-family="monospace" font-size="10">
+      01
+      <animate attributeName="opacity"
+               values="0.7;1;0.7"
+               dur="2s"
+               repeatCount="indefinite"/>
+    </text>
+  </g>
+  
+  <!-- Right circuit -->
+  <g stroke="#4FC3F7" stroke-width="1.5" fill="none" filter="url(#glow)">
+    <path d="M850 210 L820 210 L820 240">
+      <animate attributeName="stroke-dashoffset" 
+               values="0;60;0" 
+               dur="4s" 
+               repeatCount="indefinite"/>
+      <animate attributeName="stroke-dasharray" 
+               values="5,5;5,5;5,5" 
+               dur="4s" 
+               repeatCount="indefinite"/>
+    </path>
+    <circle cx="850" cy="210" r="3" fill="#4FC3F7">
+      <animate attributeName="r" 
+               values="3;4;3" 
+               dur="2s" 
+               repeatCount="indefinite"
+               begin="1s"/>
+    </circle>
+    <text x="860" y="200" fill="#4FC3F7" font-family="monospace" font-size="10">
+      AI
+      <animate attributeName="opacity"
+               values="0.7;1;0.7"
+               dur="2s"
+               repeatCount="indefinite"
+               begin="1s"/>
+    </text>
+  </g>
+  
+  <!-- Main title - refined for clarity -->
+  <text x="450" y="100" font-size="48" fill="white" text-anchor="middle" 
+        font-family="Arial, sans-serif" font-weight="bold" filter="url(#glow)">
+    AI公众号流量主私教课
+    <animate attributeName="filter"
+             values="url(#glow);url(#text-glow);url(#glow)"
+             dur="3s"
+             repeatCount="indefinite"/>
+  </text>
+  
+  <!-- Feature sections with dynamic layout -->
+  <g font-family="Arial, sans-serif">
+    <!-- Account Analysis - Left and higher -->
+    <g transform="translate(250,160)">
+      <circle cx="0" cy="0" r="24" fill="#4FC3F7" opacity="0.1">
+        <animate attributeName="opacity"
+                 values="0.1;0.2;0.1"
+                 dur="2s"
+                 repeatCount="indefinite"/>
+      </circle>
+      <path d="M-15 0 L15 0 M0 -15 L0 15" stroke="#4FC3F7" stroke-width="2">
+        <animate attributeName="opacity"
+                 values="0.7;1;0.7"
+                 dur="2s"
+                 repeatCount="indefinite"/>
+      </path>
+      <text x="0" y="45" text-anchor="middle" fill="white" font-size="20">账号分析</text>
+    </g>
+    
+    <!-- Advanced Prompts - Center -->
+    <g transform="translate(450,190)">
+      <circle cx="0" cy="0" r="28" fill="#4FC3F7" opacity="0.1">
+        <animate attributeName="opacity"
+                 values="0.1;0.2;0.1"
+                 dur="2s"
+                 repeatCount="indefinite"
+                 begin="0.7s"/>
+      </circle>
+      <path d="M-12 -12 L12 12 M-12 12 L12 -12" stroke="#4FC3F7" stroke-width="2">
+        <animate attributeName="opacity"
+                 values="0.7;1;0.7"
+                 dur="2s"
+                 repeatCount="indefinite"
+                 begin="0.7s"/>
+      </path>
+      <text x="0" y="45" text-anchor="middle" fill="white" font-size="22">提示词进阶</text>
+    </g>
+    
+    <!-- Article Layout - Right and higher -->
+    <g transform="translate(650,160)">
+      <circle cx="0" cy="0" r="24" fill="#4FC3F7" opacity="0.1">
+        <animate attributeName="opacity"
+                 values="0.1;0.2;0.1"
+                 dur="2s"
+                 repeatCount="indefinite"
+                 begin="1.4s"/>
+      </circle>
+      <path d="M-12 -12 L12 -12 L12 12 L-12 12 Z" stroke="#4FC3F7" stroke-width="2">
+        <animate attributeName="opacity"
+                 values="0.7;1;0.7"
+                 dur="2s"
+                 repeatCount="indefinite"
+                 begin="1.4s"/>
+      </path>
+      <text x="0" y="45" text-anchor="middle" fill="white" font-size="20">文章排版</text>
+    </g>
+  </g>
+  
+  <!-- Connecting lines -->
+  <g stroke="#4FC3F7" stroke-width="1" opacity="0.3">
+    <path d="M250 205 L450 235 L650 205" fill="none">
+      <animate attributeName="stroke-dashoffset" 
+               values="400;0;400" 
+               dur="4s" 
+               repeatCount="indefinite"/>
+      <animate attributeName="stroke-dasharray" 
+               values="4,4;4,4;4,4" 
+               dur="4s" 
+               repeatCount="indefinite"/>
+    </path>
+  </g>
+</svg>

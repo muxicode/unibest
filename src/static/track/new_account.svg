@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- 主圆形背景 -->
+  <circle cx="50" cy="50" r="45" fill="#8B63E6"/>
+  
+  <!-- 丝带装饰 -->
+  <path d="M20 40 Q50 35 80 40 L85 50 Q50 45 15 50 Z" fill="#9D74FF"/>
+  <path d="M15 45 L20 60 L30 55 L25 40 Z" fill="#9D74FF"/>
+  <path d="M85 45 L80 60 L70 55 L75 40 Z" fill="#9D74FF"/>
+  
+  <!-- 文字背景 -->
+  <rect x="30" y="42" width="40" height="20" rx="5" fill="#7B4FE6"/>
+  
+  <!-- 装饰星星 -->
+  <path d="M25 25 L27 30 L32 30 L28 33 L30 38 L25 35 L20 38 L22 33 L18 30 L23 30 Z" fill="#BCA1FF"/>
+  <path d="M75 65 L77 70 L82 70 L78 73 L80 78 L75 75 L70 78 L72 73 L68 70 L73 70 Z" fill="#BCA1FF"/>
+</svg>

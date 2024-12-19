@@ -9,6 +9,14 @@ export const getFooAPI = (name: string) => {
   return http.get<IFooItem>('/foo', { name })
 }
 
+export const loginJieSi = (code: string) => {
+  return http.get<IFooItem>('/agency/user/login', { code })
+}
+
+export const phoneCode = (phoneNum: string) => {
+  return http.get<IFooItem>('/agency/phone/code', { phoneNum })
+}
+
 /** POST 请求 */
 export const postFooAPI = (name: string) => {
   return http.post<IFooItem>('/foo', { name }, { name })

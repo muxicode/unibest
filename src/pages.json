@@ -39,11 +39,11 @@
   },
   "pages": [
     {
-      "path": "pages/login/login",
+      "path": "pages/home/home",
       "type": "home",
-      "layout": "page",
+      "layout": "tabbar",
       "style": {
-        "navigationBarTitleText": "注册登录"
+        "navigationBarTitleText": "首页"
       }
     },
     {
@@ -59,7 +59,8 @@
       "layout": "page",
       "style": {
         "navigationBarTitleText": "添加账号"
-      }
+      },
+      "needLogin": true
     },
     {
       "path": "pages/articles/articles",
@@ -92,14 +93,6 @@
       }
     },
     {
-      "path": "pages/home/home",
-      "type": "page",
-      "layout": "tabbar",
-      "style": {
-        "navigationBarTitleText": "首页"
-      }
-    },
-    {
       "path": "pages/income/income",
       "type": "page",
       "layout": "page",
@@ -113,6 +106,14 @@
       "style": {
         "navigationStyle": "custom",
         "navigationBarTitleText": "首页"
+      }
+    },
+    {
+      "path": "pages/login/index",
+      "type": "page",
+      "layout": "page",
+      "style": {
+        "navigationBarTitleText": "注册登录"
       }
     },
     {

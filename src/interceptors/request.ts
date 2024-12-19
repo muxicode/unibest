@@ -52,7 +52,7 @@ const httpInterceptor = {
     const userStore = useUserStore()
     const { token } = userStore.userInfo as unknown as IUserInfo
     if (token) {
-      options.header.Authorization = `Bearer ${token}`
+      options.header.Token = `${token}`
     }
   },
 }

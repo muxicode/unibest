@@ -253,7 +253,7 @@ onLoad((options: any) => {
 
 const handleAgree = () => {
   uni.navigateTo({
-    url: '/pages/login/login',
+    url: '/pages/login/index',
   })
 }
 

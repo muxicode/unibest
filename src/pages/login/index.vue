@@ -1,4 +1,4 @@
-<route lang="json5" type="home">
+<route lang="json5">
 {
   layout: 'page',
   style: {
@@ -109,6 +109,11 @@
 import { ref, reactive, computed, onUnmounted } from 'vue'
 import { getVerificationCodeAPI, phoneLoginAPI, type PhoneLoginParams } from '@/service/user/login'
 import { onShow } from '@dcloudio/uni-app'
+import { useUserStore } from '@/store'
+import { currRoute } from '@/utils' // 引入工具函数
+import { phoneCode } from '@/service/index/foo'
+
+const userStore = useUserStore()
 
 defineOptions({
   name: 'Login',
@@ -142,6 +147,7 @@ const isPhoneValid = computed(() => {
 
 // 获取验证码
 const handleGetCode = async () => {
+  // model.code =
   if (!isPhoneValid.value) {
     uni.showToast({
       title: '请输入正确的手机号',
@@ -151,23 +157,31 @@ const handleGetCode = async () => {
   }
 
   try {
-    await getVerificationCodeAPI(model.phone)
-    counting.value = true
-    countdown.value = 60
-    timer = setInterval(() => {
-      if (countdown.value > 0) {
-        countdown.value--
-      } else {
-        counting.value = false
-        if (timer) {
-          clearInterval(timer)
-          timer = null
-        }
-      }
-    }, 1000)
+    const res = await phoneCode(model.phone)
+    console.log('phoneCode res', res)
+    if (res.code !== 1) {
+      uni.showToast({
+        title: '获取验证码失败，请稍后再试！',
+        icon: 'none',
+      })
+    }
+    // await getVerificationCodeAPI(model.phone)
+    // counting.value = true
+    // countdown.value = 60
+    // timer = setInterval(() => {
+    //   if (countdown.value > 0) {
+    //     countdown.value--
+    //   } else {
+    //     counting.value = false
+    //     if (timer) {
+    //       clearInterval(timer)
+    //       timer = null
+    //     }
+    //   }
+    // }, 1000)
   } catch (error) {
     uni.showToast({
-      title: '获取验证码失败',
+      title: '获取验证码失败，请稍后再试！',
       icon: 'none',
     })
   }
@@ -180,6 +194,7 @@ const wxLogin = async () => {
     if (!code) {
       throw new Error('获取登录code失败')
     }
+    console.log(code)
     model.code = code
   } catch (error) {
     uni.showToast({
@@ -210,8 +225,28 @@ const handleLogin = async () => {
       inviteCode: model.inviteCode,
     }
 
-    const res = await phoneLoginAPI(params)
-    uni.setStorageSync('token', res.data.token)
+    // const res = await phoneLoginAPI(params)
+    // uni.setStorageSync('token', res.data.token)
+    // if (!!res.data.token) {
+    //   // 保存token
+    //   userStore.userInfo.token = res.data.token
+
+    //   // 获取当前页面路由信息
+    //   const { query } = currRoute()
+    //   const redirect = query?.redirect
+
+    //   if (redirect) {
+    //     // 解码并跳转回原页面
+    //     uni.redirectTo({
+    //       url: decodeURIComponent(redirect),
+    //     })
+    //   } else {
+    //     // 无redirect时的默认跳转
+    //     uni.switchTab({
+    //       url: '/pages/index/index',
+    //     })
+    //   }
+    // }
   } catch (error) {
     console.error('登录失败:', error)
     uni.showToast({

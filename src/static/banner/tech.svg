@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300">
+  <!-- Background gradients -->
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a1220" />
+      <stop offset="100%" style="stop-color:#0f2543" />
+    </linearGradient>
+    
+    <!-- Refined glow effect -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Subtle text glow -->
+    <filter id="text-glow">
+      <feGaussianBlur stdDeviation="1" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="900" height="300" fill="url(#bg-gradient)" />
+  
+  <!-- Tech grid -->
+  <g stroke="#ffffff08" stroke-width="0.5">
+    <path d="M0 30 L900 30 M0 60 L900 60 M0 90 L900 90 M0 120 L900 120 
+             M0 150 L900 150 M0 180 L900 180 M0 210 L900 210 M0 240 L900 240 
+             M0 270 L900 270" />
+    <path d="M30 0 L30 300 M60 0 L60 300 M90 0 L90 300 M120 0 L120 300 
+             M150 0 L150 300 M180 0 L180 300 ... M840 0 L840 300 M870 0 L870 300" />
+  </g>
+  
+  <!-- Decorative tech elements -->
+  <g stroke="#4FC3F7" stroke-width="1" fill="none">
+    <path d="M100 40 A20 20 0 0 1 120 60 L140 60" opacity="0.3"/>
+    <path d="M760 220 A20 20 0 0 0 780 240 L800 240" opacity="0.3"/>
+    <circle cx="100" cy="40" r="2" fill="#4FC3F7" opacity="0.5"/>
+    <circle cx="800" cy="240" r="2" fill="#4FC3F7" opacity="0.5"/>
+  </g>
+  
+  <!-- Left circuit -->
+  <g stroke="#4FC3F7" stroke-width="1.5" fill="none" filter="url(#glow)">
+    <path d="M50 30 L80 30 L80 60"/>
+    <circle cx="50" cy="30" r="3" fill="#4FC3F7"/>
+    <text x="40" y="20" fill="#4FC3F7" font-family="monospace" font-size="10">01</text>
+  </g>
+  
+  <!-- Right circuit -->
+  <g stroke="#4FC3F7" stroke-width="1.5" fill="none" filter="url(#glow)">
+    <path d="M850 210 L820 210 L820 240"/>
+    <circle cx="850" cy="210" r="3" fill="#4FC3F7"/>
+    <text x="860" y="200" fill="#4FC3F7" font-family="monospace" font-size="10">AI</text>
+  </g>
+  
+  <!-- Main title - refined for clarity -->
+  <text x="450" y="100" font-size="48" fill="white" text-anchor="middle" 
+        font-family="Arial, sans-serif" font-weight="bold">
+    AI公众号流量主私教课
+  </text>
+  
+  <!-- Feature sections with dynamic layout -->
+  <g font-family="Arial, sans-serif">
+    <!-- Account Analysis - Left and higher -->
+    <g transform="translate(250,160)">
+      <circle cx="0" cy="0" r="24" fill="#4FC3F7" opacity="0.1"/>
+      <path d="M-15 0 L15 0 M0 -15 L0 15" stroke="#4FC3F7" stroke-width="2"/>
+      <text x="0" y="45" text-anchor="middle" fill="white" font-size="20">账号分析</text>
+    </g>
+    
+    <!-- Advanced Prompts - Center -->
+    <g transform="translate(450,190)">
+      <circle cx="0" cy="0" r="28" fill="#4FC3F7" opacity="0.1"/>
+      <path d="M-12 -12 L12 12 M-12 12 L12 -12" stroke="#4FC3F7" stroke-width="2"/>
+      <text x="0" y="45" text-anchor="middle" fill="white" font-size="22">提示词进阶</text>
+    </g>
+    
+    <!-- Article Layout - Right and higher -->
+    <g transform="translate(650,160)">
+      <circle cx="0" cy="0" r="24" fill="#4FC3F7" opacity="0.1"/>
+      <path d="M-12 -12 L12 -12 L12 12 L-12 12 Z" stroke="#4FC3F7" stroke-width="2"/>
+      <text x="0" y="45" text-anchor="middle" fill="white" font-size="20">文章排版</text>
+    </g>
+  </g>
+  
+  <!-- Connecting lines -->
+  <g stroke="#4FC3F7" stroke-width="1" opacity="0.3">
+    <path d="M250 205 L450 235 L650 205" fill="none"/>
+  </g>
+</svg>

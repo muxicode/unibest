@@ -2,11 +2,11 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 const initState = {
-  nickname: '赞美我滴god',
+  nickname: 'muxi',
   avatar: '',
   avatarUrl:
     'https://cdn-we-retail.ym.tencent.com/miniapp/usercenter/icon-user-center-avatar@2x.png',
-  token: '11111',
+  token: '22222',
   openid: '',
 }
 
