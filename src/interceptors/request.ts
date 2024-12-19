@@ -55,6 +55,48 @@ const httpInterceptor = {
       options.header.Token = `${token}`
     }
   },
+
+  // 添加响应拦截
+  success(response: UniApp.RequestSuccessCallbackResult) {
+    // 假设后端返回格式为 { code: number, msg: string, data: any }
+    const { code, msg } = response.data as any
+
+    // 2 表示用户需要重新登陆
+    if (code === 2) {
+      // 清除用户信息
+      const userStore = useUserStore()
+      userStore.clearUserInfo()
+
+      // 获取当前页面路径
+      const pages = getCurrentPages()
+      const currentPage = pages[pages.length - 1]
+      const currentPath = `/${currentPage.route}${currentPage.$page?.fullPath.split('?')[1] ? '?' + currentPage.$page.fullPath.split('?')[1] : ''}`
+
+      // 跳转登录页面
+      const loginPath = '/pages/login/login'
+      uni.redirectTo({
+        url: `${loginPath}?redirect=${encodeURIComponent(currentPath)}`,
+      })
+      return false // 阻止后续处理
+    }
+
+    //  3 表示用户需要进行注册
+    if (code === 3) {
+      // 获取当前页面路径
+      const pages = getCurrentPages()
+      const currentPage = pages[pages.length - 1]
+      const currentPath = `/${currentPage.route}${currentPage.$page?.fullPath.split('?')[1] ? '?' + currentPage.$page.fullPath.split('?')[1] : ''}`
+
+      // 跳转注册页面
+      const loginPath = '/pages/login/register'
+      uni.redirectTo({
+        url: `${loginPath}?redirect=${encodeURIComponent(currentPath)}`,
+      })
+      return false // 阻止后续处理
+    }
+
+    return response
+  },
 }
 
 export const requestInterceptor = {
