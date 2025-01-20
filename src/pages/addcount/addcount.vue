@@ -13,7 +13,6 @@
     <wd-message-box />
     <wd-toast />
 
-    <!-- 优化后的顶部区域 -->
     <view class="header-section">
       <view class="gradient-bg"></view>
       <view class="header-content">
@@ -26,10 +25,9 @@
     </view>
 
     <wd-form ref="form" :model="model" :rules="rules">
-      <!-- 赛道和平台选择 -->
       <view class="form-card">
         <view class="form-body">
-          <wd-select-picker
+          <wd-picker
             label="选择赛道"
             label-width="140rpx"
             prop="track"
@@ -38,7 +36,7 @@
             placeholder="请选择你的赛道"
             required
           />
-          <wd-select-picker
+          <wd-picker
             class="mt-4"
             label="选择平台"
             label-width="140rpx"
@@ -51,7 +49,6 @@
         </view>
       </view>
 
-      <!-- 账号信息 -->
       <view class="form-card">
         <view class="form-header">账号信息</view>
         <view class="form-body">
@@ -102,30 +99,29 @@
             placeholder="非必填"
           />
 
-          <!-- 优化后的图片上传区域 -->
-          <view class="upload-section">
-            <view class="upload-title">账号截图</view>
-            <view class="upload-area" @click="chooseImage" v-if="!imageUrl">
-              <view class="upload-placeholder">
-                <view class="iconfont icon-camera"></view>
-                <view class="upload-text">上传截图</view>
+          <view class="custom-form-item">
+            <text class="form-label">账号截图</text>
+            <view class="upload-content">
+              <view class="upload-area" @click="chooseImage" v-if="!imageUrl">
+                <view class="upload-placeholder">
+                  <view class="iconfont icon-screenshot"></view>
+                  <view class="upload-text">上传截图</view>
+                </view>
               </view>
-            </view>
-            <view class="image-preview" v-else>
-              <image :src="imageUrl" mode="aspectFill" class="preview-image" />
-              <view class="delete-btn" @click.stop="deleteImage">
-                <view class="iconfont icon-close"></view>
+              <view class="image-preview" v-else>
+                <image :src="imageUrl" mode="aspectFill" class="preview-image" />
+                <view class="delete-btn" @click.stop="deleteImage">
+                  <view class="iconfont icon-close"></view>
+                </view>
               </view>
+              <view class="upload-tip">公众助手【我】页面的截图，需要清晰显示账号信息</view>
             </view>
-            <view class="upload-tip">公众助手【我】页面的截图，需要清晰显示账号信息</view>
           </view>
         </view>
       </view>
 
-      <!-- 提示文字 -->
       <view class="submit-tip">审核通过后，文章领取权限自动开通～</view>
 
-      <!-- 提交按钮 -->
       <view class="submit-section">
         <wd-button
           type="primary"
@@ -143,9 +139,22 @@
 </template>
 
 <script lang="ts" setup>
+// 保持脚本部分完全不变...
 import { useToast } from 'wot-design-uni'
 import { type FormInstance, type FormRules } from 'wot-design-uni/components/wd-form/types'
 import { reactive, ref } from 'vue'
+import { getTracks, type TracksInfo } from '@/service/index/foo'
+
+// 页面显示时,自动获取赛道信息
+onShow(async () => {
+  let tracksRes = await getTracks()
+  trackList.value = tracksRes.data.map((track) => ({
+    value: track.trackId,
+    label: track.trackName,
+  }))
+})
+
+const tracksInfo = reactive<TracksInfo[]>([])
 
 interface AccountForm {
   track: string
@@ -157,7 +166,6 @@ interface AccountForm {
   phone: string
 }
 
-// 表单数据
 const model = reactive<AccountForm>({
   track: '',
   platform: '',
@@ -168,11 +176,9 @@ const model = reactive<AccountForm>({
   phone: '',
 })
 
-// 图片相关
 const imageUrl = ref<string>('')
 const tempFilePath = ref<string>('')
 
-// 表单验证规则
 const rules: FormRules = {
   track: [{ required: true, message: '请选择赛道' }],
   platform: [{ required: true, message: '请选择平台' }],
@@ -181,21 +187,19 @@ const rules: FormRules = {
   registerDate: [{ required: true, message: '请选择注册日期' }],
 }
 
-// 赛道选项
 const trackList = ref([
-  { value: '1', label: '情感赛道' },
-  { value: '2', label: '职场赛道' },
-  { value: '3', label: '育儿赛道' },
+  { value: 'EMOTIONAL_STORY', label: '情感故事' },
+  { value: 'CAR_INFORMATION', label: '汽车资讯' },
+  { value: 'SPORTS_INFORMATION', label: '体育资讯' },
+  { value: 'WORKPLACE', label: '职场' },
 ])
 
-// 平台选项
-const platformList = ref([{ value: '1', label: '公众号' }])
+const platformList = ref([{ value: '公众号', label: '公众号' }])
 
 const toast = useToast()
 const form = ref<FormInstance>()
 const submitting = ref(false)
 
-// 选择图片
 async function chooseImage() {
   try {
     const res = await uni.chooseImage({
@@ -210,13 +214,11 @@ async function chooseImage() {
   }
 }
 
-// 删除图片
 function deleteImage() {
   imageUrl.value = ''
   tempFilePath.value = ''
 }
 
-// 格式化日期
 function formatDate(timestamp: number | null): string {
   if (!timestamp) return ''
   const date = new Date(timestamp)
@@ -226,7 +228,6 @@ function formatDate(timestamp: number | null): string {
   return `${year}-${month}-${day}`
 }
 
-// 提交表单
 async function handleSubmit() {
   if (!form.value) return
   if (!tempFilePath.value) {
@@ -236,38 +237,36 @@ async function handleSubmit() {
 
   try {
     submitting.value = true
-    await form.value.validate()
-
-    // 准备表单数据对象
+    let vRes = await form.value.validate()
+    if (vRes.valid === false) {
+      return
+    }
     const formData = {
-      track: model.track,
+      trackId: model.track,
       platform: model.platform,
-      nickname: model.nickname,
+      accountName: model.nickname,
       accountId: model.accountId,
       registerDate: formatDate(model.registerDate),
       isViolation: String(model.isViolation),
       phone: model.phone || '',
     }
-
-    // 使用uni.uploadFile上传
     const fileRes = await uni.uploadFile({
-      url: 'http://192.168.10.135:9099/agency/user/createAccount',
+      url: 'https://www.jiesiyunmei.cn:9099/agency/user/account',
       filePath: tempFilePath.value,
-      name: 'account_screenshot',
+      name: 'img',
       formData,
       header: {
         'Content-Type': 'multipart/form-data',
       },
     })
-
-    if (fileRes.statusCode === 200) {
+    const response = JSON.parse(fileRes.data)
+    if (response.code === 1) {
       toast.success('提交成功')
       setTimeout(() => {
         uni.navigateBack()
       }, 1500)
-    } else {
-      const response = JSON.parse(fileRes.data)
-      throw new Error(response.message || '提交失败')
+    } else if (response.code === 0) {
+      throw new Error(response.msg || '提交失败')
     }
   } catch (error: any) {
     console.error('提交失败:', error)
@@ -279,27 +278,31 @@ async function handleSubmit() {
 </script>
 
 <style lang="scss" scoped>
-.page-container {
-  min-height: 100vh;
-  padding-bottom: 40rpx;
-  background-color: #f8f8f8;
-}
+// .page-container {
+//   min-height: 100vh;
+//   padding-bottom: 40rpx;
+//   background-color: #f8f8f8;
+// }
 
 .header-section {
   position: relative;
   padding: 40rpx 30rpx;
+  margin: 24rpx;
   overflow: hidden;
+  background: #fff;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
 }
 
 .gradient-bg {
   position: absolute;
   top: 0;
   right: 0;
+  bottom: 0;
   left: 0;
   z-index: 1;
-  height: 200rpx;
   background: linear-gradient(135deg, #4d80f0 0%, #6c9cf5 100%);
-  opacity: 0.1;
+  opacity: 0.06;
 }
 
 .header-content {
@@ -335,6 +338,7 @@ async function handleSubmit() {
 }
 
 .form-card {
+  position: relative;
   margin: 24rpx 24rpx 0;
   overflow: hidden;
   background: #fff;
@@ -354,14 +358,21 @@ async function handleSubmit() {
   padding: 24rpx;
 }
 
-.upload-section {
+.custom-form-item {
+  display: flex;
+  padding: 0 0 12rpx;
   margin-top: 24rpx;
 }
 
-.upload-title {
-  margin-bottom: 16rpx;
+.form-label {
+  width: 140rpx;
+  padding-top: 4rpx;
   font-size: 28rpx;
   color: #333;
+}
+
+.upload-content {
+  flex: 1;
 }
 
 .upload-area {
@@ -371,13 +382,9 @@ async function handleSubmit() {
   width: 200rpx;
   height: 200rpx;
   cursor: pointer;
+  background: #f8f8f8;
   border: 2rpx dashed #ddd;
   border-radius: 12rpx;
-  transition: all 0.3s;
-
-  &:active {
-    opacity: 0.8;
-  }
 }
 
 .upload-placeholder {
@@ -387,8 +394,8 @@ async function handleSubmit() {
 
 .iconfont {
   font-size: 48rpx;
-  &.icon-camera::before {
-    content: '📷';
+  &.icon-screenshot::before {
+    content: '📲';
   }
   &.icon-close::before {
     content: '✕';
@@ -452,7 +459,22 @@ async function handleSubmit() {
   background: linear-gradient(135deg, #4d80f0 0%, #6c9cf5 100%) !important;
   border: none !important;
   border-radius: 44rpx !important;
-  box-shadow: 0 8rpx 16rpx rgba(77, 128, 240, 0.2);
+}
+/* 以下是修复样式部分 */
+:deep(.wd-select-picker__popup),
+:deep(.wd-calendar__popup) {
+  position: fixed !important;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 999;
+}
+
+:deep(.wd-action-sheet__modal),
+:deep(.wd-picker__modal),
+:deep(.wd-calendar__modal) {
+  position: fixed !important;
+  z-index: 998;
 }
 
 :deep(.wd-input) {
@@ -477,16 +499,19 @@ async function handleSubmit() {
 
 :deep(.wd-input__input) {
   height: 88rpx;
+  padding-left: 16rpx;
   font-size: 28rpx;
   color: #333;
 }
 
 :deep(.wd-select-picker__value) {
+  padding-left: 16rpx;
   font-size: 28rpx;
   color: #333;
 }
 
 :deep(.wd-calendar__value) {
+  padding-left: 16rpx;
   font-size: 28rpx;
   color: #333;
 }
@@ -501,21 +526,6 @@ async function handleSubmit() {
 
 :deep(.wd-button--primary:not(:disabled):active) {
   opacity: 0.9;
-  transform: translateY(2rpx);
-}
-
-.form-enter-active {
-  transition: all 0.3s ease-out;
-}
-
-.form-enter-from {
-  opacity: 0;
-  transform: translateY(30rpx);
-}
-
-.form-enter-to {
-  opacity: 1;
-  transform: translateY(0);
 }
 /* 添加必填标识的样式 */
 :deep(.wd-input__label--required)::before,
@@ -525,33 +535,19 @@ async function handleSubmit() {
   color: #fa4350;
   content: '*';
 }
-/* 添加hover效果 */
-.form-card:active {
-  transform: scale(0.995);
-}
-/* 优化placeholder样式 */
+
 :deep(.wd-input__input::placeholder) {
   font-size: 26rpx;
   color: #999;
 }
-/* 自定义日历样式 */
+
 :deep(.wd-calendar__item--selected) {
   background-color: #4d80f0 !important;
 }
-/* 优化开关组件大小 */
+
 :deep(.wd-switch) {
   margin-left: -8rpx;
   transform: scale(0.9);
-}
-/* 添加图片上传的过渡动画 */
-.image-preview,
-.upload-area {
-  transition: all 0.3s ease;
-}
-
-.image-preview:active,
-.upload-area:active {
-  transform: scale(0.98);
 }
 /* 添加错误提示样式 */
 :deep(.wd-form__error-message) {

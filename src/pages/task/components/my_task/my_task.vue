@@ -1,25 +1,50 @@
 <template>
-  <view class="mb-3 rounded-t-2 bg-white overflow-hidden">
-    <wd-cell-group :border="false" v-if="isTop">
-      <wd-cell :title="title" :value="desc" is-link @click="onClickTop" />
-    </wd-cell-group>
-    <view class="overflow-hidden w-full h-164rpx flex bg-white">
-      <view
-        class="order-group__item overflow-hidden flex flex-auto flex-items-center flex-justify-center flex-col"
-        v-for="(item, index) in orderTagInfosRef"
-        :key="index"
-        @click="() => onClickItem(item)"
-      >
-        <view class="mb-2 w-56rpx h-56rpx relative">
-          <wd-badge :model-value="item.orderNum" :max="99" :type="item.type">
-            <wd-icon
-              :name="item.iconName"
-              size="56rpx"
-              customStyle="background-image: -webkit-linear-gradient(90deg, #6a6a6a 0%,#929292 100%);-webkit-background-clip: text;-webkit-text-fill-color: transparent;"
-            />
-          </wd-badge>
+  <view class="my-task">
+    <view class="task-card">
+      <view class="card-header">
+        <text class="title">任务概览</text>
+        <text class="subtitle" @click="handleViewDetail">整体详情</text>
+      </view>
+
+      <view class="task-overview">
+        <view class="task-item" @click="handleWaitingTasks">
+          <view class="count-wrapper">
+            <wd-badge :model-value="waitingCount" :max="99" type="warning">
+              <wd-icon
+                name="list"
+                size="96rpx"
+                customStyle="background-image: -webkit-linear-gradient(90deg, #3498db 0%, #5dade2 100%);-webkit-background-clip: text;-webkit-text-fill-color: transparent;"
+              />
+            </wd-badge>
+          </view>
+          <text class="label">待发布</text>
         </view>
-        <view class="text-3 line-height-4 text-gray-600">{{ item.title }}</view>
+
+        <view class="task-item" @click="handleCompletedTasks">
+          <view class="count-wrapper">
+            <wd-badge :model-value="completedCount" :max="99" type="success">
+              <wd-icon
+                name="check-bold"
+                size="96rpx"
+                customStyle="background-image: -webkit-linear-gradient(90deg, #2ecc71 0%, #58d68d 100%);-webkit-background-clip: text;-webkit-text-fill-color: transparent;"
+              />
+            </wd-badge>
+          </view>
+          <text class="label">已完成</text>
+        </view>
+
+        <view class="task-item" @click="handleRejectedTasks">
+          <view class="count-wrapper">
+            <wd-badge :model-value="rejectedCount" :max="99" type="danger">
+              <wd-icon
+                name="close-bold"
+                size="96rpx"
+                customStyle="background-image: -webkit-linear-gradient(90deg, #e74c3c 0%, #ec7063 100%);-webkit-background-clip: text;-webkit-text-fill-color: transparent;"
+              />
+            </wd-badge>
+          </view>
+          <text class="label">已拒绝</text>
+        </view>
       </view>
     </view>
   </view>
@@ -28,57 +53,140 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 
-const props = defineProps({
-  orderTagInfos: {
-    type: Array as () => Array<any>,
-    default: () => [],
-  },
-  title: {
-    type: String,
-    default: '我的任务',
-  },
-  desc: {
-    type: String,
-    default: '详细信息',
-  },
-  isTop: {
-    type: Boolean,
-    default: true,
-  },
-})
-
-// 使用 ref 包装变量
-const orderTagInfosRef = ref(props.orderTagInfos)
-const titleRef = ref(props.title)
-const descRef = ref(props.desc)
-const isTopRef = ref(props.isTop)
-orderTagInfosRef.value.push({
-  orderNum: 3,
-  iconName: 'list',
-  title: '待发表',
-  type: 'warning',
-})
-orderTagInfosRef.value.push({
-  orderNum: 64,
-  iconName: 'check-bold',
-  title: '已完成',
-  type: 'success',
-})
-orderTagInfosRef.value.push({
-  orderNum: 5,
-  iconName: 'close-bold',
-  title: '已拒绝',
-  type: 'danger',
-})
-
-const emit = defineEmits(['onClickTop', 'onClickItem'])
-
-// 定义点击事件处理函数
-const onClickItem = (item: any) => {
-  emit('onClickItem', item)
+interface TaskCounts {
+  waiting: number
+  completed: number
+  rejected: number
 }
 
-const onClickTop = () => {
-  emit('onClickTop', {})
+// 任务数量
+const waitingCount = ref<number>(0)
+const completedCount = ref<number>(0)
+const rejectedCount = ref<number>(0)
+
+// 跳转函数
+const handleViewDetail = () => {
+  uni.navigateTo({
+    url: '/pages/task-detail/task-detail',
+  })
+}
+
+const handleWaitingTasks = () => {
+  uni.navigateTo({
+    url: '/pages/unpublishtasks/unpublishtasks',
+  })
+}
+
+const handleCompletedTasks = () => {
+  uni.navigateTo({
+    url: '/pages/completed-tasks/completed-tasks',
+  })
+}
+
+const handleRejectedTasks = () => {
+  uni.navigateTo({
+    url: '/pages/rejected-tasks/rejected-tasks',
+  })
 }
 </script>
+
+<style lang="scss" scoped>
+// 复用accounts组件的变量
+$primary-color: #1989fa;
+$success-color: #07c160;
+$warning-color: #faad14;
+$error-color: #ff4d4f;
+$text-primary: #333333;
+$text-secondary: #666666;
+$border-color: #f0f0f0;
+$background-color: #f5f5f5;
+$card-background: #ffffff;
+$spacing-xs: 8rpx;
+$spacing-sm: 12rpx;
+$spacing-md: 16rpx;
+$spacing-lg: 20rpx;
+$spacing-xl: 32rpx;
+$border-radius: 12rpx;
+
+// 图标背景色
+$waiting-color: #3498db;
+$completed-color: #2ecc71;
+$rejected-color: #e74c3c;
+
+.my-task {
+  padding: $spacing-lg;
+  background: $background-color;
+}
+
+.task-card {
+  overflow: hidden;
+  background: $card-background;
+  border-radius: $border-radius;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-xl;
+  border-bottom: 2rpx solid $border-color;
+
+  .title {
+    font-size: 32rpx;
+    font-weight: 600;
+    color: $text-primary;
+    letter-spacing: 0.5rpx;
+  }
+
+  .subtitle {
+    font-size: 28rpx;
+    color: $primary-color;
+  }
+}
+
+.task-overview {
+  display: flex;
+  justify-content: space-around;
+  padding: $spacing-xl;
+}
+
+.task-item {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+
+  &:not(:last-child) {
+    border-right: 2rpx solid $border-color;
+  }
+}
+
+.count-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96rpx;
+  height: 96rpx;
+  margin-bottom: $spacing-md;
+}
+
+.label {
+  margin-top: $spacing-md;
+  font-size: 28rpx;
+  color: $text-secondary;
+}
+
+:deep(.wd-badge) {
+  position: absolute;
+  top: -8rpx;
+  right: -8rpx;
+}
+
+:deep(.wd-icon) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>

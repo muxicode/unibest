@@ -1,95 +1,79 @@
-<!-- 使用 type="home" 属性设置首页，其他页面不需要设置，默认为page；推荐使用json5，更强大，且允许注释 -->
 <route lang="json5">
 {
   layout: 'tabbar',
   style: {
     navigationBarTitleText: '我的',
   },
+  needLogin: true,
 }
 </route>
+
 <template>
-  <view class="user-center-header fixed top-0 left-0 box-border w-full h-480rpx p-x-3">
-    <!-- 未登录的情况 -->
-    <block v-if="userStore.currAuthStep === 1">
-      <view class="header" @click="gotoUserEditPage">
-        <wd-img width="96rpx" height="96rpx" round :src="userStore.userInfo.avatarUrl"></wd-img>
-        <view class="header__name">{{ '请登录' }}</view>
+  <view class="page-container">
+    <!-- 用户信息卡片 -->
+    <view class="user-card" @click="handleEditProfile">
+      <view class="gradient-bg"></view>
+      <view class="user-info">
+        <view class="avatar">🤖</view>
+        <view class="user-name">{{ userStore.userInfo.nickname }}</view>
       </view>
-    </block>
-    <!-- 已登录但未授权用户信息情况 -->
-    <block v-if="userStore.currAuthStep === 2">
-      <view class="header">
-        <wd-img width="96rpx" height="96rpx" round :src="userStore.userInfo.avatarUrl"></wd-img>
-        <view class="header__name">{{ userStore.userInfo.nickName || '微信用户' }}</view>
-        <!-- 需要授权用户信息，通过slot添加弹窗 -->
-        <view class="header__transparent" v-if="userStore.isNeedGetUserInfo">
-          <slot name="getUserInfo" />
-        </view>
-        <!-- 不需要授权用户信息，仍然触发gotoUserEditPage事件 -->
-        <view class="header__transparent" @click="gotoUserEditPage" v-else></view>
-      </view>
-    </block>
-    <!-- 已登录且已经授权用户信息的情况 -->
-    <block v-if="userStore.currAuthStep === 3">
-      <view class="header" @click="gotoUserEditPage">
-        <wd-img width="96rpx" height="96rpx" round :src="userStore.userInfo.avatarUrl"></wd-img>
-        <view class="header__name">{{ userStore.userInfo.nickName || '微信用户' }}</view>
-      </view>
-    </block>
-  </view>
-  <view class="relative p-x-4 mt-28">
-    <view v-for="(item, index) in menuData" :key="index" class="rounded-2 overflow-hidden mb-3">
-      <wd-cell-group :border="false">
-        <wd-cell
-          v-for="(xitem, xindex) in item"
-          :key="xindex"
-          :title="xitem.title"
-          :value="xitem.tit"
-          is-link
-          @click="onClickCell(xitem)"
-        >
-          <template v-if="xitem.icon">
-            <wd-icon :name="xitem.icon"></wd-icon>
+    </view>
+
+    <!-- 菜单列表 -->
+    <view class="menu-list">
+      <view
+        v-for="(group, index) in menuList"
+        :key="index"
+        class="menu-card"
+        :class="{ 'mt-3': index > 0 }"
+      >
+        <view class="menu-group">
+          <template v-for="item in group" :key="item.type">
+            <view
+              v-if="!item.adminOnly || isAdmin"
+              class="menu-item"
+              hover-class="menu-item-hover"
+              @click="handleMenuClick(item)"
+            >
+              <view class="menu-item-left">
+                <wd-icon :name="item.icon" class="menu-icon"></wd-icon>
+                <text class="menu-text">{{ item.title }}</text>
+              </view>
+              <wd-icon name="arrow-right" class="arrow-icon"></wd-icon>
+            </view>
           </template>
-        </wd-cell>
-      </wd-cell-group>
+        </view>
+      </view>
     </view>
   </view>
 </template>
 
 <script lang="ts" setup>
-import { useUserStore } from '@/store'
-const userStore = useUserStore()
+import { computed } from 'vue'
+import { useUserStore, useTabbarStore } from '@/store'
 
-interface menuItem {
+onShow(() => {
+  tabbarStore.tabbarInfo.activeIndex = 3
+})
+
+const userStore = useUserStore()
+const tabbarStore = useTabbarStore()
+
+interface MenuItem {
   title: string
   tit: string
   url: string
   type: string
   icon: string
+  adminOnly?: boolean
 }
 
-const onClickCell = function (item: menuItem) {
-  if (item.type === 'addCount') {
-    uni.navigateTo({ url: '/pages/addcount/addcount' })
-  }
-}
+const isAdmin = computed(() => {
+  const userId = Number(userStore.userInfo.userId)
+  return !isNaN(userId) && userId < 100
+})
 
-console.log('userStore.userInfo', userStore.userInfo)
-console.log('userStore.isNeedGetUserInfo', userStore.isNeedGetUserInfo)
-console.log('userStore.currAuthStep', userStore.currAuthStep)
-console.log('userStore.isLogined', userStore.isLogined)
-
-const gotoUserEditPage = function () {
-  console.log('gotoUserEditPage')
-  if (userStore.currAuthStep === 2) {
-    uni.navigateTo({ url: '/pages/usercenter/person-info/index' })
-  } else {
-    uni.navigateTo({ url: '/pages/deal/deal' })
-  }
-}
-
-const menuData = ref([
+const menuList = [
   [
     {
       title: '我的信息',
@@ -113,6 +97,14 @@ const menuData = ref([
       url: '',
       type: 'accountManage',
       icon: 'user',
+    },
+    {
+      title: '账号审核',
+      tit: '',
+      url: '',
+      type: 'accountReview',
+      icon: 'check-circle',
+      adminOnly: true,
     },
     {
       title: '今日数据',
@@ -152,44 +144,151 @@ const menuData = ref([
       icon: 'poweroff',
     },
   ],
-])
+]
+
+const handleMenuClick = (item: MenuItem) => {
+  console.log('handleMenuClick item', item)
+  if (item.type === 'addCount') {
+    uni.navigateTo({ url: '/pages/addcount/addcount' })
+  }
+  if (item.type === 'logout') {
+    userStore.userInfo.token = ''
+    userStore.userInfo.userId = ''
+    uni.reLaunch({
+      url: '/pages/home/home',
+      success: function () {
+        tabbarStore.tabbarInfo.activeIndex = 0
+      },
+      fail: function () {},
+    })
+  }
+}
+
+const handleEditProfile = () => {
+  uni.navigateTo({ url: '/pages/usercenter/person-info/index' })
+}
 </script>
 
 <style lang="scss" scoped>
-.user-center-header {
-  background-image: url(https://cdn-we-retail.ym.tencent.com/miniapp/template/user-center-bg-v1.png);
-  background-repeat: no-repeat;
-  background-size: cover;
+// .page-container {
+//   min-height: 100vh;
+//   padding: 24rpx;
+//   background-color: #f8f8f8;
+// }
+
+.user-card {
+  position: relative;
+  padding: 40rpx 30rpx;
+  margin-bottom: 24rpx;
+  overflow: hidden;
+  background: #fff;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+
+  &:active {
+    transform: scale(0.995);
+  }
 }
 
-.header {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  height: 96rpx;
-  margin-top: 80rpx;
-  margin-bottom: 48rpx;
-  line-height: 48rpx;
-  color: #333;
-}
-.header__name {
-  margin-right: 16rpx;
-  margin-left: 24rpx;
-  font-size: 36rpx;
-  font-weight: bold;
-  line-height: 48rpx;
-  color: #333;
-}
-.header__transparent {
+.gradient-bg {
   position: absolute;
   top: 0;
+  right: 0;
+  bottom: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: transparent;
+  z-index: 1;
+  background: linear-gradient(135deg, #4d80f0 0%, #6c9cf5 100%);
+  opacity: 0.06;
 }
-.user-center-card__icon {
-  line-height: 96rpx;
+
+.user-info {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+}
+
+.avatar {
+  font-size: 80rpx;
+  line-height: 1;
+}
+
+.user-name {
+  margin-left: 24rpx;
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.menu-card {
+  overflow: hidden;
+  background: #fff;
+  border-radius: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+
+  &:active {
+    transform: scale(0.995);
+  }
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32rpx 24rpx;
+  transition: background-color 0.3s;
+
+  &:not(:last-child) {
+    border-bottom: 2rpx solid #f8f8f8;
+  }
+}
+
+.menu-item-hover {
+  background-color: #f8f8f8;
+}
+
+.menu-item-left {
+  display: flex;
+  align-items: center;
+}
+
+.menu-icon {
+  font-size: 40rpx;
+  color: #4d80f0;
+}
+
+.menu-text {
+  margin-left: 24rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.arrow-icon {
+  font-size: 32rpx;
+  color: #999;
+}
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 6rpx;
+  height: 6rpx;
+}
+
+::-webkit-scrollbar-track {
+  background: #f8f8f8;
+  border-radius: 3rpx;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 3rpx;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ccc;
+}
+/* 图标统一主题色 */
+:deep(.menu-icon) {
+  color: #4d80f0 !important;
 }
 </style>

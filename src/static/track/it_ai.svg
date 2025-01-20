@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- 大脑外形 -->
+  <path d="M30 35 C30 25 70 25 70 35 C80 35 85 45 85 55 C85 65 80 75 70 75 C70 85 30 85 30 75 C20 75 15 65 15 55 C15 45 20 35 30 35" fill="#FF6B6B"/>
+  
+  <!-- 电路线条 -->
+  <path d="M35 45 L45 45 L45 65 L65 65" fill="none" stroke="#FFE0E0" stroke-width="2"/>
+  <path d="M55 35 L55 55 L65 55" fill="none" stroke="#FFE0E0" stroke-width="2"/>
+  
+  <!-- 节点装饰 -->
+  <circle cx="45" cy="45" r="3" fill="#666"/>
+  <circle cx="55" cy="55" r="3" fill="#666"/>
+  <circle cx="65" cy="65" r="3" fill="#666"/>
+  
+  <!-- 点缀装饰 -->
+  <circle cx="35" cy="60" r="2" fill="#FF8888"/>
+  <circle cx="70" cy="45" r="2" fill="#FF8888"/>
+  <circle cx="50" cy="70" r="2" fill="#FF8888"/>
+</svg>

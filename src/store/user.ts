@@ -2,12 +2,12 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 const initState = {
-  nickname: 'muxi',
+  nickname: '',
   avatar: '',
   avatarUrl:
     'https://cdn-we-retail.ym.tencent.com/miniapp/usercenter/icon-user-center-avatar@2x.png',
-  token: '22222',
-  openid: '',
+  token: '',
+  userId: '',
 }
 
 export const useUserStore = defineStore(
@@ -26,6 +26,7 @@ export const useUserStore = defineStore(
     const reset = () => {
       userInfo.value = { ...initState }
     }
+
     const isLogined = computed(() => !!userInfo.value.token)
     const currAuthStep = computed(() => 1)
     const isNeedGetUserInfo = computed(() => !userInfo.value.token)
@@ -41,6 +42,6 @@ export const useUserStore = defineStore(
     }
   },
   {
-    persist: true,
+    persist: false,
   },
 )

@@ -13,8 +13,8 @@
           placeholder
         >
           <wd-tabbar-item title="首页" icon="home"></wd-tabbar-item>
-          <wd-tabbar-item title="任务" icon="view-module" :value="5"></wd-tabbar-item>
-          <wd-tabbar-item title="结算" icon="chart" :value="2"></wd-tabbar-item>
+          <wd-tabbar-item title="任务" icon="view-module" :value="0"></wd-tabbar-item>
+          <wd-tabbar-item title="结算" icon="chart" :value="0"></wd-tabbar-item>
           <wd-tabbar-item title="我的" icon="user"></wd-tabbar-item>
         </wd-tabbar>
       </view>

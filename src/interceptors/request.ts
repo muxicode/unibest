@@ -2,6 +2,10 @@
 import qs from 'qs'
 import { useUserStore } from '@/store'
 import { platform } from '@/utils/platform'
+import { useToast } from 'wot-design-uni'
+
+// 组件状态
+const toast = useToast()
 
 export type CustomRequestOptions = UniApp.RequestOptions & {
   query?: Record<string, any>
@@ -50,9 +54,10 @@ const httpInterceptor = {
     }
     // 3. 添加 token 请求头标识
     const userStore = useUserStore()
-    const { token } = userStore.userInfo as unknown as IUserInfo
+    const { token, userId } = userStore.userInfo as unknown as IUserInfo
     if (token) {
       options.header.Token = `${token}`
+      options.header.UserId = `${userId}`
     }
   },
 
@@ -60,7 +65,6 @@ const httpInterceptor = {
   success(response: UniApp.RequestSuccessCallbackResult) {
     // 假设后端返回格式为 { code: number, msg: string, data: any }
     const { code, msg } = response.data as any
-
     // 2 表示用户需要重新登陆
     if (code === 2) {
       // 清除用户信息
@@ -88,9 +92,17 @@ const httpInterceptor = {
       const currentPath = `/${currentPage.route}${currentPage.$page?.fullPath.split('?')[1] ? '?' + currentPage.$page.fullPath.split('?')[1] : ''}`
 
       // 跳转注册页面
-      const loginPath = '/pages/login/register'
+      const loginPath = '/pages/deal/deal'
       uni.redirectTo({
         url: `${loginPath}?redirect=${encodeURIComponent(currentPath)}`,
+      })
+      return false // 阻止后续处理
+    }
+
+    if (code === 0) {
+      uni.showToast({
+        title: msg,
+        icon: 'none',
       })
       return false // 阻止后续处理
     }

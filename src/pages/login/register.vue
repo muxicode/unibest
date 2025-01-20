@@ -52,10 +52,10 @@
             label-width="140rpx"
             :maxlength="6"
             show-word-limit
-            prop="phoneCode"
+            prop="VerificationCode"
             required
             clearable
-            v-model="model.phoneCode"
+            v-model="model.VerificationCode"
             placeholder="填写手机验证码"
           />
 
@@ -63,13 +63,26 @@
             class="mt-4"
             label="邀请码"
             label-width="140rpx"
-            :maxlength="6"
+            :maxlength="4"
             show-word-limit
             prop="inviteCode"
             required
             clearable
             v-model="model.inviteCode"
             placeholder="填写邀请码"
+          />
+
+          <wd-input
+            class="mt-4"
+            label="用户名"
+            label-width="140rpx"
+            :maxlength="6"
+            show-word-limit
+            prop="userName"
+            required
+            clearable
+            v-model="model.userName"
+            placeholder="填写用户名"
           />
         </view>
       </view>
@@ -107,12 +120,11 @@
 
 <script lang="ts" setup>
 import { ref, reactive, computed, onUnmounted } from 'vue'
-import { getVerificationCodeAPI, phoneLoginAPI, type PhoneLoginParams } from '@/service/user/login'
 import { onShow } from '@dcloudio/uni-app'
-import { useUserStore } from '@/store'
-import { currRoute } from '@/utils' // 引入工具函数
-import { phoneCode } from '@/service/index/foo'
+import { useUserStore, useTabbarStore } from '@/store'
+import { phoneCode, register, type PhoneLoginParams, type LoginResult } from '@/service/index/foo'
 
+const tabbarStore = useTabbarStore()
 const userStore = useUserStore()
 
 defineOptions({
@@ -125,8 +137,9 @@ const form = ref()
 const model = reactive({
   code: '',
   phone: '',
-  phoneCode: '',
+  VerificationCode: '',
   inviteCode: '',
+  userName: '',
 })
 
 // 协议阅读状态
@@ -165,20 +178,6 @@ const handleGetCode = async () => {
         icon: 'none',
       })
     }
-    // await getVerificationCodeAPI(model.phone)
-    // counting.value = true
-    // countdown.value = 60
-    // timer = setInterval(() => {
-    //   if (countdown.value > 0) {
-    //     countdown.value--
-    //   } else {
-    //     counting.value = false
-    //     if (timer) {
-    //       clearInterval(timer)
-    //       timer = null
-    //     }
-    //   }
-    // }, 1000)
   } catch (error) {
     uni.showToast({
       title: '获取验证码失败，请稍后再试！',
@@ -216,37 +215,34 @@ const handleLogin = async () => {
 
   try {
     loading.value = true
-    await form.value.validate()
+    let vRes = await form.value.validate()
+    if (vRes.valid === false) {
+      return
+    }
 
     const params: PhoneLoginParams = {
       code: model.code,
       phone: model.phone,
-      phoneCode: model.phoneCode,
+      VerificationCode: model.VerificationCode,
       inviteCode: model.inviteCode,
+      userName: model.userName,
     }
 
-    // const res = await phoneLoginAPI(params)
-    // uni.setStorageSync('token', res.data.token)
-    // if (!!res.data.token) {
-    //   // 保存token
-    //   userStore.userInfo.token = res.data.token
-
-    //   // 获取当前页面路由信息
-    //   const { query } = currRoute()
-    //   const redirect = query?.redirect
-
-    //   if (redirect) {
-    //     // 解码并跳转回原页面
-    //     uni.redirectTo({
-    //       url: decodeURIComponent(redirect),
-    //     })
-    //   } else {
-    //     // 无redirect时的默认跳转
-    //     uni.switchTab({
-    //       url: '/pages/index/index',
-    //     })
-    //   }
-    // }
+    let res = await register(params)
+    let u: LoginResult = res.data
+    userStore.userInfo.token = u.token
+    userStore.userInfo.userId = u.userId
+    userStore.userInfo.nickname = u.userId
+    uni.reLaunch({
+      url: '/pages/home/home',
+      success: function () {
+        tabbarStore.tabbarInfo.activeIndex = 0
+        console.log('登录成功')
+      },
+      fail: function () {
+        console.log('跳转失败')
+      },
+    })
   } catch (error) {
     console.error('登录失败:', error)
     uni.showToast({
@@ -276,7 +272,7 @@ const rules = {
       message: '请输入正确的手机号',
     },
   ],
-  phoneCode: [
+  VerificationCode: [
     {
       required: true,
       pattern: /^\d{6}$/,
@@ -286,14 +282,21 @@ const rules = {
   inviteCode: [
     {
       required: true,
-      pattern: /^\d{6}$/,
-      message: '请输入6位数字邀请码',
+      pattern: /^\d{4}$/,
+      message: '请输入4位数字邀请码',
+    },
+  ],
+  userName: [
+    {
+      required: true,
+      pattern: /^.+$/,
+      message: '请输出用户名',
     },
   ],
 }
 
 // 页面显示时自动登录
-onShow(() => {
+onShow(async () => {
   wxLogin()
 })
 

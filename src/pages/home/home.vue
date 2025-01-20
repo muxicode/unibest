@@ -22,7 +22,7 @@
       >
         <template #default>
           <view class="banner-content">
-            <view class="banner-title">AI公众号流量主私教课</view>
+            <view class="banner-title">公众号流量主进阶课</view>
             <view class="banner-actions">
               <view class="action-item">
                 <wd-icon name="plus" size="40rpx" color="#fff" />
@@ -30,7 +30,7 @@
               </view>
               <view class="action-item">
                 <wd-icon name="close" size="40rpx" color="#fff" />
-                <text>提示词胡价</text>
+                <text>提示词进阶</text>
               </view>
               <view class="action-item">
                 <wd-icon name="square" size="36rpx" color="#fff" />
@@ -112,41 +112,39 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { loginJieSi } from '@/service/index/foo'
+import { getTracks, getAccounts, type AccountInfo } from '@/service/index/foo'
+import { onShow } from '@dcloudio/uni-app'
+import { useTabbarStore } from '@/store'
+const tabbarStore = useTabbarStore()
 
-// -------  自动登录 start --------
-const loginCode = ref('')
-onShow(async () => {
-  await wxLogin()
-  if (loginCode.value !== '') {
-    console.log('code', loginCode.value)
-    const res = await loginJieSi(loginCode.value)
-    console.log('login res', res)
-  }
-})
-
-// 微信登录
-const wxLogin = async () => {
-  try {
-    const { code } = await uni.login()
-    if (!code) {
-      throw new Error('获取登录code失败')
-    }
-    loginCode.value = code
-  } catch (error) {
-    uni.showToast({
-      title: '获取登录code失败',
-      icon: 'none',
-    })
-  }
+// 定义图片映射
+const trackImageMap: Record<string, string> = {
+  EMOTIONAL_STORY: '/static/track/family_emotion.svg',
+  CAR_INFORMATION: '/static/track/car_news.svg',
+  WORKPLACE: '/static/track/new_account.svg',
+  NEW_ACCOUNT: '/static/track/zodiac.svg',
+  IT_DB: '/static/track/it_db.svg',
+  IT_AI: '/static/track/it_ai.svg',
 }
-// -------  自动登录  start ---------
+
+onShow(async () => {
+  tabbarStore.tabbarInfo.activeIndex = 0
+  let tracksRes = await getTracks()
+  trackList.value = tracksRes.data.map((track) => ({
+    title: track.trackName,
+    desc: track.description,
+    trackId: track.trackId,
+    auth: track.num, // 默认值,根据实际需求修改
+    image: trackImageMap[track.trackId] || '/static/track/default.svg',
+  }))
+})
 
 interface TrackItem {
   title: string
   desc: string
   auth: number
   image: string
+  trackId: string
 }
 
 // 轮播图数据
@@ -159,16 +157,24 @@ const showIncomeNotification = ref<boolean>(true)
 
 // 轮播图事件
 const handleSwiperClick = (e: any) => {
-  console.log('Swiper clicked:', e)
+  // console.log('Swiper clicked:', e)
 }
 
 const handleSwiperChange = (e: any) => {
-  console.log('Swiper changed:', e)
+  // console.log('Swiper changed:', e)
 }
 
 // 统计按钮点击
 const handleStatsClick = (type: 'data' | 'income') => {
-  console.log('Stats clicked:', type)
+  if (type === 'data') {
+    uni.navigateTo({
+      url: '/pages/accountupload/accountupload',
+    })
+  } else {
+    uni.navigateTo({
+      url: '/pages/accountsettlement/accountsettlement',
+    })
+  }
 }
 
 // 切换通知显示状态
@@ -181,51 +187,40 @@ const toggleNotification = (type: 'data' | 'income') => {
 }
 
 // 赛道数据
-const trackList = ref<TrackItem[]>([
-  {
-    title: '家庭情感',
-    desc: '情感赛道，奥运会正在火热中，可以剩余授权',
-    auth: 55,
-    image: '/static/track/family_emotion.svg',
-  },
-  {
-    title: '汽车资讯',
-    desc: '优选赛道，文章质量更好。仅支持剩余授权',
-    auth: 240,
-    image: '/static/track/car_news.svg',
-  },
-  {
-    title: '生肖星座',
-    desc: '新号做生肖之前，先去做文案。优选剩余授权',
-    auth: 77,
-    image: '/static/track/zodiac.svg',
-  },
-  {
-    title: '起号专用',
-    desc: '起号赛道，新号必备，10-20天发本剩余授权',
-    auth: 64,
-    image: '/static/track/new_account.svg',
-  },
-  {
-    title: '体育赛道',
-    desc: '体育赛道，奥运会正在火热中，可以剩余授权',
-    auth: 55,
-    image: '/static/track/sports.svg',
-  },
-])
+const trackList = ref<TrackItem[]>([])
+
+// {
+//     title: '生肖星座',
+//     desc: '新号做生肖之前，先去做文案。优选剩余授权',
+//     trackId: "CAR_INFORMATION",
+//     auth: 77,
+//     image: '/static/track/zodiac.svg',
+//   },
+//   {
+//     title: '起号专用',
+//     desc: '起号赛道，新号必备，10-20天发本剩余授权',
+//     trackId: "CAR_INFORMATION",
+//     auth: 64,
+//     image: '/static/track/new_account.svg',
+//   },
+//   {
+//     title: '体育赛道',
+//     desc: '体育赛道，奥运会正在火热中，可以剩余授权',
+//     trackId: "CAR_INFORMATION",
+//     auth: 55,
+//     image: '/static/track/sports.svg',
+//   },
 
 // 赛道点击
-const handleTrackClick = (item: TrackItem) => {
-  console.log('Track clicked:', item)
+const handleTrackClick = async (item: TrackItem) => {
+  uni.navigateTo({
+    url: `/pages/articles/accounts_articles?filterTrackId=${encodeURIComponent(item.trackId)}`,
+  })
 }
 </script>
 
 <style lang="scss" scoped>
 .home {
-  min-height: 100vh;
-  padding-bottom: 120rpx;
-  background-color: #f7f8fa;
-
   // 轮播图区域
   .banner-area {
     margin: 20rpx;
@@ -380,9 +375,9 @@ const handleTrackClick = (item: TrackItem) => {
 
         .track-item {
           display: flex;
-          gap: 24rpx;
+          gap: 20rpx;
           align-items: flex-start;
-          padding: 28rpx 24rpx;
+          padding: 20rpx;
           background: #fff;
           transition: background-color 0.2s ease;
 
@@ -396,8 +391,8 @@ const handleTrackClick = (item: TrackItem) => {
 
           .track-icon-wrapper {
             flex-shrink: 0;
-            width: 160rpx;
-            height: 160rpx;
+            width: 140rpx;
+            height: 140rpx;
             overflow: hidden;
             border-radius: 16rpx;
 
@@ -409,29 +404,33 @@ const handleTrackClick = (item: TrackItem) => {
           }
 
           .track-info {
+            display: flex;
             flex: 1;
-            min-width: 0; // 确保文本可以正确换行和截断
+            flex-direction: column;
+            justify-content: space-between;
+            min-width: 0;
+            height: 140rpx;
+            padding: 4rpx 0;
 
             .info-header {
               display: flex;
               gap: 12rpx;
               align-items: center;
-              margin-bottom: 16rpx;
 
               .title {
-                font-size: 32rpx;
+                font-size: 30rpx;
                 font-weight: 500;
                 color: #333;
               }
 
               .tag-wrapper {
                 flex-shrink: 0;
-                padding: 0rpx 12rpx 8rpx 12rpx;
+                padding: 0 8rpx 4rpx;
                 background: rgba(255, 77, 79, 0.1);
-                border-radius: 8rpx;
+                border-radius: 6rpx;
 
                 .tag {
-                  font-size: 24rpx;
+                  font-size: 22rpx;
                   color: #ff4d4f;
                 }
               }
@@ -439,9 +438,8 @@ const handleTrackClick = (item: TrackItem) => {
 
             .desc {
               display: block;
-              margin-bottom: 16rpx;
-              font-size: 26rpx;
-              line-height: 1.6;
+              font-size: 24rpx;
+              line-height: 1.4;
               color: #666;
             }
 
@@ -450,12 +448,12 @@ const handleTrackClick = (item: TrackItem) => {
               align-items: baseline;
 
               .auth {
-                font-size: 26rpx;
+                font-size: 24rpx;
                 color: #999;
               }
 
               .auth-number {
-                font-size: 28rpx;
+                font-size: 26rpx;
                 font-weight: 500;
                 color: #52c41a;
               }

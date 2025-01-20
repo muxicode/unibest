@@ -2,34 +2,34 @@
 {
   layout: 'page',
   style: {
-    navigationBarTitleText: '文章列表',
-    backgroundColor: '#F8F9FA',
+    navigationBarTitleText: '未完成任务详细',
   },
 }
 </route>
 
 <template>
-  <view class="articles">
-    <view class="article-card">
+  <view class="unpublish-tasks">
+    <view class="tasks-card">
       <!-- 卡片头部 -->
       <view class="card-header">
-        <text class="section-title">文章列表</text>
-        <text class="section-subtitle">共{{ articles.length }}篇文章</text>
+        <text class="section-title">未发布任务</text>
+        <text class="section-subtitle">共{{ tasks.length }}个任务</text>
       </view>
 
       <!-- 加载错误提示 -->
       <view v-if="error" class="error-tip">
         <wd-icon name="warn-bold" size="48px" color="#F56C6C" />
         <text class="error-text">加载失败,请重试</text>
-        <wd-button size="small" class="retry-btn" @click="loadArticles">重新加载</wd-button>
+        <wd-button size="small" class="retry-btn" @click="loadTasks">重新加载</wd-button>
       </view>
 
-      <!-- 文章列表 -->
-      <view v-else class="article-list">
-        <view v-for="item in articles" :key="item.id" class="article-item">
-          <!-- 文章内容区 -->
-          <view class="article-content">
-            <text class="article-title">{{ item.title }}</text>
+      <!-- 任务列表 -->
+      <view v-else class="tasks-list">
+        <view v-for="item in tasks" :key="item.id" class="task-item">
+          <!-- 任务内容区 -->
+          <view class="task-content">
+            <text class="task-title">{{ item.title }}</text>
+            <text class="account-name">账号: {{ item.accountName }}</text>
           </view>
 
           <!-- 操作按钮区 -->
@@ -42,17 +42,25 @@
               @click="handleDownload(item)"
             >
               <text v-if="downloading === item.id">下载中...</text>
-              <text v-else>{{ item.isDownload ? '重新下载' : '下载' }}</text>
+              <text v-else>下载</text>
+            </button>
+            <button
+              class="btn publish-btn"
+              :disabled="submitting === item.id"
+              @click="showPublishDialog(item)"
+            >
+              <text v-if="submitting === item.id">发布中...</text>
+              <text v-else>发表文章</text>
             </button>
           </view>
         </view>
 
         <!-- 无数据提示 -->
-        <view v-if="articles.length === 0 && !loading" class="empty-tip">
+        <view v-if="tasks.length === 0 && !loading" class="empty-tip">
           <view class="empty-icon">
             <wd-icon name="warn-bold" size="48px" color="#909399" />
           </view>
-          <text class="empty-text">暂无文章数据</text>
+          <text class="empty-text">暂无未发布任务</text>
         </view>
       </view>
     </view>
@@ -77,6 +85,17 @@
       </view>
     </wd-popup>
 
+    <!-- 发表文章弹窗 -->
+    <wd-message-box selector="publish-article-dialog">
+      <view class="publish-dialog">
+        <view class="dialog-title">{{ currentTask?.title }}</view>
+        <view class="dialog-account">账号：{{ currentTask?.accountName }}</view>
+        <view class="dialog-input">
+          <wd-input v-model="articleAddress" placeholder="请输入文章地址" clearable />
+        </view>
+      </view>
+    </wd-message-box>
+
     <!-- Toast提示 -->
     <wd-toast />
   </view>
@@ -84,45 +103,42 @@
 
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
-import { useToast } from 'wot-design-uni'
-import { getArticles, downloadArticle } from '@/service/index/foo'
-import type { ArticleItem, ArticleInfo } from '@/service/index/foo'
+import { useToast, useMessage } from 'wot-design-uni'
+import { getUnpublishedTasks, downloadArticle, fillArticleAddress } from '@/service/index/foo'
+import type { UnpublishedTask } from '@/service/index/foo'
 
 // 组件状态
 const toast = useToast()
-const articles = ref<ArticleItem[]>([])
+const message = useMessage('publish-article-dialog')
+const tasks = ref<UnpublishedTask[]>([])
 const loading = ref(false)
 const error = ref(false)
-const accountId = ref('')
-const downloading = ref('') // 记录正在下载的文章ID
+const downloading = ref('') // 记录正在下载的任务ID
+const submitting = ref('') // 记录正在提交的任务ID
 const showSharePopup = ref(false)
 const downloadFilePath = ref('')
+const articleAddress = ref('')
+const currentTask = ref<UnpublishedTask | null>(null)
 
 // 页面加载
-onLoad((options: any) => {
-  accountId.value = options?.accountId || ''
-  loadArticles()
+onMounted(() => {
+  loadTasks()
 })
 
-// 加载文章列表
-const loadArticles = async () => {
-  if (!accountId.value) {
-    toast.error('账号ID不能为空')
-    return
-  }
-
+// 加载任务列表
+const loadTasks = async () => {
   loading.value = true
   error.value = false
 
   try {
-    const res = await getArticles({
-      pageNo: 1,
-      pageSize: 10,
-      accountId: accountId.value,
-    })
-    articles.value = res.data
+    const res = await getUnpublishedTasks()
+    if (res.code === 1) {
+      tasks.value = res.data
+    } else {
+      toast.error(res.msg || '加载失败')
+    }
   } catch (err) {
-    console.error('加载文章列表失败:', err)
+    console.error('加载未发布任务列表失败:', err)
     error.value = true
     toast.error('加载失败')
   } finally {
@@ -132,7 +148,7 @@ const loadArticles = async () => {
 
 // 复制文章标题
 const copyTitle = (title: string) => {
-  uni.hideToast() // 先隐藏可能存在的提示
+  uni.hideToast()
 
   setTimeout(() => {
     uni.setClipboardData({
@@ -149,23 +165,23 @@ const copyTitle = (title: string) => {
 }
 
 // 处理下载
-const handleDownload = async (article: ArticleItem) => {
+const handleDownload = async (task: UnpublishedTask) => {
   if (downloading.value) {
     toast.warning('有文件正在下载中')
     return
   }
-  downloading.value = article.id
+  downloading.value = task.id
 
   try {
     const res = await downloadArticle({
-      articleId: article.id,
-      accountId: accountId.value,
+      articleId: task.articleId,
+      accountId: task.accountId,
     })
-    if (res.code == 1) {
-      await prepareFileToShare(res.data)
+    if (res.code === 1) {
+      await prepareFileToShare(res.data.content)
       showSharePopup.value = true
     }
-    if (res.code == 0) {
+    if (res.code === 0) {
       toast.error(res.msg)
     }
   } catch (err) {
@@ -176,13 +192,13 @@ const handleDownload = async (article: ArticleItem) => {
 }
 
 // 准备文件分享
-const prepareFileToShare = (articleInfo: ArticleInfo): Promise<void> => {
+const prepareFileToShare = (content: string): Promise<void> => {
   return new Promise((resolve, reject) => {
-    downloadFilePath.value = `${wx.env.USER_DATA_PATH}/${articleInfo.title}.txt`
+    downloadFilePath.value = `${wx.env.USER_DATA_PATH}/article.txt`
 
     uni.getFileSystemManager().writeFile({
       filePath: downloadFilePath.value,
-      data: articleInfo.content,
+      data: content,
       encoding: 'utf8',
       success: () => {
         resolve()
@@ -214,9 +230,59 @@ const shareFile = () => {
 const handleClose = () => {
   showSharePopup.value = false
 }
+
+// 显示发表文章弹窗
+const showPublishDialog = (task: UnpublishedTask) => {
+  currentTask.value = task
+  articleAddress.value = ''
+
+  message
+    .confirm({
+      title: '发表文章',
+      confirmButtonText: '提交',
+      cancelButtonText: '取消',
+    })
+    .then(() => {
+      handlePublish()
+    })
+    .catch(() => {
+      currentTask.value = null
+    })
+}
+
+// 处理发表文章
+const handlePublish = async () => {
+  if (!currentTask.value || !articleAddress.value.trim()) {
+    toast.error('请输入文章地址')
+    return
+  }
+
+  submitting.value = currentTask.value.id
+
+  try {
+    const res = await fillArticleAddress({
+      id: currentTask.value.id,
+      accountId: currentTask.value.accountId,
+      articleAddr: articleAddress.value.trim(),
+    })
+
+    if (res.code === 1) {
+      toast.success('提交成功')
+      await loadTasks() // 刷新列表
+    } else {
+      toast.error(res.msg || '提交失败')
+    }
+  } catch (err) {
+    console.error('提交文章地址失败:', err)
+    toast.error('提交失败')
+  } finally {
+    submitting.value = ''
+    currentTask.value = null
+  }
+}
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 // 变量定义
 $primary-color: #1989fa;
 $success-color: #07c160;
@@ -231,13 +297,13 @@ $card-background: #ffffff;
 $spacing-base: 24rpx;
 $border-radius: 20rpx;
 
-.articles {
+.unpublish-tasks {
   min-height: 100vh;
   padding: $spacing-base;
   background: $background-color;
 }
 
-.article-card {
+.tasks-card {
   padding: $spacing-base;
   background: $card-background;
   border-radius: $border-radius;
@@ -282,15 +348,14 @@ $border-radius: 20rpx;
   }
 }
 
-// 文章列表
-.article-list {
-  .article-item {
+// 任务列表
+.tasks-list {
+  .task-item {
     position: relative;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 88rpx;
-    padding: $spacing-base;
+    flex-direction: column;
+    gap: 16rpx;
+    padding: 24rpx 28rpx;
     background: $card-background;
     border-bottom: 2rpx solid $border-color;
 
@@ -300,34 +365,42 @@ $border-radius: 20rpx;
   }
 }
 
-.article-content {
-  flex: 1;
-  margin-right: 16rpx;
+.task-content {
+  width: 100%;
+  margin-bottom: 24rpx;
   overflow: hidden;
 }
 
-.article-title {
-  display: -webkit-box;
+.task-title {
+  display: block;
+  margin-bottom: 12rpx;
   overflow: hidden;
-  font-size: 30rpx;
+  font-size: 32rpx;
   line-height: 1.5;
   color: $text-primary;
   text-overflow: ellipsis;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  white-space: nowrap;
+}
+
+.account-name {
+  display: block;
+  font-size: 28rpx;
+  color: $text-secondary;
 }
 
 .action-btns {
   display: flex;
   gap: 12rpx;
   align-items: center;
+  margin-left: auto;
   white-space: nowrap;
 }
 
 .btn {
-  min-width: 112rpx;
+  min-width: 96rpx;
   height: 64rpx;
-  padding: 0 20rpx;
+  padding: 0 16rpx;
+  margin: 0;
   font-size: 26rpx;
   font-weight: 500;
   line-height: 64rpx;
@@ -350,6 +423,16 @@ $border-radius: 20rpx;
   &.secondary-btn {
     color: $text-secondary;
     background: #f5f5f5;
+  }
+
+  &.publish-btn {
+    color: $card-background;
+    background: $success-color;
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
   }
 }
 
@@ -399,5 +482,45 @@ $border-radius: 20rpx;
       min-width: 180rpx;
     }
   }
+}
+
+// 发表文章弹窗
+.publish-dialog {
+  max-height: 70vh;
+  padding: 24rpx 0;
+
+  .dialog-title {
+    padding: 0 24rpx;
+    margin-bottom: 16rpx;
+    font-size: 32rpx;
+    font-weight: 500;
+    line-height: 1.5;
+    color: $text-primary;
+    text-align: center;
+    word-break: break-all;
+    word-wrap: break-word;
+  }
+
+  .dialog-account {
+    margin-bottom: 24rpx;
+    font-size: 28rpx;
+    color: $text-secondary;
+    text-align: center;
+  }
+
+  .dialog-input {
+    padding: 0 24rpx;
+  }
+}
+
+// 全局覆盖弹窗样式
+:deep(.wd-message-box) {
+  width: 640rpx !important;
+  padding: 40rpx !important;
+  border-radius: 16rpx !important;
+}
+
+:deep(.wd-message-box__btns) {
+  margin-top: 32rpx !important;
 }
 </style>

@@ -9,12 +9,19 @@
 </route>
 <template>
   <myTask />
-  <myCountList />
+  <accounts mode="article,report" />
 </template>
 
 <script lang="ts" setup>
 import myCountList from './components/my_count_list/my_count_list.vue'
+import Accounts from '@/components/accounts.vue'
 import myTask from './components/my_task/my_task.vue'
+import { useTabbarStore } from '@/store'
+const tabbarStore = useTabbarStore()
+
+onShow(() => {
+  tabbarStore.tabbarInfo.activeIndex = 1
+})
 </script>
 
 <style lang="scss" scoped>

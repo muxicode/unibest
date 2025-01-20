@@ -6,7 +6,7 @@ export function useAuth() {
   const isLogined = computed(() => userStore.isLogined)
 
   const redirectLogin = (currentPath: string) => {
-    const loginRoute = '/pages/login/index'
+    const loginRoute = '/pages/login/login'
     const redirectRoute = `${loginRoute}?redirect=${encodeURIComponent(currentPath)}`
     uni.redirectTo({ url: redirectRoute })
   }
