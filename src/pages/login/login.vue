@@ -61,8 +61,8 @@ defineOptions({
   name: 'Login',
 })
 
-// 协议阅读状态 - 默认勾选
-const read = ref(true)
+// 协议阅读状态 - 默认不勾选
+const read = ref(false)
 
 // 加载状态
 const loading = ref(false)
@@ -99,13 +99,13 @@ const handleLogin = async () => {
     const code = await wxLogin()
     if (!code) return
 
-    let res = await loginJieSi(code)
-    let u: LoginResult = res.data
+    const res = await loginJieSi(code)
+    const u: LoginResult = res.data
     userStore.userInfo.token = u.token
     userStore.userInfo.userId = u.userId
     userStore.userInfo.nickname = u.userName
     let curPage = '/pages/home/home'
-    let curPageIndex = tabbarStore.tabbarInfo.activeIndex
+    const curPageIndex = tabbarStore.tabbarInfo.activeIndex
     if (curPageIndex === 1) {
       curPage = '/pages/task/task'
     } else if (curPageIndex === 2) {

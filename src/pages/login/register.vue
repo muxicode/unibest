@@ -160,7 +160,6 @@ const isPhoneValid = computed(() => {
 
 // 获取验证码
 const handleGetCode = async () => {
-  // model.code =
   if (!isPhoneValid.value) {
     uni.showToast({
       title: '请输入正确的手机号',
@@ -171,13 +170,31 @@ const handleGetCode = async () => {
 
   try {
     const res = await phoneCode(model.phone)
-    console.log('phoneCode res', res)
     if (res.code !== 1) {
       uni.showToast({
         title: '获取验证码失败，请稍后再试！',
         icon: 'none',
       })
+      return
     }
+
+    // Start countdown after successful API call
+    counting.value = true
+    countdown.value = 60
+
+    timer = setInterval(() => {
+      if (countdown.value > 0) {
+        countdown.value--
+      } else {
+        // Reset when countdown reaches 0
+        counting.value = false
+        countdown.value = 60
+        if (timer) {
+          clearInterval(timer)
+          timer = null
+        }
+      }
+    }, 1000)
   } catch (error) {
     uni.showToast({
       title: '获取验证码失败，请稍后再试！',
@@ -215,7 +232,7 @@ const handleLogin = async () => {
 
   try {
     loading.value = true
-    let vRes = await form.value.validate()
+    const vRes = await form.value.validate()
     if (vRes.valid === false) {
       return
     }
@@ -228,8 +245,8 @@ const handleLogin = async () => {
       userName: model.userName,
     }
 
-    let res = await register(params)
-    let u: LoginResult = res.data
+    const res = await register(params)
+    const u: LoginResult = res.data
     userStore.userInfo.token = u.token
     userStore.userInfo.userId = u.userId
     userStore.userInfo.nickname = u.userId
