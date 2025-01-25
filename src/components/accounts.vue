@@ -86,7 +86,12 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, computed } from 'vue'
-import { getAccounts } from '@/service/index/foo'
+import {
+  getAccounts,
+  type AccountInfo,
+  getAccountsStatus,
+  type AccountStatus,
+} from '@/service/index/foo'
 
 interface SettlementStatus {
   isUsePublicAccount: boolean
@@ -94,24 +99,6 @@ interface SettlementStatus {
   lastSettlementDate: string
   lastSettlePart: string
   msg: string
-}
-
-interface AccountItem {
-  userId: string
-  trackId: string
-  platform: string
-  phone: string
-  accountName: string
-  accountId: string
-  accountCreateDate: string
-  level: number
-  downLoadNum: number
-  accountStatu: string
-  openingFlowDate: string
-  isOpenFlow: boolean
-  isNeedOpenFlow: boolean
-  settlementStatu: SettlementStatus
-  lastReportDate?: string
 }
 
 const STATUS_TEXT_MAP: Record<string, string> = {
@@ -129,7 +116,11 @@ const STATUS_CLASS_MAP: Record<string, string> = {
 const TRACK_NAME_MAP: Record<string, string> = {
   EMOTIONAL_STORY: '情感故事',
   CAR_INFORMATION: '汽车资讯',
-  WORKPLACE: '职场',
+  WORKPLACE: '职场经验',
+  IT_DB: '数据库技术',
+  IT_AI: 'AI技术',
+  NEW_ACCOUNT: '新号起号赛道',
+  WORK_IP: '爆文IP赛道',
 }
 
 const getPlatformText = (platform: string) => {
@@ -155,7 +146,7 @@ const props = defineProps<{
   filterTrackId?: string
 }>()
 
-const accountList = ref<AccountItem[]>([])
+const accountList = ref<AccountInfo[]>([])
 const loadingMap = ref<Record<string, boolean>>({})
 
 const modeList = computed(() => props.mode.split(',').map((m) => m.trim()))
@@ -174,6 +165,9 @@ const fetchAccounts = async () => {
     if (res.code === 1) {
       accountList.value = res.data
     }
+    const res2 = await getAccountsStatus()
+    console.log(res2)
+    console.log('filteredAccounts', filteredAccounts.value)
   } catch (error) {
     console.error('Failed to fetch accounts:', error)
     uni.showToast({
@@ -184,7 +178,7 @@ const fetchAccounts = async () => {
   }
 }
 
-const handleAction = async (account: AccountItem, action: () => Promise<void>, type: string) => {
+const handleAction = async (account: AccountInfo, action: () => Promise<void>, type: string) => {
   const loadingKey = `${account.accountId}-${type}`
   if (loadingMap.value[loadingKey]) return
 
@@ -196,7 +190,7 @@ const handleAction = async (account: AccountItem, action: () => Promise<void>, t
   }
 }
 
-const handleReceiveArticle = (account: AccountItem) => {
+const handleReceiveArticle = (account: AccountInfo) => {
   handleAction(
     account,
     () =>
@@ -207,7 +201,7 @@ const handleReceiveArticle = (account: AccountItem) => {
   )
 }
 
-const handleDailyReport = (account: AccountItem) => {
+const handleDailyReport = (account: AccountInfo) => {
   handleAction(
     account,
     () =>
@@ -218,7 +212,7 @@ const handleDailyReport = (account: AccountItem) => {
   )
 }
 
-const handleSettlement = (account: AccountItem) => {
+const handleSettlement = (account: AccountInfo) => {
   handleAction(
     account,
     () =>

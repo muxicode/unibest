@@ -125,11 +125,12 @@ const trackImageMap: Record<string, string> = {
   NEW_ACCOUNT: '/static/track/zodiac.svg',
   IT_DB: '/static/track/it_db.svg',
   IT_AI: '/static/track/it_ai.svg',
+  WORK_IP: '/static/track/work_ip.svg',
 }
 
 onShow(async () => {
   tabbarStore.tabbarInfo.activeIndex = 0
-  let tracksRes = await getTracks()
+  const tracksRes = await getTracks()
   trackList.value = tracksRes.data.map((track) => ({
     title: track.trackName,
     desc: track.description,

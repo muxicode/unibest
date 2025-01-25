@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- 公文包主体 -->
+  <path d="M20 40 L80 40 C85 40 88 43 88 48 L88 75 C88 80 85 83 80 83 L20 83 C15 83 12 80 12 75 L12 48 C12 43 15 40 20 40" fill="#FF6B6B"/>
+  
+  <!-- 提手 -->
+  <path d="M35 40 C35 35 40 30 45 30 L55 30 C60 30 65 35 65 40" fill="none" stroke="#FF6B6B" stroke-width="4"/>
+  
+  <!-- 装饰线条 -->
+  <line x1="20" y1="60" x2="80" y2="60" stroke="#FF8888" stroke-width="2"/>
+  
+  <!-- 金币图案 -->
+  <circle cx="35" cy="70" r="8" fill="#FFD700"/>
+  <text x="32" y="74" font-size="12" fill="#FF6B6B">$</text>
+  
+  <!-- WiFi信号图案 -->
+  <path d="M55 75 L65 65 M60 75 L70 65 M65 75 L75 65" stroke="#FF8888" stroke-width="2"/>
+</svg>

@@ -61,10 +61,12 @@ export const getTracks = () => {
 
 /** 账户结算状态 */
 export interface SettlementStatus {
+  isFinish: boolean
   isUsePublicAccount: boolean
   isStart: boolean
   lastSettlementDate: string
-  lastSettlePart: string
+  lastSettlementPart: string
+  firstSettlementPart: string
   msg: string
 }
 
@@ -88,6 +90,36 @@ export interface AccountInfo {
 
 export const getAccounts = () => {
   return http.get<AccountInfo[]>('/agency/user/accounts')
+}
+
+/** 账户信息 */
+
+/** 结算状态 */
+export interface AccountStatus {
+  userId: string
+  trackId: string
+  accountId: string
+  accountName: string
+  level: number
+  downloadNum: number
+  accountCreateDate: string
+  openingFlowDate: string
+  isOpenFlow: boolean
+  isNeedOpenFlow: boolean
+  isStart: boolean
+  startingDate: string
+  settlementStatus: SettlementStatus
+  status: string
+  unPublishTaskNum: number
+  isLastUnPublishTaskNumFinish: boolean
+  isFinishSettlement: boolean
+  unSettlementMsg: string
+  tm: string
+  date: string
+}
+
+export const getAccountsStatus = () => {
+  return http.get<AccountStatus[]>('/agency/user/accounts/status')
 }
 
 /** 获取账号列表 */
