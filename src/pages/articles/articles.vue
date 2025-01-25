@@ -17,6 +17,25 @@
         <text class="section-subtitle">共{{ articles.length }}篇文章</text>
       </view>
 
+      <!-- 搜索框 -->
+      <view class="search-box">
+        <wd-icon name="search" size="32rpx" color="#999999" />
+        <input
+          v-model="keyword"
+          class="search-input"
+          type="text"
+          placeholder="搜索文章"
+          @input="handleSearch"
+        />
+        <wd-icon
+          v-if="keyword"
+          name="close-fill"
+          size="32rpx"
+          color="#999999"
+          @click="clearSearch"
+        />
+      </view>
+
       <!-- 加载错误提示 -->
       <view v-if="error" class="error-tip">
         <wd-icon name="warn-bold" size="48px" color="#F56C6C" />
@@ -83,7 +102,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useToast } from 'wot-design-uni'
 import { getArticles, downloadArticle } from '@/service/index/foo'
 import type { ArticleItem, ArticleInfo } from '@/service/index/foo'
@@ -97,6 +116,7 @@ const accountId = ref('')
 const downloading = ref('') // 记录正在下载的文章ID
 const showSharePopup = ref(false)
 const downloadFilePath = ref('')
+const keyword = ref('')
 
 // 页面加载
 onLoad((options: any) => {
@@ -119,12 +139,14 @@ const loadArticles = async () => {
       pageNo: 1,
       pageSize: 10,
       accountId: accountId.value,
+      keyWord: keyword.value.trim(),
     })
-    articles.value = res.data
+    articles.value = res.data || [] // Handle null response
   } catch (err) {
     console.error('加载文章列表失败:', err)
     error.value = true
     toast.error('加载失败')
+    articles.value = [] // Clear list on error
   } finally {
     loading.value = false
   }
@@ -213,7 +235,32 @@ const shareFile = () => {
 // 关闭弹窗
 const handleClose = () => {
   showSharePopup.value = false
+  loadArticles() // Refresh article list when popup closes
 }
+
+// 处理搜索
+let searchTimer: number | null = null
+const handleSearch = () => {
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+  }
+  searchTimer = setTimeout(() => {
+    loadArticles()
+  }, 800) as unknown as number // Increased debounce time
+}
+
+// 清除搜索
+const clearSearch = () => {
+  keyword.value = ''
+  loadArticles()
+}
+
+// 清理定时器
+onUnmounted(() => {
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+  }
+})
 </script>
 
 <style lang="scss" scoped>
@@ -398,6 +445,34 @@ $border-radius: 20rpx;
     .share-btn {
       min-width: 180rpx;
     }
+  }
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 24rpx;
+  margin: 0 12rpx 24rpx;
+  background: #f7f8fa;
+  border-radius: $border-radius;
+
+  .wd-icon {
+    flex-shrink: 0;
+  }
+}
+
+.search-input {
+  flex: 1;
+  width: 100%;
+  height: 48rpx;
+  padding: 0 16rpx;
+  font-size: 28rpx;
+  color: $text-primary;
+  background: transparent;
+  border: none;
+
+  &::placeholder {
+    color: $text-tertiary;
   }
 }
 </style>

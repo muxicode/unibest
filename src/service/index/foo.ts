@@ -86,6 +86,7 @@ export interface AccountInfo {
   isOpenFlow: boolean
   isNeedOpenFlow: boolean
   settlementStatu: SettlementStatus
+  unPublishTaskNum?: number
 }
 
 export const getAccounts = () => {
@@ -137,7 +138,12 @@ export interface ArticleItem {
   version: number
 }
 
-export const getArticles = (params: { pageNo: number; pageSize: number; accountId: string }) => {
+export const getArticles = (params: {
+  pageNo: number
+  pageSize: number
+  accountId: string
+  keyWord: string
+}) => {
   return http.get<ArticleItem[]>('/agency/articles', params)
 }
 /** 获取文章列表 */

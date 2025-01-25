@@ -27,9 +27,15 @@
             </view>
 
             <view class="account-actions">
-              <view class="download-info">
-                <text class="download-label">可下载文章</text>
-                <text class="download-value">{{ item.downLoadNum }}</text>
+              <view class="stats-info">
+                <view class="download-info">
+                  <text class="download-label">可下载文章</text>
+                  <text class="download-value">{{ item.downLoadNum }}</text>
+                </view>
+                <view class="unpublished-info">
+                  <text class="unpublished-label">未发布文章</text>
+                  <text class="unpublished-value">{{ item.unPublishTaskNum || 0 }}</text>
+                </view>
               </view>
 
               <view class="action-group">
@@ -67,7 +73,7 @@
                     @click="handleSettlement(item)"
                   >
                     <text>
-                      {{ item.settlementStatu.isStart ? '已开始结算' : '开始结算' }}
+                      {{ item.settlementStatu?.isStart ? '已开始结算' : '开始结算' }}
                     </text>
                     <view
                       v-if="loadingMap[`${item.accountId}-settlement`]"
@@ -161,13 +167,32 @@ const getStatusClass = (status: string) => STATUS_CLASS_MAP[status] || ''
 
 const fetchAccounts = async () => {
   try {
-    const res = await getAccounts()
-    if (res.code === 1) {
-      accountList.value = res.data
+    const [accountsRes, statusRes] = await Promise.all([getAccounts(), getAccountsStatus()])
+
+    if (accountsRes.code === 1) {
+      // Create a map of account statuses for easier lookup
+      const statusMap = statusRes.data.reduce(
+        (map, status) => {
+          map[status.accountId] = status
+          return map
+        },
+        {} as Record<string, AccountStatus>,
+      )
+
+      // Merge account data with status data
+      accountList.value = accountsRes.data.map((account) => ({
+        ...account,
+        downLoadNum: statusMap[account.accountId]?.downloadNum ?? account.downLoadNum,
+        unPublishTaskNum: statusMap[account.accountId]?.unPublishTaskNum ?? 0,
+        settlementStatu: {
+          isStart: false,
+          isUsePublicAccount: false,
+          lastSettlementDate: '',
+          lastSettlePart: '',
+          msg: '',
+        },
+      }))
     }
-    const res2 = await getAccountsStatus()
-    console.log(res2)
-    console.log('filteredAccounts', filteredAccounts.value)
   } catch (error) {
     console.error('Failed to fetch accounts:', error)
     uni.showToast({
@@ -413,7 +438,14 @@ $mini-color: #07c160;
 .account-actions {
   display: flex;
   flex-direction: column;
-  gap: $spacing-lg; // 增加垂直间距
+  gap: $spacing-lg;
+  align-items: flex-end;
+  min-width: 300rpx; // Ensure enough space for stats
+}
+
+.stats-info {
+  display: flex;
+  gap: $spacing-lg;
   align-items: flex-end;
 }
 
@@ -433,6 +465,25 @@ $mini-color: #07c160;
     font-weight: 600;
     line-height: 1.2;
     color: $primary-color;
+  }
+}
+
+.unpublished-info {
+  text-align: right;
+
+  .unpublished-label {
+    display: block;
+    margin-bottom: 2rpx;
+    font-size: 22rpx;
+    color: $text-secondary;
+  }
+
+  .unpublished-value {
+    display: block;
+    font-size: 36rpx;
+    font-weight: 600;
+    line-height: 1.2;
+    color: $warning-color;
   }
 }
 
