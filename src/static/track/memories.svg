@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <!-- 背景：使用柔和的圆形创造怀旧氛围 -->
+    <circle cx="50" cy="50" r="40" fill="#F5E6D3" opacity="0.3"/>
+    
+    <!-- 老式相机主体：采用复古造型 -->
+    <path d="M30 35 H70 V65 H30 Z" fill="#8B4513"/>
+    <path d="M35 30 H65 V35 H35 Z" fill="#8B4513"/>
+    <!-- 相机镜头 -->
+    <circle cx="50" cy="50" r="10" fill="#4A4A4A"/>
+    <circle cx="50" cy="50" r="8" fill="#696969"/>
+    <circle cx="50" cy="50" r="3" fill="#333"/>
+    
+    <!-- 飘动的照片：展现记忆碎片 -->
+    <rect x="65" y="25" width="15" height="12" 
+          transform="rotate(15)" fill="#FFF" stroke="#DEB887"/>
+    <rect x="20" y="55" width="15" height="12" 
+          transform="rotate(-10)" fill="#FFF" stroke="#DEB887"/>
+    
+    <!-- 怀旧装饰元素 -->
+    <path d="M15 45 Q25 40, 35 45" stroke="#B8860B" 
+          fill="none" stroke-width="1" opacity="0.6"/>
+    <path d="M65 55 Q75 50, 85 55" stroke="#B8860B" 
+          fill="none" stroke-width="1" opacity="0.6"/>
+    
+    <!-- 记忆飘带：使用曲线创造飘动感 -->
+    <path d="M70 30 Q80 25, 85 35 T90 40" 
+          stroke="#DEB887" fill="none" stroke-width="2" opacity="0.4"/>
+    <path d="M20 60 Q15 65, 25 70 T30 75" 
+          stroke="#DEB887" fill="none" stroke-width="2" opacity="0.4"/>
+    
+    <!-- 小星星点缀：象征闪烁的回忆 -->
+    <path d="M75 20 L77 22 L79 20 L77 18 Z" fill="#FFD700" opacity="0.6"/>
+    <path d="M25 80 L27 82 L29 80 L27 78 Z" fill="#FFD700" opacity="0.6"/>
+    <path d="M85 60 L87 62 L89 60 L87 58 Z" fill="#FFD700" opacity="0.6"/>
+</svg>

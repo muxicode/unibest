@@ -6,6 +6,7 @@
 interface NavigateToOptions {
   url: "/pages/home/home" |
        "/pages/about/about" |
+       "/pages/accountreview/accountreview" |
        "/pages/accountsettlement/accountsettlement" |
        "/pages/accountupload/accountupload" |
        "/pages/addcount/addcount" |

@@ -104,6 +104,7 @@ const handleLogin = async () => {
     userStore.userInfo.token = u.token
     userStore.userInfo.userId = u.userId
     userStore.userInfo.nickname = u.userName
+    userStore.userInfo.userType = u.userType
     let curPage = '/pages/home/home'
     const curPageIndex = tabbarStore.tabbarInfo.activeIndex
     if (curPageIndex === 1) {

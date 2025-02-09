@@ -120,9 +120,11 @@ const tabbarStore = useTabbarStore()
 // 定义图片映射
 const trackImageMap: Record<string, string> = {
   EMOTIONAL_STORY: '/static/track/family_emotion.svg',
+  MEMORIES: '/static/track/memories.svg',
   CAR_INFORMATION: '/static/track/car_news.svg',
   WORKPLACE: '/static/track/new_account.svg',
   NEW_ACCOUNT: '/static/track/zodiac.svg',
+  NEW_ACCOUNT_ELE: '/static/track/new_account_ele.svg',
   IT_DB: '/static/track/it_db.svg',
   IT_AI: '/static/track/it_ai.svg',
   WORK_IP: '/static/track/work_ip.svg',

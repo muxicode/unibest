@@ -69,8 +69,7 @@ interface MenuItem {
 }
 
 const isAdmin = computed(() => {
-  const userId = Number(userStore.userInfo.userId)
-  return !isNaN(userId) && userId < 100
+  return userStore.userInfo.userType === 'ADMIN'
 })
 
 const menuList = [
@@ -150,6 +149,9 @@ const handleMenuClick = (item: MenuItem) => {
   console.log('handleMenuClick item', item)
   if (item.type === 'addCount') {
     uni.navigateTo({ url: '/pages/addcount/addcount' })
+  }
+  if (item.type === 'accountReview') {
+    uni.navigateTo({ url: '/pages/accountreview/accountreview' })
   }
   if (item.type === 'logout') {
     userStore.userInfo.token = ''

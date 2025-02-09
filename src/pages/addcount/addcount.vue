@@ -139,15 +139,17 @@
 </template>
 
 <script lang="ts" setup>
-// 保持脚本部分完全不变...
 import { useToast } from 'wot-design-uni'
 import { type FormInstance, type FormRules } from 'wot-design-uni/components/wd-form/types'
 import { reactive, ref } from 'vue'
 import { getTracks, type TracksInfo } from '@/service/index/foo'
 
+// Initialize empty trackList
+const trackList = ref<{ value: string; label: string }[]>([])
+
 // 页面显示时,自动获取赛道信息
 onShow(async () => {
-  let tracksRes = await getTracks()
+  const tracksRes = await getTracks()
   trackList.value = tracksRes.data.map((track) => ({
     value: track.trackId,
     label: track.trackName,
@@ -186,13 +188,6 @@ const rules: FormRules = {
   accountId: [{ required: true, message: '请输入账号ID' }],
   registerDate: [{ required: true, message: '请选择注册日期' }],
 }
-
-const trackList = ref([
-  { value: 'EMOTIONAL_STORY', label: '情感故事' },
-  { value: 'CAR_INFORMATION', label: '汽车资讯' },
-  { value: 'SPORTS_INFORMATION', label: '体育资讯' },
-  { value: 'WORKPLACE', label: '职场' },
-])
 
 const platformList = ref([{ value: '公众号', label: '公众号' }])
 
@@ -237,7 +232,7 @@ async function handleSubmit() {
 
   try {
     submitting.value = true
-    let vRes = await form.value.validate()
+    const vRes = await form.value.validate()
     if (vRes.valid === false) {
       return
     }

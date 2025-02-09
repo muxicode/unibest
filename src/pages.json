@@ -30,6 +30,14 @@
       }
     },
     {
+      "path": "pages/accountreview/accountreview",
+      "type": "page",
+      "layout": "page",
+      "style": {
+        "navigationBarTitleText": "账号审核"
+      }
+    },
+    {
       "path": "pages/accountsettlement/accountsettlement",
       "type": "page",
       "layout": "page",

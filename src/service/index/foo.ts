@@ -19,6 +19,7 @@ export interface LoginResult {
   token: string
   userId: string
   userName: string
+  userType: string
 }
 
 export interface PhoneLoginParams {
@@ -29,12 +30,20 @@ export interface PhoneLoginParams {
   userName: string
 }
 
+export interface UserInfo {
+  userName: string
+}
+
 export const register = (registerInfo: PhoneLoginParams) => {
   return http.post<LoginResult>('/agency/user/register', registerInfo)
 }
 
 export const loginJieSi = (code: string) => {
   return http.get<LoginResult>('/agency/user/login', { code })
+}
+
+export const getUserInfo = () => {
+  return http.get<UserInfo>('/agency/user/info')
 }
 
 export const phoneCode = (phone: string) => {
@@ -189,4 +198,37 @@ export interface ArticleAddressParams {
 
 export const fillArticleAddress = (params: ArticleAddressParams) => {
   return http.put<IFooItem>('/agency/article/adress/filled', params)
+}
+
+/** Account Review Sheet */
+export interface AccountReviewSheet {
+  id: string
+  userId: string
+  trackId: string
+  platform: string
+  phone: string
+  accountName: string
+  accountId: string
+  img: string
+  isReview: boolean
+  status: string
+  createTime: string
+  reviewer: string
+  note: string
+}
+
+/** 账号评审参数 */
+export interface AccountReviewParams {
+  id: string
+  status: 'SUCCESS' | 'FAIL'
+  note: string
+}
+
+/** 评审账号 */
+export const reviewAccount = (params: AccountReviewParams) => {
+  return http.put<null>('/agency/admin/review/account_sheet', params)
+}
+
+export const getAccountReviewSheets = () => {
+  return http.get<AccountReviewSheet[]>('/agency/admin/review/account_sheets')
 }

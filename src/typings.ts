@@ -21,6 +21,7 @@ type IUserInfo = {
   avatarUrl?: string
   token: string
   userId: string
+  userType: string
 }
 
 type TabbarInfo = {

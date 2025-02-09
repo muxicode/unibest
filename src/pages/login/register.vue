@@ -250,6 +250,7 @@ const handleLogin = async () => {
     userStore.userInfo.token = u.token
     userStore.userInfo.userId = u.userId
     userStore.userInfo.nickname = u.userId
+    userStore.userInfo.userType = u.userType
     uni.reLaunch({
       url: '/pages/home/home',
       success: function () {
