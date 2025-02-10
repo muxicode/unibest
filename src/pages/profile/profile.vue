@@ -15,7 +15,13 @@
       <view class="gradient-bg"></view>
       <view class="user-info">
         <view class="avatar">🤖</view>
-        <view class="user-name">{{ userStore.userInfo.nickname }}</view>
+        <view class="info-right">
+          <view class="user-name">{{ userStore.userInfo.nickname }}</view>
+          <view class="invite-code" @click="handleCopyInviteCode">
+            邀请码: {{ userStore.userInfo.inviteCode }}
+            <text class="copy-hint">(点击复制)</text>
+          </view>
+        </view>
       </view>
     </view>
 
@@ -106,6 +112,14 @@ const menuList = [
       adminOnly: true,
     },
     {
+      title: '赛道审核',
+      tit: '',
+      url: '',
+      type: 'trackReview',
+      icon: 'check-circle',
+      adminOnly: true,
+    },
+    {
       title: '今日数据',
       tit: '',
       url: '',
@@ -153,6 +167,12 @@ const handleMenuClick = (item: MenuItem) => {
   if (item.type === 'accountReview') {
     uni.navigateTo({ url: '/pages/accountreview/accountreview' })
   }
+  if (item.type === 'accountManage') {
+    uni.navigateTo({ url: '/pages/accountmanage/accountchangetrack' })
+  }
+  if (item.type === 'trackReview') {
+    uni.navigateTo({ url: '/pages/accounttrackreview/accounttrackreview' })
+  }
   if (item.type === 'logout') {
     userStore.userInfo.token = ''
     userStore.userInfo.userId = ''
@@ -168,6 +188,20 @@ const handleMenuClick = (item: MenuItem) => {
 
 const handleEditProfile = () => {
   uni.navigateTo({ url: '/pages/usercenter/person-info/index' })
+}
+
+const handleCopyInviteCode = () => {
+  const code = userStore.userInfo.inviteCode
+  uni.setClipboardData({
+    data: code,
+    success: () => {
+      uni.showToast({
+        title: '邀请码已复制',
+        icon: 'success',
+        duration: 2000,
+      })
+    },
+  })
 }
 </script>
 
@@ -216,11 +250,33 @@ const handleEditProfile = () => {
   line-height: 1;
 }
 
+.info-right {
+  display: flex;
+  flex-direction: column;
+  margin-left: 24rpx;
+}
+
 .user-name {
   margin-left: 24rpx;
   font-size: 36rpx;
   font-weight: 600;
   color: #333;
+}
+
+.invite-code {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #666;
+
+  .copy-hint {
+    margin-left: 8rpx;
+    font-size: 20rpx;
+    color: #4d80f0;
+  }
+
+  &:active {
+    opacity: 0.7;
+  }
 }
 
 .menu-card {

@@ -6,8 +6,10 @@
 interface NavigateToOptions {
   url: "/pages/home/home" |
        "/pages/about/about" |
+       "/pages/accountmanage/accountchangetrack" |
        "/pages/accountreview/accountreview" |
        "/pages/accountsettlement/accountsettlement" |
+       "/pages/accounttrackreview/accounttrackreview" |
        "/pages/accountupload/accountupload" |
        "/pages/addcount/addcount" |
        "/pages/articles/accounts_articles" |

@@ -8,6 +8,8 @@ const initState = {
     'https://cdn-we-retail.ym.tencent.com/miniapp/usercenter/icon-user-center-avatar@2x.png',
   token: '',
   userId: '',
+  userType: '',
+  inviteCode: '',
 }
 
 export const useUserStore = defineStore(

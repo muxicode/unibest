@@ -133,7 +133,7 @@ const loadTasks = async () => {
   try {
     const res = await getUnpublishedTasks()
     if (res.code === 1) {
-      tasks.value = res.data
+      tasks.value = res.data || [] // 确保当 data 为 null 或 undefined 时设置为空数组
     } else {
       toast.error(res.msg || '加载失败')
     }
@@ -267,6 +267,7 @@ const handlePublish = async () => {
     })
 
     if (res.code === 1) {
+      message.close()
       toast.success('提交成功')
       await loadTasks() // 刷新列表
     } else {
@@ -278,6 +279,7 @@ const handlePublish = async () => {
   } finally {
     submitting.value = ''
     currentTask.value = null
+    articleAddress.value = ''
   }
 }
 </script>

@@ -599,16 +599,25 @@ $mini-color: #07c160;
   background: rgba(0, 0, 0, 0.9);
 
   .preview-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
     width: 90%;
+    max-height: 90vh;
     overflow: hidden;
     background: #ffffff;
     border-radius: 12rpx;
   }
 
   .preview-header {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 2;
     padding: 24rpx;
     text-align: right;
-    background: #f8f8f8;
+    background: rgba(248, 248, 248, 0.95);
 
     .close-icon {
       font-size: 40rpx;
@@ -618,6 +627,10 @@ $mini-color: #07c160;
 
   .preview-image {
     width: 100%;
+    height: auto;
+    max-height: calc(90vh - 88rpx);
+    margin-top: 88rpx;
+    overflow-y: auto;
   }
 }
 </style>

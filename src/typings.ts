@@ -22,6 +22,7 @@ type IUserInfo = {
   token: string
   userId: string
   userType: string
+  inviteCode: string
 }
 
 type TabbarInfo = {

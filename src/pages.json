@@ -30,6 +30,14 @@
       }
     },
     {
+      "path": "pages/accountmanage/accountchangetrack",
+      "type": "page",
+      "layout": "page",
+      "style": {
+        "navigationBarTitleText": "账号赛道管理"
+      }
+    },
+    {
       "path": "pages/accountreview/accountreview",
       "type": "page",
       "layout": "page",
@@ -43,6 +51,14 @@
       "layout": "page",
       "style": {
         "navigationBarTitleText": "收益结算"
+      }
+    },
+    {
+      "path": "pages/accounttrackreview/accounttrackreview",
+      "type": "page",
+      "layout": "page",
+      "style": {
+        "navigationBarTitleText": "赛道变更审核"
       }
     },
     {

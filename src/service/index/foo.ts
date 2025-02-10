@@ -20,6 +20,7 @@ export interface LoginResult {
   userId: string
   userName: string
   userType: string
+  inviteCode: string
 }
 
 export interface PhoneLoginParams {
@@ -231,4 +232,50 @@ export const reviewAccount = (params: AccountReviewParams) => {
 
 export const getAccountReviewSheets = () => {
   return http.get<AccountReviewSheet[]>('/agency/admin/review/account_sheets')
+}
+
+/** 更新账号赛道 */
+export interface UpdateAccountTrackParams {
+  accountId: string
+  trackId: string
+}
+
+export const updateAccountTrack = (params: UpdateAccountTrackParams) => {
+  return http.put<null>('/agency/user/account/track', params)
+}
+
+/** 赛道变更审核单 */
+export interface AccountTrackReviewSheet {
+  id: string
+  userId: string
+  accountName: string
+  accountId: string
+  trackId: string
+  oldTrackId: string
+  status: string
+  createTime: string
+  isReview: boolean
+  reviewer: string
+  note: string
+}
+
+/** 获取赛道变更审核单列表 */
+export const getAccountTrackReviewSheets = (
+  reviewStatus: 'UN_REVIEW' | 'REVIEW' | 'ALL' = 'UN_REVIEW',
+) => {
+  return http.get<AccountTrackReviewSheet[]>('/agency/admin/review/account/track/review_sheets', {
+    reviewStatus,
+  })
+}
+
+/** 赛道变更审核参数 */
+export interface AccountTrackReviewParams {
+  id: string
+  status: 'SUCCESS' | 'FAIL'
+  note: string
+}
+
+/** 审核赛道变更 */
+export const reviewAccountTrack = (params: AccountTrackReviewParams) => {
+  return http.put<null>('/agency/admin/review/account/track', params)
 }
