@@ -12,6 +12,7 @@ interface NavigateToOptions {
        "/pages/accounttrackreview/accounttrackreview" |
        "/pages/accountupload/accountupload" |
        "/pages/addcount/addcount" |
+       "/pages/articleFormat/articleFormat" |
        "/pages/articles/accounts_articles" |
        "/pages/articles/articles" |
        "/pages/deal/deal" |

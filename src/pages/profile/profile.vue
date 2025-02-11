@@ -136,6 +136,13 @@ const menuList = [
   ],
   [
     {
+      title: '格式文章',
+      tit: '',
+      url: '',
+      type: 'articleFormat',
+      icon: 'service',
+    },
+    {
       title: '联系客服',
       tit: '',
       url: '',
@@ -172,6 +179,9 @@ const handleMenuClick = (item: MenuItem) => {
   }
   if (item.type === 'trackReview') {
     uni.navigateTo({ url: '/pages/accounttrackreview/accounttrackreview' })
+  }
+  if (item.type === 'articleFormat') {
+    uni.navigateTo({ url: '/pages/articleFormat/articleFormat' })
   }
   if (item.type === 'logout') {
     userStore.userInfo.token = ''

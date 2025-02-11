@@ -79,6 +79,15 @@
       "needLogin": true
     },
     {
+      "path": "pages/articleFormat/articleFormat",
+      "type": "page",
+      "layout": "page",
+      "style": {
+        "navigationBarTitleText": "Markdown格式化",
+        "backgroundColor": "#F8F9FA"
+      }
+    },
+    {
       "path": "pages/articles/accounts_articles",
       "type": "page",
       "layout": "page",
