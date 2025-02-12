@@ -10,15 +10,17 @@
   --text-secondary: #476582;
   --text-emphasis: #3eaf7c;
   --link-color: #3eaf7c;
-  --code-bg: #f8f8f8;
+  --code-bg: #282c34;
   --border-color: #eaecef;
   --blockquote-bg: #f8f8f8;
   --blockquote-border: #42b983;
-  --code-text: #476582;
-  --code-keyword: #c92c2c;
-  --code-function: #2973b7;
-  --code-string: #42b983;
-  --code-comment: #90a4ae;
+  --code-text: #abb2bf;
+  --code-keyword: #c678dd;
+  --code-function: #61afef;
+  --code-string: #98c379;
+  --code-comment: #5c6370;
+  --code-number: #d19a66;
+  --code-operator: #56b6c2;
 
   // Spacing
   --block-margin: 1.2em;
@@ -86,12 +88,12 @@
 
   .md-code {
     padding: 0.25em 0.5em;
-    margin: 0 0.2em;
-    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
-    font-size: 0.85em;
+    margin: 0;
+    font-family: 'JetBrains Mono', Menlo, Monaco, Consolas, 'Courier New', monospace;
+    font-size: 0.9em;
     color: var(--code-text);
     background-color: var(--code-bg);
-    border-radius: 3px;
+    border-radius: 4px;
 
     .keyword {
       color: var(--code-keyword);
@@ -105,22 +107,55 @@
     .comment {
       color: var(--code-comment);
     }
+    .number {
+      color: var(--code-number);
+    }
+    .operator {
+      color: var(--code-operator);
+    }
   }
 
   .md-pre {
+    position: relative;
     padding: 1em;
-    margin: var(--block-margin) 0;
-    overflow: auto;
+    margin: 1.2em 0;
+    overflow-x: auto;
     background-color: var(--code-bg);
-    border-radius: 6px;
+    border-radius: 8px;
+
+    // 添加滚动条样式
+    &::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #21252b;
+      border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #4e5561;
+      border-radius: 4px;
+
+      &:hover {
+        background: #5c6370;
+      }
+    }
 
     .md-code {
+      display: block;
       padding: 0;
-      margin: 0;
-      font-size: 0.85em;
+      overflow-x: auto;
+      font-size: 0.9em;
       line-height: 1.6;
       color: var(--code-text);
+      white-space: pre;
       background: none;
+
+      // 确保长行可以水平滚动
+      .hljs {
+        min-width: fit-content;
+      }
     }
   }
 

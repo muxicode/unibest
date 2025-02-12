@@ -140,7 +140,7 @@ const menuList = [
       tit: '',
       url: '',
       type: 'articleFormat',
-      icon: 'service',
+      icon: 'tools',
     },
     {
       title: '联系客服',
