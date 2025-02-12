@@ -243,11 +243,11 @@ export function convertMarkdownToHtml(
   const theme = themes[themeName] || defaultTheme
   setupRenderer(theme)
 
-  // 添加全局样式
   const html = md.render(markdown)
   console.log('Rendered HTML:', JSON.stringify(html))
 
-  const wrappedHtml = `<div style="
+  // 添加主题类名到最外层div
+  const wrappedHtml = `<div class="${themeName}" style="
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
     font-size: 16px;
     line-height: 1.75;
@@ -261,128 +261,134 @@ export function convertMarkdownToHtml(
 
 // 转换HTML为富文本节点数组
 export function convertHtmlToNodes(html: string): any[] {
-  // 简单的HTML解析函数
-  function parseHTML(html: string): any[] {
-    const nodes: any[] = []
-    const stack: any[] = []
-    let currentIndex = 0
+  // 直接使用字符串解析方式，移除DOM相关代码
+  return parseHTMLFallback(html)
+}
 
-    while (currentIndex < html.length) {
-      // 找到下一个标签开始
-      const tagStart = html.indexOf('<', currentIndex)
+// 原来的解析方式作为回退方案
+function parseHTMLFallback(html: string): any[] {
+  const nodes: any[] = []
+  const stack: any[] = []
+  let currentIndex = 0
+  const htmlLength = html.length
 
-      if (tagStart === -1) {
-        // 剩余的都是文本
-        if (currentIndex < html.length) {
-          const text = html.slice(currentIndex).trim()
-          if (text) {
-            const textNode = {
-              type: 'text',
-              text,
-            }
-            if (stack.length > 0) {
-              stack[stack.length - 1].children.push(textNode)
-            } else {
-              nodes.push(textNode)
-            }
-          }
-        }
-        break
-      }
+  while (currentIndex < htmlLength) {
+    // 找到下一个标签开始
+    const tagStart = html.indexOf('<', currentIndex)
 
-      // 处理标签前的文本
-      if (tagStart > currentIndex) {
-        const text = html.slice(currentIndex, tagStart).trim()
-        if (text) {
-          const textNode = {
-            type: 'text',
-            text,
-          }
-          if (stack.length > 0) {
-            stack[stack.length - 1].children.push(textNode)
-          } else {
-            nodes.push(textNode)
-          }
-        }
-      }
-
-      // 找到标签结束
-      const tagEnd = html.indexOf('>', tagStart)
-      if (tagEnd === -1) break
-
-      // 解析标签
-      const tag = html.slice(tagStart + 1, tagEnd)
-
-      // 检查是否是结束标签
-      if (tag.startsWith('/')) {
-        const tagName = tag.slice(1)
-        if (stack.length > 0 && stack[stack.length - 1].name === tagName) {
-          const node = stack.pop()
-          if (stack.length > 0) {
-            stack[stack.length - 1].children.push(node)
-          } else {
-            nodes.push(node)
-          }
-        }
-        currentIndex = tagEnd + 1
-        continue
-      }
-
-      // 解析标签名和属性
-      const [tagName, ...attrParts] = tag.split(' ')
-      const attrs: Record<string, string> = {}
-
-      // 处理属性
-      if (attrParts.length > 0) {
-        const attrString = attrParts.join(' ')
-        // 处理style属性
-        const styleMatch = attrString.match(/style="([^"]*)"/)
-        if (styleMatch) {
-          attrs.style = styleMatch[1]
-        }
-        // 处理color属性
-        const colorMatch = attrString.match(/color="([^"]*)"/)
-        if (colorMatch) {
-          attrs.color = colorMatch[1]
-        }
-        // 处理其他属性
-        const otherAttrs = attrString.match(/(\w+)="([^"]*)"/g)
-        if (otherAttrs) {
-          otherAttrs.forEach((attr) => {
-            const [key, value] = attr.split('=')
-            if (key !== 'style' && key !== 'color') {
-              attrs[key] = value.replace(/"/g, '')
-            }
-          })
-        }
-      }
-
-      // 创建节点
-      const node = {
-        name: tagName,
-        attrs,
-        children: [],
-      }
-
-      // 自闭合标签直接添加到当前层级
-      if (tag.endsWith('/') || ['img', 'br', 'hr'].includes(tagName)) {
+    if (tagStart === -1) {
+      // 处理剩余的文本
+      const remainingText = html.slice(currentIndex).trim()
+      if (remainingText) {
+        const textNode = { type: 'text', text: remainingText }
         if (stack.length > 0) {
-          stack[stack.length - 1].children.push(node)
+          stack[stack.length - 1].children.push(textNode)
         } else {
-          nodes.push(node)
+          nodes.push(textNode)
         }
-      } else {
-        // 非自闭合标签入栈
-        stack.push(node)
       }
-
-      currentIndex = tagEnd + 1
+      break
     }
 
-    return nodes
+    // 处理标签前的文本
+    if (tagStart > currentIndex) {
+      const text = html.slice(currentIndex, tagStart).trim()
+      if (text) {
+        const textNode = { type: 'text', text }
+        if (stack.length > 0) {
+          stack[stack.length - 1].children.push(textNode)
+        } else {
+          nodes.push(textNode)
+        }
+      }
+    }
+
+    // 找到标签结束
+    const tagEnd = html.indexOf('>', tagStart)
+    if (tagEnd === -1) break
+
+    // 解析标签
+    const tag = html.slice(tagStart + 1, tagEnd)
+
+    // 检查是否是结束标签
+    if (tag.startsWith('/')) {
+      const tagName = tag.slice(1)
+      if (stack.length > 0) {
+        const node = stack.pop()
+        if (stack.length > 0) {
+          // 将节点添加到父节点的children中
+          stack[stack.length - 1].children.push(node)
+        } else {
+          // 如果没有父节点，添加到根节点列表
+          nodes.push(node)
+        }
+      }
+      currentIndex = tagEnd + 1
+      continue
+    }
+
+    // 解析开始标签
+    const spaceIndex = tag.indexOf(' ')
+    const tagName = spaceIndex === -1 ? tag : tag.slice(0, spaceIndex)
+    const attrs: Record<string, string> = {}
+
+    // 解析属性
+    if (spaceIndex !== -1) {
+      const attrString = tag.slice(spaceIndex + 1)
+      const attrMatches = attrString.match(/([a-zA-Z-]+)="([^"]*)"/g)
+      if (attrMatches) {
+        attrMatches.forEach((attr) => {
+          const [key, value] = attr.split('=')
+          attrs[key] = value.slice(1, -1) // 移除引号
+        })
+      }
+    }
+
+    // 创建节点
+    const node = {
+      name: tagName,
+      attrs,
+      children: [],
+    }
+
+    // 特殊处理img标签
+    if (tagName === 'img') {
+      if (!attrs.style) {
+        attrs.style = 'max-width: 100%; margin: 1.2em 0; border-radius: 4px;'
+      }
+      if (stack.length > 0) {
+        stack[stack.length - 1].children.push(node)
+      } else {
+        nodes.push(node)
+      }
+      currentIndex = tagEnd + 1
+      continue
+    }
+
+    // 处理自闭合标签
+    if (tag.endsWith('/') || ['br', 'hr', 'img'].includes(tagName)) {
+      if (stack.length > 0) {
+        stack[stack.length - 1].children.push(node)
+      } else {
+        nodes.push(node)
+      }
+    } else {
+      // 非自闭合标签入栈
+      stack.push(node)
+    }
+
+    currentIndex = tagEnd + 1
   }
 
-  const nodes = parseHTML(html)
-  console.log('Parsed nodes:', JSON.stringify(nodes, null, 2))
+  // 处理未正确闭合的标签
+  while (stack.length > 0) {
+    const node = stack.pop()
+    if (stack.length > 0) {
+      stack[stack.length - 1].children.push(node)
+    } else {
+      nodes.push(node)
+    }
+  }
+
   return nodes
 }
