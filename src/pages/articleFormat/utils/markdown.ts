@@ -105,12 +105,64 @@ const md = new MarkdownIt({
           language: lang,
           ignoreIllegals: true,
         }).value
-        // 返回高亮后的HTML，包含必要的样式
-        return `<div class="hljs" style="background: none;">${highlighted}</div>`
+
+        // Convert highlighted code to inline styles
+        const styledCode = highlighted
+          .replace(/<span class="hljs-keyword">/g, '<span style="color: var(--code-keyword);">')
+          .replace(/<span class="hljs-string">/g, '<span style="color: var(--code-string);">')
+          .replace(/<span class="hljs-comment">/g, '<span style="color: var(--code-comment);">')
+          .replace(/<span class="hljs-function">/g, '<span style="color: var(--code-function);">')
+          .replace(/<span class="hljs-number">/g, '<span style="color: var(--code-number);">')
+          .replace(/<span class="hljs-operator">/g, '<span style="color: var(--code-operator);">')
+          .replace(/<span class="hljs-built_in">/g, '<span style="color: var(--code-function);">')
+          .replace(
+            /<span class="hljs-title function_">/g,
+            '<span style="color: var(--code-function);">',
+          )
+          .replace(/<span class="hljs-params">/g, '<span style="color: var(--code-text);">')
+          .replace(/<span class="hljs-subst">/g, '<span style="color: var(--code-text);">')
+
+        // Add pre and code with inline styles
+        return `<pre style="
+          position: relative;
+          padding: 1em;
+          margin: 1.2em 0;
+          overflow-x: auto;
+          background-color: var(--code-bg);
+          border-radius: 8px;
+        "><code style="
+          display: block;
+          padding: 0;
+          overflow-x: auto;
+          font-family: 'JetBrains Mono', Menlo, Monaco, Consolas, 'Courier New', monospace;
+          font-size: 0.9em;
+          line-height: 1.6;
+          color: var(--code-text);
+          white-space: pre;
+          background: none;
+        ">${styledCode}</code></pre>`
       } catch (__) {}
     }
-    // 如果语言不支持或出错，返回原始代码
-    return `<pre><code>${md.utils.escapeHtml(str)}</code></pre>`
+
+    // Handle non-highlighted code
+    return `<pre style="
+      position: relative;
+      padding: 1em;
+      margin: 1.2em 0;
+      overflow-x: auto;
+      background-color: var(--code-bg);
+      border-radius: 8px;
+    "><code style="
+      display: block;
+      padding: 0;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', Menlo, Monaco, Consolas, 'Courier New', monospace;
+      font-size: 0.9em;
+      line-height: 1.6;
+      color: var(--code-text);
+      white-space: pre;
+      background: none;
+    ">${md.utils.escapeHtml(str)}</code></pre>`
   },
 })
 
@@ -156,33 +208,18 @@ function setupRenderer(theme: ThemeConfig) {
   }
 
   // 代码块
-  renderer.code_block = (tokens, idx) => {
-    const content = tokens[idx].content
-    return `<pre style="
-      padding: 1em;
-      margin: 1.2em 0;
-      overflow: auto;
-      background-color: ${theme.codeBg};
-      border-radius: 6px;
-    "><code style="
-      font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
-      font-size: 0.85em;
-      line-height: 1.6;
-      color: ${theme.codeText};
-    ">${content}
-    </code></pre>`
-  }
+  delete renderer.code_block
 
   // 行内代码
   renderer.code_inline = (tokens, idx) => {
     return `<code style="
       padding: 0.25em 0.5em;
-      margin: 0 0.2em;
-      font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
-      font-size: 0.85em;
-      color: ${theme.codeText};
-      background-color: ${theme.codeBg};
-      border-radius: 3px;
+      margin: 0;
+      font-family: 'JetBrains Mono', Menlo, Monaco, Consolas, 'Courier New', monospace;
+      font-size: 0.9em;
+      color: var(--code-text);
+      background-color: var(--code-bg);
+      border-radius: 4px;
     ">${tokens[idx].content}</code>`
   }
 

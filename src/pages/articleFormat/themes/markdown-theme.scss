@@ -95,22 +95,29 @@
     background-color: var(--code-bg);
     border-radius: 4px;
 
-    .keyword {
+    // Syntax highlighting - update selectors to match highlight.js classes
+    .hljs-keyword,
+    .language-python .hljs-keyword {
       color: var(--code-keyword);
     }
-    .function {
+    .hljs-function,
+    .language-python .hljs-function {
       color: var(--code-function);
     }
-    .string {
+    .hljs-string,
+    .language-python .hljs-string {
       color: var(--code-string);
     }
-    .comment {
+    .hljs-comment,
+    .language-python .hljs-comment {
       color: var(--code-comment);
     }
-    .number {
+    .hljs-number,
+    .language-python .hljs-number {
       color: var(--code-number);
     }
-    .operator {
+    .hljs-operator,
+    .language-python .hljs-operator {
       color: var(--code-operator);
     }
   }
@@ -123,25 +130,6 @@
     background-color: var(--code-bg);
     border-radius: 8px;
 
-    // 添加滚动条样式
-    &::-webkit-scrollbar {
-      height: 8px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: #21252b;
-      border-radius: 4px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: #4e5561;
-      border-radius: 4px;
-
-      &:hover {
-        background: #5c6370;
-      }
-    }
-
     .md-code {
       display: block;
       padding: 0;
@@ -151,11 +139,6 @@
       color: var(--code-text);
       white-space: pre;
       background: none;
-
-      // 确保长行可以水平滚动
-      .hljs {
-        min-width: fit-content;
-      }
     }
   }
 
