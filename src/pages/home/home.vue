@@ -128,6 +128,8 @@ const trackImageMap: Record<string, string> = {
   IT_DB: '/static/track/it_db.svg',
   IT_AI: '/static/track/it_ai.svg',
   WORK_IP: '/static/track/work_ip.svg',
+  EXCEL: '/static/track/zodiac.svg',
+  PET: '/static/track/zodiac.svg',
 }
 
 onShow(async () => {

@@ -127,6 +127,10 @@ const TRACK_NAME_MAP: Record<string, string> = {
   IT_AI: 'AI技术',
   NEW_ACCOUNT: '新号起号赛道',
   WORK_IP: '爆文IP赛道',
+  NEW_ACCOUNT_ELE: '新号起号电工',
+  MEMORIES: '往事回忆',
+  EXCEL: '职场技能',
+  PET: '可爱萌宠',
 }
 
 const getPlatformText = (platform: string) => {

@@ -52,6 +52,14 @@
               <text v-if="submitting === item.id">发布中...</text>
               <text v-else>发表文章</text>
             </button>
+            <button
+              class="btn reject-btn"
+              :disabled="rejecting === item.id"
+              @click="showRejectDialog(item)"
+            >
+              <text v-if="rejecting === item.id">拒绝中...</text>
+              <text v-else>拒绝</text>
+            </button>
           </view>
         </view>
 
@@ -96,6 +104,17 @@
       </view>
     </wd-message-box>
 
+    <!-- 拒绝任务弹窗 -->
+    <wd-message-box selector="reject-task-dialog">
+      <view class="reject-dialog">
+        <view class="dialog-title">{{ currentTask?.title }}</view>
+        <view class="dialog-account">账号：{{ currentTask?.accountName }}</view>
+        <view class="dialog-input">
+          <wd-input v-model="rejectReason" placeholder="请输入拒绝原因" type="textarea" clearable />
+        </view>
+      </view>
+    </wd-message-box>
+
     <!-- Toast提示 -->
     <wd-toast />
   </view>
@@ -104,12 +123,18 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
 import { useToast, useMessage } from 'wot-design-uni'
-import { getUnpublishedTasks, downloadArticle, fillArticleAddress } from '@/service/index/foo'
+import {
+  getUnpublishedTasks,
+  downloadArticle,
+  fillArticleAddress,
+  rejectTask,
+} from '@/service/index/foo'
 import type { UnpublishedTask } from '@/service/index/foo'
 
 // 组件状态
 const toast = useToast()
 const message = useMessage('publish-article-dialog')
+const rejectDialog = useMessage('reject-task-dialog')
 const tasks = ref<UnpublishedTask[]>([])
 const loading = ref(false)
 const error = ref(false)
@@ -119,6 +144,8 @@ const showSharePopup = ref(false)
 const downloadFilePath = ref('')
 const articleAddress = ref('')
 const currentTask = ref<UnpublishedTask | null>(null)
+const rejectReason = ref('')
+const rejecting = ref('') // 记录正在拒绝的任务ID
 
 // 页面加载
 onMounted(() => {
@@ -282,6 +309,57 @@ const handlePublish = async () => {
     articleAddress.value = ''
   }
 }
+
+// 显示拒绝任务弹窗
+const showRejectDialog = (task: UnpublishedTask) => {
+  currentTask.value = task
+  rejectReason.value = ''
+
+  rejectDialog
+    .confirm({
+      title: '拒绝任务',
+      confirmButtonText: '确认拒绝',
+      cancelButtonText: '取消',
+    })
+    .then(() => {
+      handleReject()
+    })
+    .catch(() => {
+      currentTask.value = null
+    })
+}
+
+// 处理拒绝任务
+const handleReject = async () => {
+  if (!currentTask.value) {
+    toast.error('任务信息错误')
+    return
+  }
+
+  rejecting.value = currentTask.value.id
+
+  try {
+    const res = await rejectTask({
+      id: currentTask.value.id,
+      reason: rejectReason.value.trim(),
+    })
+
+    if (res.code === 1) {
+      rejectDialog.close()
+      toast.success('拒绝成功')
+      await loadTasks() // 刷新列表
+    } else {
+      toast.error(res.msg || '拒绝失败')
+    }
+  } catch (err) {
+    console.error('拒绝任务失败:', err)
+    toast.error('拒绝失败')
+  } finally {
+    rejecting.value = ''
+    currentTask.value = null
+    rejectReason.value = ''
+  }
+}
 </script>
 
 <style lang="scss">
@@ -436,6 +514,16 @@ $border-radius: 20rpx;
       opacity: 0.6;
     }
   }
+
+  &.reject-btn {
+    color: $card-background;
+    background: $error-color;
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+  }
 }
 
 // 空数据提示
@@ -488,6 +576,35 @@ $border-radius: 20rpx;
 
 // 发表文章弹窗
 .publish-dialog {
+  max-height: 70vh;
+  padding: 24rpx 0;
+
+  .dialog-title {
+    padding: 0 24rpx;
+    margin-bottom: 16rpx;
+    font-size: 32rpx;
+    font-weight: 500;
+    line-height: 1.5;
+    color: $text-primary;
+    text-align: center;
+    word-break: break-all;
+    word-wrap: break-word;
+  }
+
+  .dialog-account {
+    margin-bottom: 24rpx;
+    font-size: 28rpx;
+    color: $text-secondary;
+    text-align: center;
+  }
+
+  .dialog-input {
+    padding: 0 24rpx;
+  }
+}
+
+// 拒绝任务弹窗
+.reject-dialog {
   max-height: 70vh;
   padding: 24rpx 0;
 

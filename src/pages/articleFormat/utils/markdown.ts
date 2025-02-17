@@ -37,6 +37,8 @@ interface ThemeConfig {
   codeString: string
   codeComment: string
   background: string
+  codeNumber: string
+  codeOperator: string
 }
 
 // 默认主题
@@ -55,6 +57,8 @@ const defaultTheme: ThemeConfig = {
   codeString: '#42b983',
   codeComment: '#90a4ae',
   background: '#ffffff',
+  codeNumber: '#d19a66',
+  codeOperator: '#56b6c2',
 }
 
 // 暗色主题
@@ -67,12 +71,14 @@ const darkTheme: ThemeConfig = {
   borderColor: '#3e4c5a',
   blockquoteBg: '#1c1c1c',
   blockquoteBorder: '#42b983',
-  codeText: '#e0e0e0',
-  codeKeyword: '#ff7875',
-  codeFunction: '#61aeee',
+  codeText: '#abb2bf',
+  codeKeyword: '#c678dd',
+  codeFunction: '#61afef',
   codeString: '#98c379',
-  codeComment: '#676e95',
+  codeComment: '#5c6370',
   background: '#1a1a1a',
+  codeNumber: '#d19a66',
+  codeOperator: '#56b6c2',
 }
 
 // 护眼主题
@@ -91,6 +97,8 @@ const greenTheme: ThemeConfig = {
   codeString: '#42b983',
   codeComment: '#90a4ae',
   background: '#f0f9eb',
+  codeNumber: '#d19a66',
+  codeOperator: '#56b6c2',
 }
 
 // 创建markdown-it实例
@@ -108,36 +116,36 @@ const md = new MarkdownIt({
 
         // Convert highlighted code to inline styles
         const styledCode = highlighted
-          .replace(/<span class="hljs-keyword">/g, '<span style="color: var(--code-keyword);">')
-          .replace(/<span class="hljs-string">/g, '<span style="color: var(--code-string);">')
-          .replace(/<span class="hljs-comment">/g, '<span style="color: var(--code-comment);">')
-          .replace(/<span class="hljs-function">/g, '<span style="color: var(--code-function);">')
-          .replace(/<span class="hljs-number">/g, '<span style="color: var(--code-number);">')
-          .replace(/<span class="hljs-operator">/g, '<span style="color: var(--code-operator);">')
-          .replace(/<span class="hljs-built_in">/g, '<span style="color: var(--code-function);">')
-          .replace(
-            /<span class="hljs-title function_">/g,
-            '<span style="color: var(--code-function);">',
-          )
-          .replace(/<span class="hljs-params">/g, '<span style="color: var(--code-text);">')
-          .replace(/<span class="hljs-subst">/g, '<span style="color: var(--code-text);">')
+          .replace(/<span class="hljs-keyword">/g, '<span style="color: #c678dd;">')
+          .replace(/<span class="hljs-string">/g, '<span style="color: #98c379;">')
+          .replace(/<span class="hljs-comment">/g, '<span style="color: #5c6370;">')
+          .replace(/<span class="hljs-function">/g, '<span style="color: #61afef;">')
+          .replace(/<span class="hljs-number">/g, '<span style="color: #d19a66;">')
+          .replace(/<span class="hljs-operator">/g, '<span style="color: #56b6c2;">')
+          .replace(/<span class="hljs-built_in">/g, '<span style="color: #61afef;">')
+          .replace(/<span class="hljs-title function_">/g, '<span style="color: #61afef;">')
+          .replace(/<span class="hljs-params">/g, '<span style="color: #abb2bf;">')
+          .replace(/<span class="hljs-subst">/g, '<span style="color: #abb2bf;">')
+          .replace(/<span class="hljs-literal">/g, '<span style="color: #56b6c2;">')
 
         // Add pre and code with inline styles
         return `<pre style="
           position: relative;
-          padding: 1em;
+          padding: 1.25em 1.5em;
           margin: 1.2em 0;
           overflow-x: auto;
-          background-color: var(--code-bg);
+          background-color: #282c34;
           border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+          border: 1px solid rgba(0,0,0,0.1);
         "><code style="
           display: block;
           padding: 0;
           overflow-x: auto;
           font-family: 'JetBrains Mono', Menlo, Monaco, Consolas, 'Courier New', monospace;
-          font-size: 0.9em;
-          line-height: 1.6;
-          color: var(--code-text);
+          font-size: 0.95em;
+          line-height: 1.7;
+          color: #abb2bf;
           white-space: pre;
           background: none;
         ">${styledCode}</code></pre>`
@@ -217,8 +225,8 @@ function setupRenderer(theme: ThemeConfig) {
       margin: 0;
       font-family: 'JetBrains Mono', Menlo, Monaco, Consolas, 'Courier New', monospace;
       font-size: 0.9em;
-      color: var(--code-text);
-      background-color: var(--code-bg);
+      color: #abb2bf;
+      background-color: #282c34;
       border-radius: 4px;
     ">${tokens[idx].content}</code>`
   }

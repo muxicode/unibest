@@ -177,6 +177,14 @@
       }
     },
     {
+      "path": "pages/taskReview/taskReview",
+      "type": "page",
+      "layout": "page",
+      "style": {
+        "navigationBarTitleText": "任务审核"
+      }
+    },
+    {
       "path": "pages/unpublishtasks/unpublishtasks",
       "type": "page",
       "layout": "page",

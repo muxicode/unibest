@@ -279,3 +279,52 @@ export interface AccountTrackReviewParams {
 export const reviewAccountTrack = (params: AccountTrackReviewParams) => {
   return http.put<null>('/agency/admin/review/account/track', params)
 }
+
+/** 拒绝任务参数 */
+export interface TaskRejectionParams {
+  id: string
+  reason: string
+}
+
+/** 拒绝任务 */
+export const rejectTask = (params: TaskRejectionParams) => {
+  return http.put<null>('/agency/task/rejection', params)
+}
+
+export interface TaskReviewSheet {
+  id: string
+  taskId: string
+  accountId: string
+  accountName: string
+  platform: string
+  userId: string
+  title: string
+  textAddr: string
+  articleDownloadTime: string
+  note: string
+  reason: string
+  status: string
+  createTime: string
+  isReview: boolean
+  reviewer: string
+  articleAddr: string
+  articleId: string
+}
+
+export interface TaskReviewParams {
+  id: string
+  status: 'SUCCESS' | 'FAIL'
+  note?: string
+}
+
+// Get task review sheets
+export const getTaskReviewSheets = (reviewStatus: 'ALL' | 'REVIEW' | 'UN_REVIEW' = 'UN_REVIEW') => {
+  return http.get<TaskReviewSheet[]>('/agency/admin/review/task/rejection/sheets', {
+    reviewStatus,
+  })
+}
+
+// Submit task review
+export const reviewTask = (params: TaskReviewParams) => {
+  return http.put('/agency/admin/review/task/rejection', params)
+}

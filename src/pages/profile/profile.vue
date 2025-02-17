@@ -120,6 +120,14 @@ const menuList = [
       adminOnly: true,
     },
     {
+      title: '任务审核',
+      tit: '',
+      url: '',
+      type: 'taskReview',
+      icon: 'check-circle',
+      adminOnly: true,
+    },
+    {
       title: '今日数据',
       tit: '',
       url: '',
@@ -179,6 +187,9 @@ const handleMenuClick = (item: MenuItem) => {
   }
   if (item.type === 'trackReview') {
     uni.navigateTo({ url: '/pages/accounttrackreview/accounttrackreview' })
+  }
+  if (item.type === 'taskReview') {
+    uni.navigateTo({ url: '/pages/taskReview/taskReview' })
   }
   if (item.type === 'articleFormat') {
     uni.navigateTo({ url: '/pages/articleFormat/articleFormat' })

@@ -18,13 +18,23 @@
       </view>
 
       <!-- 主题选择 -->
-      <view class="theme-selector">
-        <text class="theme-label">主题选择：</text>
-        <wd-radio-group v-model="currentTheme" direction="horizontal" @change="handleThemeChange">
-          <wd-radio v-for="theme in themes" :key="theme.value" :value="theme.value">
-            {{ theme.label }}
-          </wd-radio>
-        </wd-radio-group>
+      <view class="format-options">
+        <view class="theme-selector">
+          <text class="theme-label">主题：</text>
+          <wd-picker
+            v-model="currentTheme"
+            :columns="themes"
+            :label-key="'label'"
+            :value-key="'value'"
+            @confirm="handleThemeChange"
+          >
+            <text class="picker-text">
+              {{ themes.find((t) => t.value === currentTheme)?.label }}
+            </text>
+          </wd-picker>
+        </view>
+
+        <image-downloader v-if="content" :content="content" />
       </view>
 
       <!-- 文件导入区域 -->
@@ -64,6 +74,7 @@
 import { ref, computed } from 'vue'
 import { useToast } from 'wot-design-uni'
 import { convertMarkdownToHtml, convertHtmlToNodes } from './utils/markdown'
+import ImageDownloader from './components/ImageDownloader.vue'
 
 const toast = useToast()
 
@@ -177,18 +188,29 @@ $card-background: #ffffff;
   color: $text-tertiary;
 }
 
+.format-options {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+  margin-bottom: 32rpx;
+}
+
 .theme-selector {
   display: flex;
   align-items: center;
   padding: 24rpx;
-  margin-bottom: 24rpx;
   background: #f8f9fa;
   border-radius: 12rpx;
 
   .theme-label {
-    margin-right: 24rpx;
+    margin-right: 16rpx;
     font-size: 28rpx;
     color: $text-secondary;
+  }
+
+  .picker-text {
+    font-size: 28rpx;
+    color: $text-primary;
   }
 }
 

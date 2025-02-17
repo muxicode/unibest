@@ -24,6 +24,7 @@ interface NavigateToOptions {
        "/pages/settlement/settlement" |
        "/pages/settlements/settlements" |
        "/pages/task/task" |
+       "/pages/taskReview/taskReview" |
        "/pages/unpublishtasks/unpublishtasks" |
        "/pages/upload/upload";
 }
