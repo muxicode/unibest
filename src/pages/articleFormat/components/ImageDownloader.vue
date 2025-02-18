@@ -66,6 +66,7 @@ const toast = useToast()
 const isDownloading = ref(false)
 const downloadedImages = ref<{ url: string; path: string }[]>([])
 const selectedImages = ref<string[]>([])
+const currentIndex = ref(0)
 
 const props = defineProps<{
   content: string
@@ -123,15 +124,11 @@ const shareFile = (filePath: string): Promise<void> => {
 
 // 切换图片选择状态
 const toggleImageSelection = (path: string) => {
-  const index = selectedImages.value.indexOf(path)
-  if (index === -1) {
-    selectedImages.value.push(path)
-  } else {
-    selectedImages.value.splice(index, 1)
-  }
+  selectedImages.value = [path]
+  currentIndex.value = downloadedImages.value.findIndex((img) => img.path === path)
 }
 
-// 处理下载
+// 更新下载处理函数
 const handleDownload = async () => {
   const imageUrls = extractImageUrls(props.content)
   console.log('Found image URLs:', imageUrls)
@@ -144,6 +141,7 @@ const handleDownload = async () => {
   isDownloading.value = true
   downloadedImages.value = []
   selectedImages.value = []
+  currentIndex.value = 0 // 重置索引
 
   try {
     // 下载所有图片
@@ -157,6 +155,8 @@ const handleDownload = async () => {
     }
 
     if (downloadedImages.value.length > 0) {
+      // 只默认选中第一张图片
+      selectedImages.value = [downloadedImages.value[0].path]
       toast.success(`成功下载 ${downloadedImages.value.length} 张图片`)
     } else {
       toast.error('所有图片下载失败')
@@ -169,54 +169,53 @@ const handleDownload = async () => {
   }
 }
 
-// 处理分享
+// 更新分享处理函数
 const handleShare = async () => {
   if (selectedImages.value.length === 0) {
     toast.error('请选择要分享的图片')
     return
   }
 
-  let successCount = 0
-  let failCount = 0
+  try {
+    // 分享当前选中的图片
+    await shareFile(selectedImages.value[0])
+    toast.success('分享成功')
 
-  for (const path of selectedImages.value) {
-    try {
-      await shareFile(path)
-      successCount++
-    } catch (error) {
-      console.error('Share error:', error)
-      failCount++
+    // 更新选中状态到下一张图片
+    currentIndex.value++
+    if (currentIndex.value < downloadedImages.value.length) {
+      // 还有下一张图片，更新选中
+      selectedImages.value = [downloadedImages.value[currentIndex.value].path]
+      toast.info(`请继续分享第 ${currentIndex.value + 1} 张图片`)
+    } else {
+      // 已经分享完所有图片
+      selectedImages.value = []
+      currentIndex.value = 0
+      toast.success('已分享完所有图片')
     }
-  }
-
-  if (successCount > 0) {
-    toast.success(`成功分享 ${successCount} 张图片`)
-  }
-  if (failCount > 0) {
-    toast.error(`${failCount} 张图片分享失败`)
+  } catch (error) {
+    console.error('Share error:', error)
+    toast.error('分享失败')
   }
 }
 
-// 重置
+// 更新重置函数
 const handleReset = () => {
   downloadedImages.value = []
   selectedImages.value = []
+  currentIndex.value = 0
 }
 </script>
 
 <style lang="scss" scoped>
 .image-downloader {
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
   width: 100%;
-  transition: all 0.3s ease;
 
   .action-section {
     display: flex;
     align-items: center;
-    padding: 24rpx 0;
-    border-bottom: 2rpx solid #f5f5f5;
+    padding: 20rpx 0;
+    border-bottom: 1px solid #eee;
 
     .btn-text {
       margin-left: 8rpx;
@@ -226,14 +225,14 @@ const handleReset = () => {
 }
 
 .image-preview {
-  margin-top: 24rpx;
+  margin-top: 20rpx;
 
   .preview-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 24rpx;
-    margin-bottom: 24rpx;
+    padding: 0 20rpx;
+    margin-bottom: 20rpx;
 
     .preview-title {
       font-size: 28rpx;
@@ -248,30 +247,24 @@ const handleReset = () => {
 
   .image-grid-container {
     max-height: 800rpx;
-    padding: 0 24rpx;
+    padding: 0 20rpx;
   }
 
   .image-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 24rpx;
-    padding-bottom: 24rpx;
+    gap: 20rpx;
+    padding-bottom: 20rpx;
 
     .image-item {
       position: relative;
       aspect-ratio: 1;
       overflow: hidden;
-      border: 2rpx solid #eee;
-      border-radius: 8rpx;
-      transition: all 0.2s ease;
+      border: 1px solid #eee;
+      border-radius: 6rpx;
 
       &.selected {
-        border-color: #1989fa;
-        transform: scale(1.02);
-      }
-
-      &:active {
-        transform: scale(0.98);
+        border: 2px solid #1989fa;
       }
 
       image {
@@ -284,15 +277,8 @@ const handleReset = () => {
         position: absolute;
         top: 8rpx;
         right: 8rpx;
-        padding: 4rpx;
         background: rgba(255, 255, 255, 0.9);
         border-radius: 50%;
-        box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
-        transition: all 0.2s ease;
-
-        &:active {
-          transform: scale(0.9);
-        }
       }
     }
   }

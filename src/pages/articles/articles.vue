@@ -183,11 +183,11 @@ const handleDownload = async (article: ArticleItem) => {
       articleId: article.id,
       accountId: accountId.value,
     })
-    if (res.code == 1) {
+    if (res.code === 1) {
       await prepareFileToShare(res.data)
       showSharePopup.value = true
     }
-    if (res.code == 0) {
+    if (res.code === 0) {
       toast.error(res.msg)
     }
   } catch (err) {
