@@ -7,8 +7,10 @@ interface NavigateToOptions {
   url: "/pages/home/home" |
        "/pages/about/about" |
        "/pages/accountmanage/accountchangetrack" |
+       "/pages/accountprogress/accountprogress" |
        "/pages/accountreview/accountreview" |
        "/pages/accountsettlement/accountsettlement" |
+       "/pages/accounttrackprogress/accounttrackprogress" |
        "/pages/accounttrackreview/accounttrackreview" |
        "/pages/accountupload/accountupload" |
        "/pages/addcount/addcount" |

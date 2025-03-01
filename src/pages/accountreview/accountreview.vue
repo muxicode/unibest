@@ -19,6 +19,37 @@
       </view>
     </view>
 
+    <!-- Add rejection dialog -->
+    <view v-if="rejectDialogVisible" class="dialog-overlay" @click="closeRejectDialog">
+      <view class="dialog-content" @click.stop>
+        <view class="dialog-header">
+          <text class="dialog-title">拒绝原因</text>
+          <wd-icon name="close" class="close-icon" @click="closeRejectDialog"></wd-icon>
+        </view>
+        <view class="dialog-body">
+          <textarea
+            class="reject-note-input"
+            v-model="rejectNote"
+            placeholder="请输入拒绝原因（必填）"
+            maxlength="200"
+          ></textarea>
+          <text class="char-count">{{ rejectNote.length }}/200</text>
+        </view>
+        <view class="dialog-footer">
+          <button class="dialog-btn cancel-btn" @click="closeRejectDialog">取消</button>
+          <button
+            class="dialog-btn confirm-btn"
+            :disabled="!rejectNote.trim() || confirmLoading"
+            :class="{ 'is-loading': confirmLoading }"
+            @click="confirmReject"
+          >
+            <text>确认</text>
+            <view v-if="confirmLoading" class="loading-icon"></view>
+          </button>
+        </view>
+      </view>
+    </view>
+
     <view class="account-card">
       <view class="card-header">
         <text class="title">账号审核</text>
@@ -55,6 +86,10 @@
                 <view class="detail-item">
                   <text class="detail-label">账号ID</text>
                   <text class="detail-value">{{ item.accountId }}</text>
+                </view>
+                <view class="detail-item">
+                  <text class="detail-label">用户ID</text>
+                  <text class="detail-value">{{ item.userId }}</text>
                 </view>
                 <view class="detail-item">
                   <text class="detail-label">手机号</text>
@@ -230,27 +265,64 @@ const handleApprove = async (item: AccountReviewSheet) => {
   )
 }
 
-const handleReject = async (item: AccountReviewSheet) => {
-  handleAction(
-    item,
-    async () => {
-      const params: AccountReviewParams = {
-        id: item.id,
-        status: 'FAIL',
-        note: '审核不通过',
-      }
-      const res = await reviewAccount(params)
-      if (res.code === 1) {
-        uni.showToast({
-          title: '已拒绝',
-          icon: 'success',
-        })
-      } else {
-        throw new Error(res.msg || '审核失败')
-      }
-    },
-    'reject',
-  )
+// 拒绝对话框状态
+const rejectDialogVisible = ref(false)
+const rejectNote = ref('')
+const currentRejectItem = ref<AccountReviewSheet | null>(null)
+const confirmLoading = ref(false)
+
+// 打开拒绝对话框
+const openRejectDialog = (item: AccountReviewSheet) => {
+  currentRejectItem.value = item
+  rejectNote.value = '审核不通过' // 默认值，用户可以修改
+  rejectDialogVisible.value = true
+}
+
+// 关闭拒绝对话框
+const closeRejectDialog = () => {
+  rejectDialogVisible.value = false
+  currentRejectItem.value = null
+  rejectNote.value = ''
+}
+
+// 确认拒绝
+const confirmReject = async () => {
+  if (!currentRejectItem.value || !rejectNote.value.trim()) return
+
+  confirmLoading.value = true
+  try {
+    const params: AccountReviewParams = {
+      id: currentRejectItem.value.id,
+      status: 'FAIL',
+      note: rejectNote.value.trim(),
+    }
+    const res = await reviewAccount(params)
+    if (res.code === 1) {
+      uni.showToast({
+        title: '已拒绝',
+        icon: 'success',
+      })
+      // 从列表中移除已审核的账号
+      reviewSheets.value = reviewSheets.value.filter(
+        (sheet) => sheet.id !== currentRejectItem.value?.id,
+      )
+      closeRejectDialog()
+    } else {
+      throw new Error(res.msg || '审核失败')
+    }
+  } catch (error) {
+    uni.showToast({
+      title: error instanceof Error ? error.message : '操作失败',
+      icon: 'none',
+    })
+  } finally {
+    confirmLoading.value = false
+  }
+}
+
+// 修改原来的拒绝处理函数
+const handleReject = (item: AccountReviewSheet) => {
+  openRejectDialog(item)
 }
 
 onMounted(() => {
@@ -635,6 +707,116 @@ $mini-color: #07c160;
     max-height: calc(90vh - 88rpx);
     margin-top: 88rpx;
     overflow-y: auto;
+  }
+}
+
+// 对话框样式
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.dialog-content {
+  width: 80%;
+  max-width: 600rpx;
+  overflow: hidden;
+  background: #ffffff;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.12);
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 32rpx;
+  border-bottom: 1rpx solid $border-color;
+
+  .dialog-title {
+    font-size: 32rpx;
+    font-weight: 600;
+    color: $text-primary;
+  }
+
+  .close-icon {
+    font-size: 36rpx;
+    color: $text-secondary;
+  }
+}
+
+.dialog-body {
+  position: relative;
+  padding: 32rpx;
+
+  .reject-note-input {
+    width: 100%;
+    height: 200rpx;
+    padding: 16rpx;
+    font-size: 28rpx;
+    line-height: 1.5;
+    color: $text-primary;
+    background: $background-color;
+    border: 1rpx solid $border-color;
+    border-radius: 8rpx;
+  }
+
+  .char-count {
+    position: absolute;
+    right: 40rpx;
+    bottom: 40rpx;
+    font-size: 24rpx;
+    color: $text-secondary;
+  }
+}
+
+.dialog-footer {
+  display: flex;
+  padding: 24rpx 32rpx;
+  border-top: 1rpx solid $border-color;
+
+  .dialog-btn {
+    position: relative;
+    flex: 1;
+    height: 80rpx;
+    margin: 0 8rpx;
+    font-size: 28rpx;
+    font-weight: 500;
+    border: none;
+    border-radius: 8rpx;
+
+    &.cancel-btn {
+      color: $text-secondary;
+      background: $background-color;
+    }
+
+    &.confirm-btn {
+      color: #ffffff;
+      background: $primary-color;
+
+      &:disabled {
+        background: rgba($primary-color, 0.6);
+      }
+
+      &.is-loading {
+        pointer-events: none;
+
+        text {
+          opacity: 0;
+        }
+
+        .loading-icon {
+          opacity: 1;
+        }
+      }
+    }
   }
 }
 </style>

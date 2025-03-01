@@ -328,3 +328,31 @@ export const getTaskReviewSheets = (reviewStatus: 'ALL' | 'REVIEW' | 'UN_REVIEW'
 export const reviewTask = (params: TaskReviewParams) => {
   return http.put('/agency/admin/review/task/rejection', params)
 }
+
+/** 账号审核进度信息 */
+export interface AccountReviewProgress {
+  id: string
+  userId: string
+  trackId: string
+  platform: string
+  phone: string
+  accountName: string
+  accountId: string
+  isReview: boolean
+  status: string
+  createTime: string
+  reviewer: string
+  note: string
+}
+
+/** 获取账号审核进度信息 */
+export const getAccountReviewProgress = () => {
+  return http.get<AccountReviewProgress[]>('/agency/user/account_review_sheet')
+}
+
+/**
+ * 获取账号审核进度信息
+ */
+export function getAccountTrackReviewSheet() {
+  return http.get<AccountTrackReviewSheet[]>('/agency/user/account/track/review_sheet')
+}

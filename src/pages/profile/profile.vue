@@ -17,7 +17,12 @@
         <view class="avatar">🤖</view>
         <view class="info-right">
           <view class="user-name">{{ userStore.userInfo.nickname }}</view>
-          <view class="invite-code" @click="handleCopyInviteCode">
+          <view class="invite-code">用户ID: {{ userStore.userInfo.userId }}</view>
+          <view
+            class="invite-code"
+            v-show="!!userStore.userInfo.inviteCode"
+            @click="handleCopyInviteCode"
+          >
             邀请码: {{ userStore.userInfo.inviteCode }}
             <text class="copy-hint">(点击复制)</text>
           </view>
@@ -92,6 +97,20 @@ const menuList = [
       tit: '',
       url: '',
       type: 'addCount',
+      icon: 'usergroup-add',
+    },
+    {
+      title: '账号审核进度',
+      tit: '',
+      url: '',
+      type: 'accountprogress',
+      icon: 'usergroup-add',
+    },
+    {
+      title: '赛道审核进度',
+      tit: '',
+      url: '',
+      type: 'accounttrackprogress',
       icon: 'usergroup-add',
     },
   ],
@@ -190,6 +209,12 @@ const handleMenuClick = (item: MenuItem) => {
   }
   if (item.type === 'taskReview') {
     uni.navigateTo({ url: '/pages/taskReview/taskReview' })
+  }
+  if (item.type === 'accountprogress') {
+    uni.navigateTo({ url: '/pages/accountprogress/accountprogress' })
+  }
+  if (item.type === 'accounttrackprogress') {
+    uni.navigateTo({ url: '/pages/accounttrackprogress/accounttrackprogress' })
   }
   if (item.type === 'articleFormat') {
     uni.navigateTo({ url: '/pages/articleFormat/articleFormat' })

@@ -42,6 +42,7 @@
         <wd-icon name="upload" size="48px" color="#999999" />
         <text class="upload-text">点击选择Markdown文件</text>
         <text class="upload-tip">支持.txt、.md格式</text>
+        <text v-if="isIOS" class="upload-tip">请先将文件发送至微信聊天，再从聊天记录中选择</text>
       </view>
 
       <!-- 预览区域 -->
@@ -89,6 +90,9 @@ const themes = [
   { label: '护眼主题', value: 'theme-green' },
 ]
 
+// 判断是否为 iOS 平台
+const isIOS = computed(() => uni.getSystemInfoSync().platform === 'ios')
+
 // 格式化后的内容
 const formattedContent = computed(() => {
   if (!content.value) return []
@@ -102,32 +106,48 @@ const formattedContent = computed(() => {
 
 // 选择文件
 const handleChooseFile = () => {
-  uni.chooseMessageFile({
+  // 统一使用 chooseMessageFile，但针对不同平台使用不同的配置
+  const options: any = {
     count: 1,
     type: 'file',
     extension: ['.txt', '.md'],
-    success: (res) => {
-      const file = res.tempFiles[0]
-      console.log('Selected file:', JSON.stringify(file))
-
-      // 读取文件内容
-      uni.getFileSystemManager().readFile({
-        filePath: file.path,
-        encoding: 'utf8',
-        success: (res) => {
-          console.log('File content:', JSON.stringify(res.data))
-          content.value = res.data
-          toast.success('导入成功')
-        },
-        fail: (err) => {
-          console.error('Read file error:', JSON.stringify(err))
-          toast.error('读取文件失败')
-        },
-      })
-    },
+    success: handleFileSuccess,
     fail: (err) => {
       console.error('Choose file error:', JSON.stringify(err))
-      toast.error('选择文件失败')
+      // 针对 iOS 平台给出更详细的提示
+      if (isIOS.value) {
+        toast.error('请先将文件发送至微信聊天，再从聊天记录中选择')
+      } else {
+        toast.error('选择文件失败')
+      }
+    },
+  }
+
+  // iOS 平台尝试不同的类型
+  if (isIOS.value) {
+    options.type = 'all'
+  }
+
+  uni.chooseMessageFile(options)
+}
+
+// 处理文件选择成功
+const handleFileSuccess = (res: any) => {
+  const file = res.tempFiles[0]
+  console.log('Selected file:', JSON.stringify(file))
+
+  // 读取文件内容
+  uni.getFileSystemManager().readFile({
+    filePath: file.path,
+    encoding: 'utf8',
+    success: (res) => {
+      console.log('File content:', JSON.stringify(res.data))
+      content.value = String(res.data)
+      toast.success('导入成功')
+    },
+    fail: (err) => {
+      console.error('Read file error:', JSON.stringify(err))
+      toast.error('读取文件失败')
     },
   })
 }
@@ -236,6 +256,7 @@ $card-background: #ffffff;
     margin-top: 12rpx;
     font-size: 24rpx;
     color: $text-tertiary;
+    text-align: center;
   }
 }
 

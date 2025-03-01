@@ -38,6 +38,14 @@
       }
     },
     {
+      "path": "pages/accountprogress/accountprogress",
+      "type": "page",
+      "layout": "page",
+      "style": {
+        "navigationBarTitleText": "账号审核进度"
+      }
+    },
+    {
       "path": "pages/accountreview/accountreview",
       "type": "page",
       "layout": "page",
@@ -51,6 +59,14 @@
       "layout": "page",
       "style": {
         "navigationBarTitleText": "收益结算"
+      }
+    },
+    {
+      "path": "pages/accounttrackprogress/accounttrackprogress",
+      "type": "page",
+      "layout": "page",
+      "style": {
+        "navigationBarTitleText": "赛道审核进度"
       }
     },
     {
