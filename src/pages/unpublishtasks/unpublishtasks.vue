@@ -49,8 +49,8 @@
               :disabled="submitting === item.id"
               @click="showPublishDialog(item)"
             >
-              <text v-if="submitting === item.id">发布中...</text>
-              <text v-else>发表文章</text>
+              <text v-if="submitting === item.id">回填中...</text>
+              <text v-else>回填地址</text>
             </button>
             <button
               class="btn reject-btn"

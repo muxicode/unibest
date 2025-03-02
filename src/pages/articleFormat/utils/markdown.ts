@@ -306,7 +306,24 @@ export function convertMarkdownToHtml(
 
 // 转换HTML为富文本节点数组
 export function convertHtmlToNodes(html: string): any[] {
-  // 直接使用字符串解析方式，移除DOM相关代码
+  // 为 iOS 添加特殊处理
+  const isIOS = uni.getSystemInfoSync().platform === 'ios'
+
+  if (isIOS) {
+    // 在 iOS 上，我们需要确保所有节点都可以选择
+    html = html.replace(
+      /<([a-z][a-z0-9]*)\s/gi,
+      '<$1 selectable="true" user-select="true" style="user-select: text; -webkit-user-select: text;" ',
+    )
+  }
+
+  // 修复图片宽度问题
+  html = html.replace(
+    /<img\s([^>]*?)>/gi,
+    '<img $1 style="max-width:100% !important;width:auto !important;height:auto !important;display:block;margin:1.2em auto;">',
+  )
+
+  // 直接使用字符串解析方式
   return parseHTMLFallback(html)
 }
 
@@ -387,6 +404,22 @@ function parseHTMLFallback(html: string): any[] {
           attrs[key] = value.slice(1, -1) // 移除引号
         })
       }
+
+      // 确保所有节点都有这些属性
+      attrs.selectable = 'true'
+
+      // 如果是文本相关标签，添加更多属性
+      if (
+        ['p', 'span', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'a', 'code', 'pre'].includes(
+          tagName,
+        )
+      ) {
+        if (!attrs.style) attrs.style = ''
+        attrs.style += 'user-select: text; -webkit-user-select: text;'
+      }
+    } else {
+      // 如果没有属性，添加基本属性
+      attrs.selectable = 'true'
     }
 
     // 创建节点
@@ -399,8 +432,11 @@ function parseHTMLFallback(html: string): any[] {
     // 特殊处理img标签
     if (tagName === 'img') {
       if (!attrs.style) {
-        attrs.style = 'max-width: 100%; margin: 1.2em 0; border-radius: 4px;'
+        attrs.style = ''
       }
+      // 确保图片样式正确，强制设置最大宽度
+      attrs.style +=
+        'max-width: 100% !important; width: auto !important; height: auto !important; margin: 1.2em auto; border-radius: 4px; display: block;'
       if (stack.length > 0) {
         stack[stack.length - 1].children.push(node)
       } else {

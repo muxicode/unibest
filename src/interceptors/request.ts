@@ -65,6 +65,7 @@ const httpInterceptor = {
   success(response: UniApp.RequestSuccessCallbackResult) {
     // 假设后端返回格式为 { code: number, msg: string, data: any }
     const { code, msg } = response.data as any
+
     // 2 表示用户需要重新登陆
     if (code === 2) {
       // 清除用户信息
@@ -74,7 +75,7 @@ const httpInterceptor = {
       // 获取当前页面路径
       const pages = getCurrentPages()
       const currentPage = pages[pages.length - 1]
-      const currentPath = `/${currentPage.route}${currentPage.$page?.fullPath.split('?')[1] ? '?' + currentPage.$page.fullPath.split('?')[1] : ''}`
+      const currentPath = `/${currentPage.route}${(currentPage as any).$page?.fullPath.split('?')[1] ? '?' + (currentPage as any).$page.fullPath.split('?')[1] : ''}`
 
       // 跳转登录页面
       const loginPath = '/pages/login/login'
@@ -89,7 +90,7 @@ const httpInterceptor = {
       // 获取当前页面路径
       const pages = getCurrentPages()
       const currentPage = pages[pages.length - 1]
-      const currentPath = `/${currentPage.route}${currentPage.$page?.fullPath.split('?')[1] ? '?' + currentPage.$page.fullPath.split('?')[1] : ''}`
+      const currentPath = `/${currentPage.route}${(currentPage as any).$page?.fullPath.split('?')[1] ? '?' + (currentPage as any).$page.fullPath.split('?')[1] : ''}`
 
       // 跳转注册页面
       const loginPath = '/pages/deal/deal'
@@ -98,13 +99,14 @@ const httpInterceptor = {
       })
       return false // 阻止后续处理
     }
-
     if (code === 0) {
       uni.showToast({
         title: msg,
         icon: 'none',
       })
-      return false // 阻止后续处理
+      // 修改这里：不阻止后续处理，而是返回响应，让调用方处理错误
+      // 这样下载按钮的加载状态才能被重置
+      return response
     }
 
     return response

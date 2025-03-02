@@ -41,18 +41,6 @@
 
           <wd-input
             class="mt-4"
-            label="完读数"
-            label-width="140rpx"
-            prop="lastFinishReadingNum"
-            type="number"
-            required
-            clearable
-            v-model.number="model.lastFinishReadingNum"
-            placeholder="请输入昨日完读数"
-          />
-
-          <wd-input
-            class="mt-4"
             label="昨日收入"
             label-width="140rpx"
             prop="lastIncome"
@@ -145,7 +133,6 @@ import { reactive, ref } from 'vue'
 
 interface UploadForm {
   lastReadingNum: number
-  lastFinishReadingNum: number
   lastIncome: number
   incomeOfMonth: number
   accountId: string
@@ -153,7 +140,6 @@ interface UploadForm {
 
 const model = reactive<UploadForm>({
   lastReadingNum: 0,
-  lastFinishReadingNum: 0,
   lastIncome: 0,
   incomeOfMonth: 0,
   accountId: '',
@@ -167,7 +153,6 @@ onLoad((options: any) => {
 // 表单校验规则
 const rules: FormRules = {
   lastReadingNum: [{ required: true, message: '请输入昨日阅读数' }],
-  lastFinishReadingNum: [{ required: true, message: '请输入昨日完读数' }],
   lastIncome: [{ required: true, message: '请输入昨日收入' }],
   incomeOfMonth: [{ required: true, message: '请输入当月收入' }],
 }
@@ -236,7 +221,7 @@ function createFormData(data: Record<string, any>, files: Record<string, string>
           fileData += `--${boundary}\r\n`
           fileData += `Content-Disposition: form-data; name="${key}"; filename="image.png"\r\n`
           fileData += 'Content-Type: image/png\r\n\r\n'
-          // @ts-ignore
+          // @ts-expect-error
           fileData += res.data + '\r\n'
           resolve(fileData)
         },
@@ -272,7 +257,6 @@ async function handleSubmit() {
 
     const formData = {
       lastReadingNum: Number(model.lastReadingNum),
-      lastFinishReadingNum: Number(model.lastFinishReadingNum),
       lastIncome: Number(model.lastIncome),
       incomeOfMonth: Number(model.incomeOfMonth),
       accountId: model.accountId,
@@ -294,7 +278,7 @@ async function handleSubmit() {
       data,
     })
 
-    // @ts-ignore
+    // @ts-expect-error
     const response = result.data
     if (response.code === 1) {
       toast.success('提交成功')

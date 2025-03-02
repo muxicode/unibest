@@ -50,6 +50,7 @@
         <rich-text
           :nodes="formattedContent"
           :selectable="true"
+          :user-select="true"
           class="article-content"
           space="nbsp"
         />
@@ -58,6 +59,7 @@
       <!-- 操作按钮 -->
       <view v-if="content" class="action-btns">
         <wd-button class="btn" type="warning" @click="handleReset">重新选择</wd-button>
+        <wd-button class="btn" type="primary" @click="copyFullContent">复制全文</wd-button>
       </view>
 
       <!-- 操作提示 -->
@@ -72,7 +74,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useToast } from 'wot-design-uni'
 import { convertMarkdownToHtml, convertHtmlToNodes } from './utils/markdown'
 import ImageDownloader from './components/ImageDownloader.vue'
@@ -162,6 +164,53 @@ const handleReset = () => {
   content.value = ''
   currentTheme.value = 'theme-default'
 }
+
+// 添加复制全文功能
+const copyFullContent = () => {
+  // 使用 uni.setClipboardData 复制原始内容
+  uni.setClipboardData({
+    data: content.value,
+    success: () => {
+      toast.success('已复制全文到剪贴板')
+    },
+    fail: () => {
+      toast.error('复制失败')
+    },
+  })
+}
+
+// 在 setup 函数末尾添加
+onMounted(() => {
+  // 针对 iOS 平台添加额外处理
+  if (isIOS.value) {
+    // 延迟一点时间确保 DOM 已经渲染
+    setTimeout(() => {
+      // 尝试增强 iOS 上的文本选择能力
+      const articleContent = document.querySelector('.article-content')
+      if (articleContent) {
+        // 设置为可编辑但禁止实际编辑
+        articleContent.setAttribute('contenteditable', 'plaintext-only')
+
+        // 强制启用文本选择
+        const style = document.createElement('style')
+        style.textContent = `
+          .article-content, .article-content * {
+            -webkit-user-select: text !important;
+            user-select: text !important;
+            -webkit-touch-callout: default !important;
+          }
+        `
+        document.head.appendChild(style)
+
+        // 添加点击事件处理
+        articleContent.addEventListener('click', (e) => {
+          // 防止默认行为可能会帮助触发选择
+          e.preventDefault()
+        })
+      }
+    }, 500)
+  }
+})
 </script>
 
 <style lang="scss" scoped>
@@ -264,9 +313,14 @@ $card-background: #ffffff;
   min-height: 400rpx;
   margin: 24rpx 0;
   overflow-x: auto;
+
+  // 添加这些样式以增强 iOS 上的选择能力
+  -webkit-user-select: text;
+  user-select: text;
   background: #ffffff;
   border: 2rpx solid #ebeef5;
   border-radius: 12rpx;
+  -webkit-touch-callout: default;
 
   :deep(.article-content) {
     // 精确控制文本区域
@@ -291,16 +345,20 @@ $card-background: #ffffff;
     // 确保文本可以选择
     -webkit-user-select: text !important;
     user-select: text !important;
+    text-selection-enabled: true;
 
     // 移除可能影响选择的样式
     -webkit-touch-callout: default;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
 
-    // 图片样式优化
-    :deep(.md-img) {
+    // 图片样式优化 - 修复宽度问题
+    :deep(.md-img),
+    :deep(img) {
+      box-sizing: border-box; // 确保padding和border计入宽度
       display: block;
-      max-width: 100%;
-      height: auto;
+      width: auto !important; // 保持宽高比
+      max-width: 100% !important; // 强制最大宽度为100%
+      height: auto !important;
       margin: 16rpx auto;
     }
 

@@ -183,16 +183,18 @@ const handleDownload = async (article: ArticleItem) => {
       articleId: article.id,
       accountId: accountId.value,
     })
+
+    // 检查响应码
     if (res.code === 1) {
       await prepareFileToShare(res.data)
       showSharePopup.value = true
     }
-    if (res.code === 0) {
-      toast.error(res.msg)
-    }
+    // 不需要在这里处理 code === 0 的情况，因为拦截器已经显示了错误提示
   } catch (err) {
+    console.error('下载失败:', err)
     toast.error('下载失败')
   } finally {
+    // 确保在所有情况下都重置下载状态
     downloading.value = ''
   }
 }
