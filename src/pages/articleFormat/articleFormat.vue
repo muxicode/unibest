@@ -144,7 +144,14 @@ const handleFileSuccess = (res: any) => {
     encoding: 'utf8',
     success: (res) => {
       console.log('File content:', JSON.stringify(res.data))
-      content.value = String(res.data)
+      // 处理 figure 标签
+      let processedContent = String(res.data)
+      // 使用正则表达式匹配 figure 标签包裹的 img 标签
+      processedContent = processedContent.replace(
+        /<figure[^>]*>(\s*<img[^>]*>)\s*<\/figure>/g,
+        '$1',
+      )
+      content.value = processedContent
       toast.success('导入成功')
     },
     fail: (err) => {

@@ -19,10 +19,12 @@ interface NavigateToOptions {
        "/pages/articles/articles" |
        "/pages/deal/deal" |
        "/pages/deal/user_service_deal" |
+       "/pages/finishedtasks/finishedtasks" |
        "/pages/income/income" |
        "/pages/login/login" |
        "/pages/login/register" |
        "/pages/profile/profile" |
+       "/pages/rejectiontasks/rejectiontasks" |
        "/pages/settlement/settlement" |
        "/pages/settlements/settlements" |
        "/pages/task/task" |

@@ -356,3 +356,45 @@ export const getAccountReviewProgress = () => {
 export function getAccountTrackReviewSheet() {
   return http.get<AccountTrackReviewSheet[]>('/agency/user/account/track/review_sheet')
 }
+
+// 已完成任务类型定义
+export interface PublishedTask {
+  id: string
+  accountId: string
+  accountName: string
+  platform: string
+  articleId: string
+  userId: string
+  title: string
+  textAddr: string
+  articleAddr: string
+  tm: string
+  date: string
+  fillTm: string
+}
+
+// 获取已完成任务列表
+export function getPublishedTasks() {
+  return http.get<PublishedTask[]>('/agency/task/published')
+}
+
+// 拒绝任务的接口类型
+export interface RejectionTask {
+  id: string
+  accountId: string
+  accountName: string
+  platform: string
+  articleId: string
+  userId: string
+  title: string
+  textAddr: string
+  articleAddr: string
+  tm: string
+  date: string
+  fillTm: string
+}
+
+// 获取拒绝任务列表
+export function getRejectionTasks() {
+  return http.get<RejectionTask[]>('/agency/task/rejection')
+}

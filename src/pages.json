@@ -136,6 +136,14 @@
       }
     },
     {
+      "path": "pages/finishedtasks/finishedtasks",
+      "type": "page",
+      "layout": "page",
+      "style": {
+        "navigationBarTitleText": "已完成任务详细"
+      }
+    },
+    {
       "path": "pages/income/income",
       "type": "page",
       "layout": "page",
@@ -167,6 +175,14 @@
         "navigationBarTitleText": "我的"
       },
       "needLogin": true
+    },
+    {
+      "path": "pages/rejectiontasks/rejectiontasks",
+      "type": "page",
+      "layout": "page",
+      "style": {
+        "navigationBarTitleText": "已拒绝任务"
+      }
     },
     {
       "path": "pages/settlement/settlement",
