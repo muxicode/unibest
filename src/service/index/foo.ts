@@ -398,3 +398,23 @@ export interface RejectionTask {
 export function getRejectionTasks() {
   return http.get<RejectionTask[]>('/agency/task/rejection')
 }
+
+/** 文章统计信息 */
+export interface ArticleStats {
+  accountCount: number
+  articlesPerDay: number
+  additionalArticleCount: number
+}
+
+export interface TrackArticleStats {
+  trackId: string
+  trackName: string
+  description: string
+  num: number
+  articleStats: ArticleStats
+}
+
+/** 获取赛道文章统计信息 */
+export const getTrackArticleStats = () => {
+  return http.post<TrackArticleStats[]>('/agency/third/track/article/stats')
+}

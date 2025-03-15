@@ -17,6 +17,7 @@ interface NavigateToOptions {
        "/pages/articleFormat/articleFormat" |
        "/pages/articles/accounts_articles" |
        "/pages/articles/articles" |
+       "/pages/articlestats/articlestats" |
        "/pages/deal/deal" |
        "/pages/deal/user_service_deal" |
        "/pages/finishedtasks/finishedtasks" |

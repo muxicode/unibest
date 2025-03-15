@@ -139,6 +139,14 @@ const menuList = [
       adminOnly: true,
     },
     {
+      title: '文章数据',
+      tit: '',
+      url: '',
+      type: 'articleReview',
+      icon: 'check-circle',
+      adminOnly: true,
+    },
+    {
       title: '任务审核',
       tit: '',
       url: '',
@@ -216,8 +224,8 @@ const handleMenuClick = (item: MenuItem) => {
   if (item.type === 'accounttrackprogress') {
     uni.navigateTo({ url: '/pages/accounttrackprogress/accounttrackprogress' })
   }
-  if (item.type === 'articleFormat') {
-    uni.navigateTo({ url: '/pages/articleFormat/articleFormat' })
+  if (item.type === 'articleReview') {
+    uni.navigateTo({ url: '/pages/articlestats/articlestats' })
   }
   if (item.type === 'logout') {
     userStore.userInfo.token = ''

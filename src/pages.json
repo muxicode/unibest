@@ -122,6 +122,14 @@
       }
     },
     {
+      "path": "pages/articlestats/articlestats",
+      "type": "page",
+      "layout": "page",
+      "style": {
+        "navigationBarTitleText": "文章统计"
+      }
+    },
+    {
       "path": "pages/deal/deal",
       "type": "page",
       "style": {

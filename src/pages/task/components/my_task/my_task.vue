@@ -79,13 +79,13 @@ const handleWaitingTasks = () => {
 
 const handleCompletedTasks = () => {
   uni.navigateTo({
-    url: '/pages/completed-tasks/completed-tasks',
+    url: '/pages/finishedtasks/finishedtasks',
   })
 }
 
 const handleRejectedTasks = () => {
   uni.navigateTo({
-    url: '/pages/rejected-tasks/rejected-tasks',
+    url: '/pages/rejectiontasks/rejectiontasks',
   })
 }
 </script>
