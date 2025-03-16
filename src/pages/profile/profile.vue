@@ -227,6 +227,9 @@ const handleMenuClick = (item: MenuItem) => {
   if (item.type === 'articleReview') {
     uni.navigateTo({ url: '/pages/articlestats/articlestats' })
   }
+  if (item.type === 'articleFormat') {
+    uni.navigateTo({ url: '/pages/articleFormat/articleFormat' })
+  }
   if (item.type === 'logout') {
     userStore.userInfo.token = ''
     userStore.userInfo.userId = ''
