@@ -418,3 +418,60 @@ export interface TrackArticleStats {
 export const getTrackArticleStats = () => {
   return http.post<TrackArticleStats[]>('/agency/third/track/article/stats')
 }
+
+/** 结算单状态 */
+export type SettlementStatus = 'INIT' | 'COMMIT' | 'FINISH'
+export type ReviewStatus = 'NO_REVIEW' | 'FAIL' | 'SUCCESS'
+
+/** 结算单信息 */
+export interface Settlement {
+  id: string
+  settlementStatus: SettlementStatus
+  reviewStatus: ReviewStatus
+  suggestion: string
+  settlementPart: string
+  userId: string
+  accountId: string
+  accountName: string
+  platForm: string
+  payment: number
+  paymentImg: string
+  isPublicAccount: boolean
+  income: number
+  settlementStatement: string
+  commitTime: string
+  proportion: number
+  settlementType: string
+  transferOrder: string
+}
+
+/** 获取结算单列表参数 */
+export interface GetSettlementsParams {
+  accountId: string
+  status?: SettlementStatus
+}
+
+/** 提交结算信息参数 */
+export interface CommitSettlementParams {
+  id: string
+  income: number
+  settlementType: '支付宝' | '微信' | '其他' | '无需结算'
+  transferOrder: string
+  payment: number
+  paymentImg: File | string
+  settlementStatement: File | string
+}
+
+/** 获取结算单列表 */
+export const getSettlements = (params: GetSettlementsParams) => {
+  return http.get<Settlement[]>('/agency/user/account/settlements', params)
+}
+
+/** 提交结算信息 */
+export const commitSettlement = (params: CommitSettlementParams) => {
+  const formData = new FormData()
+  Object.entries(params).forEach(([key, value]) => {
+    formData.append(key, value)
+  })
+  return http.post<null>('/agency/user/account/settlement/commit', formData)
+}

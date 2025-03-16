@@ -7,184 +7,243 @@
   },
 }
 </route>
+
 <template>
-  <view class="articles">
-    <wd-card v-for="(item, index) in articles" :key="item.id">
-      <view class="article-title">
-        <view class="flex">
-          <view class="flex-1">{{ item.title }}</view>
-          <view class="flex-[0_0_30%]">
-            <wd-button size="small" @click="clickDownload(item)">开始结算</wd-button>
-          </view>
+  <view class="page-container">
+    <wd-message-box />
+    <wd-toast />
+
+    <view class="header-section">
+      <view class="gradient-bg"></view>
+      <view class="header-content">
+        <image src="/static/logo.png" alt="" class="logo" />
+        <view class="header-text">
+          <view class="title">结算列表</view>
+          <view class="subtitle">记录每一笔收益，见证成长轨迹</view>
         </view>
       </view>
-    </wd-card>
+    </view>
+
+    <view class="form-card" v-for="item in settlements" :key="item.id">
+      <view class="form-header">
+        <text>{{ item.settlementPart }}</text>
+        <text :class="['status', getStatusClass(item.settlementStatus)]">
+          {{ getStatusText(item.settlementStatus) }}
+        </text>
+      </view>
+      <view class="form-body">
+        <view class="info-row">
+          <text class="label">平台：</text>
+          <text class="value">{{ item.platForm }}</text>
+        </view>
+        <view class="info-row">
+          <text class="label">分成比例：</text>
+          <text class="value">{{ formatProportion(item.proportion) }}%</text>
+        </view>
+        <view class="info-row">
+          <text class="label">结算单：</text>
+          <text class="value">{{ item.settlementStatement || '暂无' }}</text>
+        </view>
+        <view class="button-row" v-if="item.settlementStatus === 'INIT'">
+          <wd-button type="primary" size="small" @click="handleSettle(item)">去结算</wd-button>
+        </view>
+      </view>
+    </view>
   </view>
 </template>
 
 <script lang="ts" setup>
+import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 import { useToast } from 'wot-design-uni'
+import type { Settlement, SettlementStatus } from '@/service/index/foo'
+import { getSettlements } from '@/service/index/foo'
 
 const toast = useToast()
+const settlements = ref<Settlement[]>([])
+const accountId = ref('')
 
-const show = ref(false)
-const downloadFilePath = ref('')
+onLoad((options: any) => {
+  accountId.value = options.accountId
+  loadSettlements()
+})
 
-const handleClose = () => {
-  show.value = false
+const getStatusText = (status: SettlementStatus) => {
+  const statusMap = {
+    INIT: '待结算',
+    COMMIT: '审核中',
+    FINISH: '已完成',
+  }
+  return statusMap[status]
 }
 
-const shareDownFile = () => {
-  console.log('shareDownFile')
-  uni.shareFileMessage({
-    filePath: downloadFilePath.value,
-    success(res) {
-      show.value = false
-      toast.success('文件保存成功')
-    },
-    fail(res) {
-      console.log('shareFileMessage失败', res)
-    },
+const getStatusClass = (status: SettlementStatus) => {
+  const classMap = {
+    INIT: 'init',
+    COMMIT: 'commit',
+    FINISH: 'finish',
+  }
+  return status ? classMap[status] : ''
+}
+
+const loadSettlements = async () => {
+  try {
+    const res = await getSettlements({ accountId: accountId.value })
+    // 确保我们正确处理接口返回的数据结构
+    if (res && Array.isArray(res)) {
+      settlements.value = res
+    } else if (res && Array.isArray(res.data)) {
+      settlements.value = res.data
+    } else {
+      settlements.value = []
+      console.error('Unexpected response format:', res)
+    }
+  } catch (error: any) {
+    toast.error(error.message || '获取结算列表失败')
+  }
+}
+
+const handleSettle = (item: Settlement) => {
+  uni.navigateTo({
+    url: `/pages/income/income?id=${item.id}&accountId=${item.accountId}`,
   })
 }
 
-interface article {
-  title: string
-  id: string
+const formatProportion = (proportion: number | undefined) => {
+  return proportion !== undefined ? (proportion * 100).toFixed(0) : '0'
 }
-
-const articles = ref([
-  {
-    title: '十月上半月收益',
-    id: '1',
-  },
-  {
-    title: '十月下半月收益',
-    id: '2',
-  },
-  {
-    title: '十一月上半月收益',
-    id: '3',
-  },
-])
-
-let clickDownload = function (article: article) {
-  // item.report = trues
-  uni.navigateTo({ url: '/pages/income/income' })
-}
-
-// 弹窗提示并分享文件
-const onShareFile = (content) => {
-  prepareFileToShare(content)
-  //   uni.showModal({
-  //     title: '提示',
-  //     content: '请分享到文件传输助手',
-  //     success: (res) => {
-  //       if (res.confirm) {
-  //         prepareFileToShare(content)
-  //       }
-  //     },
-  //   })
-}
-
-// 准备文件分享
-const prepareFileToShare = (content) => {
-  downloadFilePath.value = `${wx.env.USER_DATA_PATH}/file.txt`
-  console.log('prepareFileToShare', downloadFilePath.value)
-  // 将文件内容写入本地文件系统
-  uni.getFileSystemManager().writeFile({
-    filePath: downloadFilePath.value,
-    data: content,
-    encoding: 'utf8',
-    success: () => {
-      console.log('writeFile success', downloadFilePath.value)
-      show.value = true
-      //   shareFile(filePath)
-      //   uni.shareFileMessage({
-      //     filePath: filePath,
-      //     success(res) {
-      //       console.log('shareFileMessage成功', res)
-      //     },
-      //     fail(res) {
-      //       console.log('shareFileMessage失败', res)
-      //     },
-      //   })
-    },
-    fail: () => {
-      uni.showToast({ title: '文件保存失败', icon: 'none' })
-    },
-  })
-}
-
-// 打开文件并调用分享
-const shareFile = (filePath) => {
-  //   uni.openDocument({
-  //     filePath: filePath,
-  //     fileType: 'txt',
-  //     success: () => {
-  //       // 打开微信分享菜单
-  //       uni.showShareMenu({
-  //         withShareTicket: true,
-  //         success: () => {
-  //           console.log('分享菜单已打开')
-  //         },
-  //         fail: (err) => {
-  //           console.error('分享菜单打开失败', err)
-  //         },
-  //       })
-  //     },
-  //     fail: (err) => {
-  //       console.error('文件打开失败', err)
-  //     },
-  //   })
-}
-// const let download = uni.downloadFile({
-//     url: '',
-//     success: (result)=>{
-
-//     },
-//     fail: ()=>{},
-//     complete: ()=>{}
-// });
 </script>
 
 <style lang="scss" scoped>
-:root {
-  --wot-card-bg: #fff;
+.page-container {
+  min-height: 100vh;
+  padding: 24rpx;
+  background-color: #f5f5f5;
 }
 
-.downloadToast {
-  display: flex;
-  flex-direction: column;
-}
-
-.downloadToastTip {
-  padding-bottom: 20rpx;
-  margin-bottom: 20rpx;
-  font-size: 40rpx;
-  font-weight: 1000;
-  border-bottom: #f5f5f5 solid 4rpx;
-}
-
-.downloadToastButton {
-  display: flex;
-}
-
-.articles {
-  :deep(.wd-card__title-content) {
-    padding: 15rpx;
-  }
-  :deep(.wd-popup) {
-    border-radius: 20rpx;
-  }
-}
-
-.article-title {
-  width: 100%;
+.header-section {
+  position: relative;
+  padding: 40rpx 30rpx;
+  margin-bottom: 24rpx;
   overflow: hidden;
-  font-size: 30rpx;
-  font-weight: 1000;
-  line-height: 40rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.gradient-bg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  background: linear-gradient(135deg, #4d80f0 0%, #6c9cf5 100%);
+  opacity: 0.06;
+}
+
+.header-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+}
+
+.logo {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.header-text {
+  margin-left: 24rpx;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #333;
+}
+
+.subtitle {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #666;
+}
+
+.form-card {
+  margin-bottom: 24rpx;
+  overflow: hidden;
+  background: #fff;
+  border-radius: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333;
+  background-color: #f8f8f8;
+}
+
+.status {
+  padding: 4rpx 12rpx;
+  font-size: 24rpx;
+  border-radius: 24rpx;
+
+  &.init {
+    color: #ff9900;
+    background-color: #fff9e6;
+  }
+
+  &.commit {
+    color: #2b85e4;
+    background-color: #f0faff;
+  }
+
+  &.finish {
+    color: #19be6b;
+    background-color: #e8f9f0;
+  }
+}
+
+.form-body {
+  padding: 24rpx;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+  font-size: 28rpx;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.label {
+  width: 160rpx;
+  color: #666;
+}
+
+.value {
+  flex: 1;
+  color: #333;
+}
+
+.button-row {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 24rpx;
+  margin-top: 24rpx;
+  border-top: 2rpx solid #f5f5f5;
 }
 </style>
