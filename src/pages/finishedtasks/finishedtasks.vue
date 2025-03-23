@@ -177,7 +177,13 @@ const handleDownload = async (task: PublishedTask) => {
 // 准备文件分享
 const prepareFileToShare = (content: string): Promise<void> => {
   return new Promise((resolve, reject) => {
-    downloadFilePath.value = `${wx.env.USER_DATA_PATH}/article.txt`
+    // 使用文章标题作为文件名，并处理可能的非法字符
+    const safeTitle = downloading.value
+      ? tasks.value.find((t) => t.id === downloading.value)?.title?.replace(/[\\/:*?"<>|]/g, '_') ||
+        'article'
+      : 'article'
+
+    downloadFilePath.value = `${wx.env.USER_DATA_PATH}/${safeTitle}.txt`
 
     uni.getFileSystemManager().writeFile({
       filePath: downloadFilePath.value,

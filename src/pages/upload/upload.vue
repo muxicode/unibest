@@ -213,16 +213,24 @@ function createFormData(data: Record<string, any>, files: Record<string, string>
   // 读取并添加文件
   const filePromises = Object.keys(files).map((key) => {
     return new Promise<string>((resolve, reject) => {
+      // 获取文件扩展名和MIME类型
+      const filePath = files[key]
+      const fileExt = filePath.substring(filePath.lastIndexOf('.') + 1).toLowerCase()
+      const mimeType = getMimeType(fileExt)
+      // 使用key作为文件名前缀，确保文件名唯一
+      const fileName = `${key}_image.${fileExt}`
+
       const fileSystem = uni.getFileSystemManager()
       fileSystem.readFile({
         filePath: files[key],
         success: (res) => {
           let fileData = ''
           fileData += `--${boundary}\r\n`
-          fileData += `Content-Disposition: form-data; name="${key}"; filename="image.png"\r\n`
-          fileData += 'Content-Type: image/png\r\n\r\n'
-          // @ts-expect-error
-          fileData += res.data + '\r\n'
+          fileData += `Content-Disposition: form-data; name="${key}"; filename="${fileName}"\r\n`
+          fileData += `Content-Type: ${mimeType}\r\n\r\n`
+          // FileSystemManager.readFile returns ArrayBuffer that needs to be appended to string
+          // Using a type assertion instead of ts-expect-error
+          fileData += (res.data as unknown as string) + '\r\n'
           resolve(fileData)
         },
         fail: reject,
@@ -238,6 +246,20 @@ function createFormData(data: Record<string, any>, files: Record<string, string>
       data: formData,
     }
   })
+}
+
+// 获取MIME类型
+function getMimeType(extension: string): string {
+  const mimeTypes: Record<string, string> = {
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    png: 'image/png',
+    gif: 'image/gif',
+    webp: 'image/webp',
+    bmp: 'image/bmp',
+  }
+
+  return mimeTypes[extension] || 'application/octet-stream'
 }
 
 // 提交表单
@@ -278,15 +300,19 @@ async function handleSubmit() {
       data,
     })
 
-    // @ts-expect-error
-    const response = result.data
-    if (response.code === 1) {
-      toast.success('提交成功')
-      setTimeout(() => {
-        uni.navigateBack()
-      }, 1500)
+    // Using type assertion instead of ts-expect-error
+    const response = result.data as any
+    if (response && typeof response === 'object' && 'code' in response) {
+      if (response.code === 1) {
+        toast.success('提交成功')
+        setTimeout(() => {
+          uni.navigateBack()
+        }, 1500)
+      } else {
+        throw new Error(response.msg || '提交失败')
+      }
     } else {
-      throw new Error(response.msg || '提交失败')
+      throw new Error('服务器返回数据格式错误')
     }
   } catch (error: any) {
     console.error('提交失败:', error)
