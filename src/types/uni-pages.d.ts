@@ -27,6 +27,8 @@ interface NavigateToOptions {
        "/pages/profile/profile" |
        "/pages/rejectiontasks/rejectiontasks" |
        "/pages/settlement/settlement" |
+       "/pages/settlementprogress/settlementprogress" |
+       "/pages/settlementreview/settlementreview" |
        "/pages/settlements/settlements" |
        "/pages/task/task" |
        "/pages/taskReview/taskReview" |

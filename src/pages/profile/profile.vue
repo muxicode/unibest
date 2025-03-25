@@ -113,6 +113,13 @@ const menuList = [
       type: 'accounttrackprogress',
       icon: 'usergroup-add',
     },
+    {
+      title: '结算审核进度',
+      tit: '',
+      url: '',
+      type: 'settlementprogress',
+      icon: 'usergroup-add',
+    },
   ],
   [
     {
@@ -135,6 +142,14 @@ const menuList = [
       tit: '',
       url: '',
       type: 'trackReview',
+      icon: 'check-circle',
+      adminOnly: true,
+    },
+    {
+      title: '结算审核',
+      tit: '',
+      url: '',
+      type: 'settlementReview',
       icon: 'check-circle',
       adminOnly: true,
     },
@@ -229,6 +244,12 @@ const handleMenuClick = (item: MenuItem) => {
   }
   if (item.type === 'articleFormat') {
     uni.navigateTo({ url: '/pages/articleFormat/articleFormat' })
+  }
+  if (item.type === 'settlementprogress') {
+    uni.navigateTo({ url: '/pages/settlementprogress/settlementprogress' })
+  }
+  if (item.type === 'settlementReview') {
+    uni.navigateTo({ url: '/pages/settlementreview/settlementreview' })
   }
   if (item.type === 'logout') {
     userStore.userInfo.token = ''

@@ -130,6 +130,7 @@
 import { useToast } from 'wot-design-uni'
 import { type FormInstance, type FormRules } from 'wot-design-uni/components/wd-form/types'
 import { reactive, ref } from 'vue'
+import { uploadImage, uploadDailyData } from '@/service/index/foo'
 
 interface UploadForm {
   lastReadingNum: number
@@ -175,15 +176,24 @@ async function chooseImage(type: 'reading' | 'income') {
       sizeType: ['compressed'],
       sourceType: ['album', 'camera'],
     })
+
+    // 上传图片
+    const uploadRes = await uploadImage({
+      filePath: res.tempFilePaths[0],
+      type: 'LDD',
+    })
+
+    // 保存图片URL和临时路径
     if (type === 'reading') {
-      readingImageUrl.value = res.tempFilePaths[0]
-      readingTempFilePath.value = res.tempFilePaths[0]
+      readingImageUrl.value = uploadRes
+      readingTempFilePath.value = uploadRes
     } else {
-      incomeImageUrl.value = res.tempFilePaths[0]
-      incomeTempFilePath.value = res.tempFilePaths[0]
+      incomeImageUrl.value = uploadRes
+      incomeTempFilePath.value = uploadRes
     }
   } catch (error) {
-    console.error('选择图片失败:', error)
+    console.error('选择或上传图片失败:', error)
+    toast.error('图片上传失败')
   }
 }
 
@@ -196,70 +206,6 @@ function deleteImage(type: 'reading' | 'income') {
     incomeImageUrl.value = ''
     incomeTempFilePath.value = ''
   }
-}
-
-// 创建 FormData
-function createFormData(data: Record<string, any>, files: Record<string, string>) {
-  const boundary = '----WebKitFormBoundary' + Math.random().toString(16).substr(2)
-  let formData = ''
-
-  // 添加文本字段
-  Object.keys(data).forEach((key) => {
-    formData += `--${boundary}\r\n`
-    formData += `Content-Disposition: form-data; name="${key}"\r\n\r\n`
-    formData += `${data[key]}\r\n`
-  })
-
-  // 读取并添加文件
-  const filePromises = Object.keys(files).map((key) => {
-    return new Promise<string>((resolve, reject) => {
-      // 获取文件扩展名和MIME类型
-      const filePath = files[key]
-      const fileExt = filePath.substring(filePath.lastIndexOf('.') + 1).toLowerCase()
-      const mimeType = getMimeType(fileExt)
-      // 使用key作为文件名前缀，确保文件名唯一
-      const fileName = `${key}_image.${fileExt}`
-
-      const fileSystem = uni.getFileSystemManager()
-      fileSystem.readFile({
-        filePath: files[key],
-        success: (res) => {
-          let fileData = ''
-          fileData += `--${boundary}\r\n`
-          fileData += `Content-Disposition: form-data; name="${key}"; filename="${fileName}"\r\n`
-          fileData += `Content-Type: ${mimeType}\r\n\r\n`
-          // FileSystemManager.readFile returns ArrayBuffer that needs to be appended to string
-          // Using a type assertion instead of ts-expect-error
-          fileData += (res.data as unknown as string) + '\r\n'
-          resolve(fileData)
-        },
-        fail: reject,
-      })
-    })
-  })
-
-  return Promise.all(filePromises).then((fileParts) => {
-    formData += fileParts.join('')
-    formData += `--${boundary}--`
-    return {
-      contentType: `multipart/form-data; boundary=${boundary}`,
-      data: formData,
-    }
-  })
-}
-
-// 获取MIME类型
-function getMimeType(extension: string): string {
-  const mimeTypes: Record<string, string> = {
-    jpg: 'image/jpeg',
-    jpeg: 'image/jpeg',
-    png: 'image/png',
-    gif: 'image/gif',
-    webp: 'image/webp',
-    bmp: 'image/bmp',
-  }
-
-  return mimeTypes[extension] || 'application/octet-stream'
 }
 
 // 提交表单
@@ -277,43 +223,20 @@ async function handleSubmit() {
       return
     }
 
-    const formData = {
+    // 使用新的上传接口
+    await uploadDailyData({
       lastReadingNum: Number(model.lastReadingNum),
       lastIncome: Number(model.lastIncome),
       incomeOfMonth: Number(model.incomeOfMonth),
       accountId: model.accountId,
-    }
-
-    const files = {
-      reading: readingTempFilePath.value,
-      income: incomeTempFilePath.value,
-    }
-
-    const { contentType, data } = await createFormData(formData, files)
-
-    const result = await uni.request({
-      url: 'https://www.jiesiyunmei.cn:9099/agency/ldd/upload',
-      method: 'POST',
-      header: {
-        'Content-Type': contentType,
-      },
-      data,
+      readingImg: readingTempFilePath.value,
+      incomeImg: incomeTempFilePath.value,
     })
 
-    // Using type assertion instead of ts-expect-error
-    const response = result.data as any
-    if (response && typeof response === 'object' && 'code' in response) {
-      if (response.code === 1) {
-        toast.success('提交成功')
-        setTimeout(() => {
-          uni.navigateBack()
-        }, 1500)
-      } else {
-        throw new Error(response.msg || '提交失败')
-      }
-    } else {
-      throw new Error('服务器返回数据格式错误')
-    }
+    toast.success('提交成功')
+    setTimeout(() => {
+      uni.navigateBack()
+    }, 1500)
   } catch (error: any) {
     console.error('提交失败:', error)
     toast.error(error.message || '提交失败')

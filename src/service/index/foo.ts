@@ -70,7 +70,7 @@ export const getTracks = () => {
 /** 获取账号列表 */
 
 /** 账户结算状态 */
-export interface SettlementStatus {
+export interface AccountSettlementStatus {
   isFinish: boolean
   isUsePublicAccount: boolean
   isStart: boolean
@@ -95,7 +95,7 @@ export interface AccountInfo {
   openingFlowDate: string
   isOpenFlow: boolean
   isNeedOpenFlow: boolean
-  settlementStatu: SettlementStatus
+  settlementStatu: AccountSettlementStatus
   unPublishTaskNum?: number
 }
 
@@ -119,7 +119,7 @@ export interface AccountStatus {
   isNeedOpenFlow: boolean
   isStart: boolean
   startingDate: string
-  settlementStatus: SettlementStatus
+  settlementStatus: AccountSettlementStatus
   status: string
   unPublishTaskNum: number
   isLastUnPublishTaskNumFinish: boolean
@@ -455,11 +455,11 @@ export interface GetSettlementsParams {
 export interface CommitSettlementParams {
   id: string
   income: number
-  settlementType: '支付宝' | '微信' | '其他' | '无需结算'
+  settlementType: 'ALI_PAY' | 'WECHAT' | 'OTHER' | 'NO_NEED_PAY'
   transferOrder: string
   payment: number
-  paymentImg: File | string
-  settlementStatement: File | string
+  paymentImg: string
+  settlementOrder: string
 }
 
 /** 获取结算单列表 */
@@ -469,9 +469,132 @@ export const getSettlements = (params: GetSettlementsParams) => {
 
 /** 提交结算信息 */
 export const commitSettlement = (params: CommitSettlementParams) => {
-  const formData = new FormData()
-  Object.entries(params).forEach(([key, value]) => {
-    formData.append(key, value)
+  return http.post<null>('/agency/user/account/settlement/commit', params)
+}
+
+/** 图片上传参数 */
+export interface UploadImageParams {
+  filePath: string
+  type: 'LDD' | 'SETTLEMENT'
+}
+
+/** 每日数据上传参数 */
+export interface UploadDailyDataParams {
+  lastReadingNum: number
+  lastIncome: number
+  incomeOfMonth: number
+  accountId: string
+  readingImg: string
+  incomeImg: string
+}
+
+/** 上传图片 */
+export async function uploadImage(params: { filePath: string; type: string }) {
+  try {
+    const res = await uni.uploadFile({
+      url: `https://www.jiesiyunmei.cn:9099/agency/inner/img/upload?type=${params.type}`,
+      filePath: params.filePath,
+      name: 'img',
+      formData: {},
+    })
+
+    if (res.statusCode !== 200) {
+      throw new Error('上传失败')
+    }
+
+    const data = JSON.parse(res.data)
+    if (data.code !== 1) {
+      throw new Error(data.msg || '上传失败')
+    }
+
+    return data.data
+  } catch (error) {
+    console.error('上传失败:', error)
+    throw error
+  }
+}
+
+/** 上传每日数据 */
+export const uploadDailyData = (params: UploadDailyDataParams) => {
+  return http.post<null>('/agency/ldd/upload', params)
+}
+
+// 获取结算单列表
+export function getUserSettlements(status?: string) {
+  return http.get<Settlement[]>('/agency/user/settlements', {
+    params: {
+      status,
+    },
   })
-  return http.post<null>('/agency/user/account/settlement/commit', formData)
+}
+
+/** 结算单系统参考收入数据 */
+export interface SysReferenceIncome {
+  referenceIncome: number
+  referencePayment: number
+  dataCompleteStatus: string
+  ldd: {
+    lastReadingNum: number
+    lastFinishReadingNum: number
+    lastIncome: number
+    incomeOfMonth: number
+    readingImg: string
+    incomeImg: string
+    userId: string
+    dateTime: string
+    accountId: string
+    accountName: string
+    platform: string
+    feedbackDate: string
+  }
+  note: string
+  isFinishLastLdd: boolean
+  totalDayIncome: number
+}
+
+/** 结算单分期信息 */
+export interface SettlementPeriod {
+  year: number
+  month: number
+  part: string
+  settlementPart: string
+}
+
+/** 管理员查看的结算单信息 */
+export interface AdminSettlement extends Settlement {
+  sp: SettlementPeriod
+  createTime: string
+  reviewTime: string
+  reviewer: string
+  sysReferenceIncome: SysReferenceIncome
+  proportionPayment: number
+  publicAccountBankCard: string
+  userPublicBankCard?: string
+  userPublicBankCardType?: string
+  companyPublicBandCard?: string
+  companyPublicBandCardType?: string
+  platformIncome?: number
+  settlementOrder?: string
+}
+
+/** 获取管理员结算单列表参数 */
+export interface GetAdminSettlementsParams {
+  status?: SettlementStatus
+}
+
+/** 结算单审核参数 */
+export interface ReviewSettlementParams {
+  id: string
+  reviewStatus: ReviewStatus
+  suggestion: string
+}
+
+/** 获取管理员结算单列表 */
+export const getAdminSettlements = (params?: GetAdminSettlementsParams) => {
+  return http.get<AdminSettlement[]>('/agency/admin/settlements', params)
+}
+
+/** 审核结算单 */
+export const reviewSettlement = (params: ReviewSettlementParams) => {
+  return http.post<null>('/agency/admin/account/settlement/review', params)
 }

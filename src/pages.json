@@ -201,6 +201,22 @@
       }
     },
     {
+      "path": "pages/settlementprogress/settlementprogress",
+      "type": "page",
+      "layout": "page",
+      "style": {
+        "navigationBarTitleText": "结算单进度"
+      }
+    },
+    {
+      "path": "pages/settlementreview/settlementreview",
+      "type": "page",
+      "layout": "page",
+      "style": {
+        "navigationBarTitleText": "结算审核"
+      }
+    },
+    {
       "path": "pages/settlements/settlements",
       "type": "page",
       "layout": "page",
