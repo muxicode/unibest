@@ -37,7 +37,7 @@
           <text class="value">{{ item.platForm }}</text>
         </view>
         <view class="info-row">
-          <text class="label">分成比例：</text>
+          <text class="label">用户分成比例：</text>
           <text class="value">{{ formatProportion(item.proportion) }}%</text>
         </view>
         <view class="info-row">
@@ -53,7 +53,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onLoad } from '@dcloudio/uni-app'
+import { onLoad, onShow } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 import { useToast } from 'wot-design-uni'
 import type { Settlement, SettlementStatus } from '@/service/index/foo'
@@ -66,6 +66,13 @@ const accountId = ref('')
 onLoad((options: any) => {
   accountId.value = options.accountId
   loadSettlements()
+})
+
+// 添加 onShow 生命周期钩子，每次页面显示时重新加载数据
+onShow(() => {
+  if (accountId.value) {
+    loadSettlements()
+  }
 })
 
 const getStatusText = (status: SettlementStatus) => {
@@ -105,7 +112,7 @@ const loadSettlements = async () => {
 
 const handleSettle = (item: Settlement) => {
   uni.navigateTo({
-    url: `/pages/income/income?id=${item.id}&accountId=${item.accountId}`,
+    url: `/pages/income/income?id=${item.id}&accountId=${item.accountId}&proportion=${item.proportion}`,
   })
 }
 
@@ -230,7 +237,7 @@ const formatProportion = (proportion: number | undefined) => {
 }
 
 .label {
-  width: 160rpx;
+  width: 200rpx;
   color: #666;
 }
 

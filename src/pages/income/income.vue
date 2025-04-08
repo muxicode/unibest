@@ -31,26 +31,36 @@
             clearable
             v-model="model.transferOrder"
             placeholder="复制粘贴转账订单号"
+            v-if="model.settlementType !== 'NO_NEED_PAY'"
           />
           <wd-input
-            label="本期结算收益"
+            label="本期账号总收益"
             label-width="140rpx"
             prop="income"
             type="digit"
             required
             clearable
             v-model="model.income"
-            placeholder="填写本期分成后收益"
+            placeholder="填写本期账号总收益"
           />
           <wd-input
-            label="本期账号收益"
+            label="需支付给平台金额"
             label-width="140rpx"
             prop="payment"
             type="digit"
+            disabled
+            v-model="model.payment"
+            placeholder="系统自动计算"
+          />
+          <wd-input
+            v-if="model.settlementType === 'NO_NEED_PAY'"
+            label="备注说明"
+            label-width="140rpx"
+            prop="note"
             required
             clearable
-            v-model="model.payment"
-            placeholder="填写本期账号总收益"
+            v-model="model.note"
+            placeholder="请填写无需支付的原因"
           />
         </wd-cell-group>
 
@@ -115,7 +125,7 @@ import type { UploadFileItem } from 'wot-design-uni/components/wd-upload/types'
 import { onLoad } from '@dcloudio/uni-app'
 import { uploadImage, commitSettlement } from '@/service/index/foo'
 
-import { reactive, ref } from 'vue'
+import { reactive, ref, watch, onMounted } from 'vue'
 
 const settlementImageUrl = ref<string>('')
 const paymentImageUrl = ref<string>('')
@@ -125,17 +135,21 @@ const paymentTempFilePath = ref<string>('')
 const model = reactive<{
   id: string
   accountId: string
+  proportion: number
   income: number
   settlementType: 'ALI_PAY' | 'WECHAT' | 'OTHER' | 'NO_NEED_PAY'
   transferOrder: string
   payment: number
+  note: string
 }>({
   id: '',
   accountId: '',
   income: 0,
+  proportion: 0,
   settlementType: 'ALI_PAY',
   transferOrder: '',
   payment: 0,
+  note: '',
 })
 
 const rules: FormRules = {
@@ -194,6 +208,22 @@ const rules: FormRules = {
       },
     },
   ],
+  note: [
+    {
+      required: true,
+      message: '请填写无需支付的原因',
+      validator: (value) => {
+        if (model.settlementType === 'NO_NEED_PAY') {
+          if (value && value !== 'NORMAL_PAYMENT') {
+            return Promise.resolve()
+          } else {
+            return Promise.reject(new Error('请填写无需支付的原因'))
+          }
+        }
+        return Promise.resolve()
+      },
+    },
+  ],
 }
 
 const platformList = ref([
@@ -205,6 +235,48 @@ const platformList = ref([
 
 const toast = useToast()
 const form = ref<FormInstance>()
+
+// 添加watch来监听income变化，自动计算payment
+watch(
+  () => model.income,
+  (newIncome) => {
+    if (newIncome) {
+      // 计算需支付给平台的金额 = 总收益 * (1 - 分成比例)
+      model.payment = Number((newIncome * (1 - model.proportion)).toFixed(2))
+    } else {
+      model.payment = 0
+    }
+  },
+)
+
+// 监听结算方式变化
+watch(
+  () => model.settlementType,
+  (newType) => {
+    if (newType === 'NO_NEED_PAY') {
+      // 设置无需支付时的默认值
+      model.transferOrder = 'NO_NEED_PAY'
+      paymentTempFilePath.value = 'NO_NEED_PAY'
+      paymentImageUrl.value = 'NO_NEED_PAY'
+      // 清空note，让用户填写
+      model.note = ''
+    } else {
+      // 恢复为空值
+      model.transferOrder = ''
+      paymentTempFilePath.value = ''
+      paymentImageUrl.value = ''
+      // 设置默认note值，以通过校验
+      model.note = 'NORMAL_PAYMENT'
+    }
+  },
+)
+
+// 初始化时设置默认note值
+onMounted(() => {
+  if (model.settlementType !== 'NO_NEED_PAY') {
+    model.note = 'NORMAL_PAYMENT'
+  }
+})
 
 async function chooseImage(type: 'settlement' | 'payment') {
   try {
@@ -252,6 +324,7 @@ async function handleSubmit() {
       return
     }
 
+    // 修改校验逻辑
     if (model.settlementType !== 'NO_NEED_PAY' && !paymentTempFilePath.value) {
       toast.error('请上传转账截图')
       return
@@ -261,10 +334,12 @@ async function handleSubmit() {
       id: model.id,
       income: parseFloat(model.income.toString()),
       settlementType: model.settlementType,
-      transferOrder: model.settlementType === 'NO_NEED_PAY' ? '' : model.transferOrder,
+      transferOrder: model.settlementType === 'NO_NEED_PAY' ? 'NO_NEED_PAY' : model.transferOrder,
       payment: parseFloat(model.payment.toString()),
-      paymentImg: model.settlementType === 'NO_NEED_PAY' ? '' : paymentTempFilePath.value || '',
+      paymentImg:
+        model.settlementType === 'NO_NEED_PAY' ? 'NO_NEED_PAY' : paymentTempFilePath.value || '',
       settlementOrder: settlementTempFilePath.value || '',
+      note: model.note,
     }
 
     await commitSettlement(params)
@@ -284,7 +359,7 @@ function handleIconClick() {
 onLoad((options: any) => {
   model.id = options?.id || ''
   model.accountId = options?.accountId || ''
-
+  model.proportion = options?.proportion || 0
   if (!model.id || !model.accountId) {
     toast.error('参数错误')
     setTimeout(() => {
@@ -325,27 +400,29 @@ onLoad((options: any) => {
 
 .custom-form-item {
   display: flex;
-  padding: 0 0 12rpx;
+  padding: 0 24rpx 12rpx;
   margin-top: 24rpx;
 }
 
 .form-label {
-  width: 140rpx;
-  padding-top: 4rpx;
+  flex-shrink: 0;
+  width: 200rpx;
+  padding-left: 4rpx;
   font-size: 28rpx;
   color: #333;
 }
 
 .upload-content {
   flex: 1;
+  min-width: 0;
 }
 
 .upload-area {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 200rpx;
-  height: 200rpx;
+  width: 240rpx;
+  height: 240rpx;
   cursor: pointer;
   background: #f8f8f8;
   border: 2rpx dashed #ddd;
@@ -374,8 +451,8 @@ onLoad((options: any) => {
 
 .image-preview {
   position: relative;
-  width: 200rpx;
-  height: 200rpx;
+  width: 240rpx;
+  height: 240rpx;
   overflow: hidden;
   border-radius: 12rpx;
 }

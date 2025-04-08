@@ -757,6 +757,7 @@ $mini-color: #07c160;
   padding: 32rpx;
 
   .reject-note-input {
+    box-sizing: border-box;
     width: 100%;
     height: 200rpx;
     padding: 16rpx;

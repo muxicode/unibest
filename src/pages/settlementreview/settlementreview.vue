@@ -52,8 +52,29 @@
 
     <view class="settlement-card">
       <view class="card-header">
-        <text class="title">结算审核</text>
-        <text class="subtitle">待审核{{ pendingSettlements.length }}个结算单</text>
+        <view class="header-left">
+          <text class="title">结算审核</text>
+          <text class="subtitle">
+            {{
+              currentStatus === 'COMMIT'
+                ? '待审核'
+                : currentStatus === 'INIT'
+                  ? '待提交'
+                  : '已完成'
+            }}{{ pendingSettlements.length }}个结算单
+          </text>
+        </view>
+        <view class="status-selector">
+          <view
+            v-for="option in statusOptions"
+            :key="option.value"
+            class="status-option"
+            :class="{ active: currentStatus === option.value }"
+            @click="handleStatusChange(option.value)"
+          >
+            {{ option.label }}
+          </view>
+        </view>
       </view>
 
       <view class="settlement-list">
@@ -249,9 +270,7 @@ const loadingMap = ref<Record<string, boolean>>({})
 
 // 根据状态获取待审核的结算单
 const pendingSettlements = computed(() => {
-  return allSettlements.value.filter(
-    (item) => item.settlementStatus === 'INIT' || item.settlementStatus === 'COMMIT',
-  )
+  return allSettlements.value.filter((item) => item.settlementStatus === currentStatus.value)
 })
 
 // 图片预览状态
@@ -272,13 +291,33 @@ const closePreview = () => {
 
 const formatDate = (dateStr: string) => {
   if (!dateStr) return '暂无'
-  const date = new Date(dateStr)
-  return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`
+  try {
+    // 首先将日期字符串转换为标准格式
+    const date = new Date(dateStr.replace(' ', 'T'))
+    // 格式化为 MM/dd HH:mm 格式
+    const month = date.getMonth() + 1
+    const day = date.getDate()
+    const hours = date.getHours()
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+
+    return `${month}/${day} ${hours}:${minutes}`
+  } catch (error) {
+    console.error('Date parsing error:', error)
+    return '日期格式错误'
+  }
 }
+
+const statusOptions = [
+  { label: '待审核', value: 'COMMIT' },
+  { label: '待提交', value: 'INIT' },
+  { label: '已完成', value: 'FINISH' },
+]
+
+const currentStatus = ref('COMMIT')
 
 const fetchSettlements = async () => {
   try {
-    const res = await getAdminSettlements()
+    const res = await getAdminSettlements({ status: currentStatus.value })
     if (res.code === 1) {
       console.log('Settlements data:', res.data)
       allSettlements.value = res.data
@@ -396,6 +435,12 @@ const handleReject = (item: AdminSettlement) => {
   openRejectDialog(item)
 }
 
+// 添加状态切换处理函数
+const handleStatusChange = (status: string) => {
+  currentStatus.value = status
+  fetchSettlements()
+}
+
 onMounted(() => {
   fetchSettlements()
 })
@@ -445,20 +490,53 @@ $status-finish: $success-color;
 .card-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: $spacing-xl;
   border-bottom: 2rpx solid $border-color;
 
-  .title {
-    margin-right: $spacing-sm;
-    font-size: 32rpx;
-    font-weight: 600;
-    color: $text-primary;
-    letter-spacing: 0.5rpx;
+  .header-left {
+    display: flex;
+    align-items: center;
+
+    .title {
+      margin-right: $spacing-sm;
+      font-size: 32rpx;
+      font-weight: 600;
+      color: $text-primary;
+      letter-spacing: 0.5rpx;
+    }
+
+    .subtitle {
+      font-size: 24rpx;
+      color: $text-secondary;
+    }
   }
 
-  .subtitle {
-    font-size: 24rpx;
-    color: $text-secondary;
+  .status-selector {
+    display: flex;
+    gap: 16rpx;
+    padding: 4rpx;
+    background: $background-color;
+    border-radius: 8rpx;
+
+    .status-option {
+      padding: 8rpx 16rpx;
+      font-size: 24rpx;
+      color: $text-secondary;
+      cursor: pointer;
+      border-radius: 6rpx;
+      transition: all 0.3s ease;
+
+      &.active {
+        color: $primary-color;
+        background: #ffffff;
+        box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+      }
+
+      &:hover {
+        color: $primary-color;
+      }
+    }
   }
 }
 
@@ -838,6 +916,7 @@ $status-finish: $success-color;
   padding: 32rpx;
 
   .reject-note-input {
+    box-sizing: border-box;
     width: 100%;
     height: 200rpx;
     padding: 16rpx;

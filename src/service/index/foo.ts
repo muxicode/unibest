@@ -460,6 +460,7 @@ export interface CommitSettlementParams {
   payment: number
   paymentImg: string
   settlementOrder: string
+  note: string
 }
 
 /** 获取结算单列表 */
