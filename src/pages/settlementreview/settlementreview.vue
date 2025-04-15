@@ -270,7 +270,10 @@ const loadingMap = ref<Record<string, boolean>>({})
 
 // 根据状态获取待审核的结算单
 const pendingSettlements = computed(() => {
-  return allSettlements.value.filter((item) => item.settlementStatus === currentStatus.value)
+  if (allSettlements.value) {
+    return allSettlements.value.filter((item) => item.settlementStatus === currentStatus.value)
+  }
+  return []
 })
 
 // 图片预览状态
@@ -319,12 +322,9 @@ const fetchSettlements = async () => {
   try {
     const res = await getAdminSettlements({ status: currentStatus.value })
     if (res.code === 1) {
-      console.log('Settlements data:', res.data)
       allSettlements.value = res.data
-      console.log('Filtered settlements:', pendingSettlements.value)
     }
   } catch (error) {
-    console.error('Failed to fetch settlements:', error)
     uni.showToast({
       title: '获取结算单列表失败',
       icon: 'none',
@@ -405,7 +405,6 @@ const confirmReject = async () => {
       reviewStatus: 'FAIL',
       suggestion: rejectNote.value.trim(),
     }
-    console.log('Sending rejection with params:', params)
     const res = await reviewSettlement(params)
     if (res.code === 1) {
       uni.showToast({

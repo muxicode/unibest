@@ -53,7 +53,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onLoad, onShow } from '@dcloudio/uni-app'
+import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 import { useToast } from 'wot-design-uni'
 import type { Settlement, SettlementStatus } from '@/service/index/foo'
@@ -66,13 +66,6 @@ const accountId = ref('')
 onLoad((options: any) => {
   accountId.value = options.accountId
   loadSettlements()
-})
-
-// 添加 onShow 生命周期钩子，每次页面显示时重新加载数据
-onShow(() => {
-  if (accountId.value) {
-    loadSettlements()
-  }
 })
 
 const getStatusText = (status: SettlementStatus) => {
