@@ -46,7 +46,7 @@
       </view>
 
       <!-- 预览区域 -->
-      <view v-else class="preview-area">
+      <view v-else class="preview-area" :class="currentTheme">
         <rich-text
           :nodes="formattedContent"
           :selectable="true"
@@ -78,6 +78,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useToast } from 'wot-design-uni'
 import { convertMarkdownToHtml, convertHtmlToNodes } from './utils/markdown'
 import ImageDownloader from './components/ImageDownloader.vue'
+import { getAllThemes } from './themes'
 
 const toast = useToast()
 
@@ -85,12 +86,8 @@ const toast = useToast()
 const content = ref('')
 const currentTheme = ref('theme-default')
 
-// 主题列表
-const themes = [
-  { label: '默认主题', value: 'theme-default' },
-  { label: '暗色主题', value: 'theme-dark' },
-  { label: '护眼主题', value: 'theme-green' },
-]
+// 获取主题列表
+const themes = getAllThemes()
 
 // 判断是否为 iOS 平台
 const isIOS = computed(() => uni.getSystemInfoSync().platform === 'ios')
@@ -98,11 +95,32 @@ const isIOS = computed(() => uni.getSystemInfoSync().platform === 'ios')
 // 格式化后的内容
 const formattedContent = computed(() => {
   if (!content.value) return []
-  console.log('Original content:', JSON.stringify(content.value))
+  console.log('Original content:', JSON.stringify(content.value, null, 2))
   const html = convertMarkdownToHtml(content.value, currentTheme.value)
-  console.log('Converted HTML:', JSON.stringify(html))
-  const nodes = convertHtmlToNodes(html)
-  console.log('Final nodes:', JSON.stringify(nodes))
+  console.log('Converted HTML:', JSON.stringify(html, null, 2))
+
+  // 预处理 HTML，确保任何特殊格式的文本都正确被解析
+  const processedHtml = html
+    // 处理HTML实体
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    // 处理可能在文本中的特殊标签
+    .replace(
+      /<div class="preserved-format" data-color="([^"]*)" data-style="([^"]*)" data-content="([^"]*)">/g,
+      (match, color, style, content) => {
+        try {
+          const decodedContent = decodeURIComponent(content)
+          return `<font color="${color}"${style ? ' ' + style : ''}>${decodedContent}</font>`
+        } catch (e) {
+          return match
+        }
+      },
+    )
+
+  const nodes = convertHtmlToNodes(processedHtml)
+  console.log('Final nodes structure:', JSON.stringify(nodes, null, 2))
   return nodes
 })
 
@@ -329,6 +347,18 @@ $card-background: #ffffff;
   border-radius: 12rpx;
   -webkit-touch-callout: default;
 
+  // 主题样式由 convertMarkdownToHtml 函数直接在 HTML 中处理
+  // 以下是主题相关的样式类，用于外部容器背景色
+  &.theme-dark {
+    background: #1a1a1a;
+    border-color: #3e4c5a;
+  }
+
+  &.theme-green {
+    background: #f0f9eb;
+    border-color: #a3d899;
+  }
+
   :deep(.article-content) {
     // 精确控制文本区域
     display: block;
@@ -352,7 +382,7 @@ $card-background: #ffffff;
     // 确保文本可以选择
     -webkit-user-select: text !important;
     user-select: text !important;
-    text-selection-enabled: true;
+    /* 移除不支持的属性 */
 
     // 移除可能影响选择的样式
     -webkit-touch-callout: default;
@@ -510,5 +540,4 @@ $card-background: #ffffff;
     opacity: 1;
   }
 }
-/* 主题相关样式会从theme.scss中继承 */
 </style>
