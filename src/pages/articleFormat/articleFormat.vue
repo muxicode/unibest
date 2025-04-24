@@ -98,30 +98,7 @@ const formattedContent = computed(() => {
   console.log('Original content:', JSON.stringify(content.value, null, 2))
   const html = convertMarkdownToHtml(content.value, currentTheme.value)
   console.log('Converted HTML:', JSON.stringify(html, null, 2))
-
-  // 预处理 HTML，确保任何特殊格式的文本都正确被解析
-  const processedHtml = html
-    // 处理HTML实体
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&amp;/g, '&')
-    // 处理可能在文本中的特殊标签
-    .replace(
-      /<div class="preserved-format" data-color="([^"]*)" data-style="([^"]*)" data-content="([^"]*)">/g,
-      (match, color, style, content) => {
-        try {
-          const decodedContent = decodeURIComponent(content)
-          return `<font color="${color}"${style ? ' ' + style : ''}>${decodedContent}</font>`
-        } catch (e) {
-          return match
-        }
-      },
-    )
-
-  const nodes = convertHtmlToNodes(processedHtml)
-  console.log('Final nodes structure:', JSON.stringify(nodes, null, 2))
-  return nodes
+  return html
 })
 
 // 选择文件

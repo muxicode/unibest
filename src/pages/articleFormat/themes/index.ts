@@ -1,12 +1,10 @@
-// 导入各个主题
+// 导入姹紫主题
 import { defaultThemeParser } from './default'
-import { darkThemeParser } from './dark'
-import { greenThemeParser } from './green'
 
 // 主题解析器接口
 export interface ThemeParser {
   // 解析函数：接收markdown内容和md实例，返回解析后的HTML
-  parse: (markdown: string, md: any, hljs: any) => string
+  parse: (markdown: string, md?: any, hljs?: any) => string
   // 主题名称
   name: string
   // 主题描述
@@ -16,8 +14,6 @@ export interface ThemeParser {
 // 所有可用主题的映射
 const themeParsers: Record<string, ThemeParser> = {
   'theme-default': defaultThemeParser,
-  'theme-dark': darkThemeParser,
-  'theme-green': greenThemeParser,
 }
 
 /**
