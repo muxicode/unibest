@@ -229,6 +229,14 @@ export const purplesThemeParser: ThemeParser = {
       return `<img${attrs} style="${themeStyles.img_inline}">`
     })
 
+    // 处理带有颜色属性的font标签
+    html = html.replace(
+      /<strong[^>]*><font color="([^"]*)">([^<]*)<\/font><\/strong>/g,
+      (match, color, text) => {
+        return `<strong style="font-weight: bold; color: ${color};">${text}</strong>`
+      },
+    )
+
     // 处理代码块的代码高亮
     html = html.replace(/<code class="hljs" style="[^"]*">([^<]*)<\/code>/g, (match, code) => {
       if (code.includes('function')) {

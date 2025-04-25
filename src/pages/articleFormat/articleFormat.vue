@@ -37,6 +37,11 @@
         <image-downloader v-if="content" :content="content" />
       </view>
 
+      <!-- 操作提示 -->
+      <view v-if="content" class="operation-tips">
+        <text class="tip-text">选择主题，长按文章全选复制去发布吧~</text>
+      </view>
+
       <!-- 文件导入区域 -->
       <view v-if="!content" class="upload-area" @click="handleChooseFile">
         <wd-icon name="upload" size="48px" color="#999999" />
@@ -59,12 +64,9 @@
       <!-- 操作按钮 -->
       <view v-if="content" class="action-btns">
         <wd-button class="btn" type="warning" @click="handleReset">重新选择</wd-button>
-        <wd-button class="btn" type="primary" @click="copyFullContent">复制全文</wd-button>
-      </view>
-
-      <!-- 操作提示 -->
-      <view v-if="content" class="operation-tips">
-        <text class="tip-text">长按文章内容可以选择并复制</text>
+        <wd-button v-if="isIOS" class="btn" type="primary" @click="copyFullContent">
+          复制全文
+        </wd-button>
       </view>
     </view>
 

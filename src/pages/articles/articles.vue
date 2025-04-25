@@ -96,6 +96,51 @@
       </view>
     </wd-popup>
 
+    <!-- 相似度检测弹窗 -->
+    <wd-popup
+      v-model="showSimilarityPopup"
+      custom-style="padding: 30px 40px; border-radius: 16px;"
+      @close="cancelDownloadSimilar"
+    >
+      <view class="similarity-popup">
+        <view class="similarity-title">相似文章检测</view>
+        <view class="similarity-content">
+          <text class="similarity-warning">
+            检测到{{
+              similarityResult?.similarityTitleNum || 0
+            }}篇相似文章，建议选择其他文章进行下载。
+          </text>
+
+          <view class="similar-list">
+            <view
+              v-for="(item, index) in similarityResult?.similarityTitles"
+              :key="index"
+              class="similar-item"
+            >
+              <view class="similar-title">{{ item.title }}</view>
+              <view class="similar-info">
+                <text class="similar-date">{{ item.date }}</text>
+                <text class="similar-percent">相似度: {{ item.similarity }}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+        <view class="similarity-footer">
+          <wd-button size="medium" plain class="cancel-btn" @click="cancelDownloadSimilar">
+            取消下载
+          </wd-button>
+          <wd-button
+            size="medium"
+            type="primary"
+            class="confirm-btn"
+            @click="confirmDownloadSimilar"
+          >
+            继续下载
+          </wd-button>
+        </view>
+      </view>
+    </wd-popup>
+
     <!-- Toast提示 -->
     <wd-toast />
   </view>
@@ -103,9 +148,10 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { onShow } from '@dcloudio/uni-app'
 import { useToast } from 'wot-design-uni'
-import { getArticles, downloadArticle } from '@/service/index/foo'
-import type { ArticleItem, ArticleInfo } from '@/service/index/foo'
+import { getArticles, downloadArticle, checkTitleSimilarity } from '@/service/index/foo'
+import type { ArticleItem, ArticleInfo, SimilarityResult } from '@/service/index/foo'
 
 // 组件状态
 const toast = useToast()
@@ -118,10 +164,23 @@ const showSharePopup = ref(false)
 const downloadFilePath = ref('')
 const keyword = ref('')
 
+// 相似度检测相关状态
+const showSimilarityPopup = ref(false)
+const similarityResult = ref<SimilarityResult | null>(null)
+const currentArticle = ref<ArticleItem | null>(null)
+
 // 页面加载
 onLoad((options: any) => {
   accountId.value = options?.accountId || ''
   loadArticles()
+})
+
+// 页面显示时刷新数据
+onShow(() => {
+  // 如果账号ID存在，刷新文章列表
+  if (accountId.value) {
+    loadArticles()
+  }
 })
 
 // 加载文章列表
@@ -176,6 +235,36 @@ const handleDownload = async (article: ArticleItem) => {
     toast.warning('有文件正在下载中')
     return
   }
+
+  // 先检查标题相似度
+  try {
+    downloading.value = article.id
+    currentArticle.value = article
+
+    const res = await checkTitleSimilarity({
+      accountId: accountId.value,
+      title: article.title,
+    })
+
+    // 如果存在相似标题
+    if (res.data.similarityTitleNum > 0) {
+      similarityResult.value = res.data
+      showSimilarityPopup.value = true
+      downloading.value = '' // 重置下载状态
+      return
+    }
+
+    // 如果没有相似标题，直接下载
+    await downloadArticleFile(article)
+  } catch (err) {
+    console.error('检查标题相似度失败:', err)
+    toast.error('检查失败')
+    downloading.value = ''
+  }
+}
+
+// 实际下载文章的方法
+const downloadArticleFile = async (article: ArticleItem) => {
   downloading.value = article.id
 
   try {
@@ -197,6 +286,21 @@ const handleDownload = async (article: ArticleItem) => {
     // 确保在所有情况下都重置下载状态
     downloading.value = ''
   }
+}
+
+// 确认下载相似文章
+const confirmDownloadSimilar = async () => {
+  showSimilarityPopup.value = false
+
+  if (currentArticle.value) {
+    await downloadArticleFile(currentArticle.value)
+  }
+}
+
+// 取消下载相似文章
+const cancelDownloadSimilar = () => {
+  showSimilarityPopup.value = false
+  loadArticles() // 刷新文章列表
 }
 
 // 准备文件分享
@@ -237,7 +341,7 @@ const shareFile = () => {
 // 关闭弹窗
 const handleClose = () => {
   showSharePopup.value = false
-  loadArticles() // Refresh article list when popup closes
+  loadArticles() // 刷新文章列表
 }
 
 // 处理搜索
@@ -475,6 +579,84 @@ $border-radius: 20rpx;
 
   &::placeholder {
     color: $text-tertiary;
+  }
+}
+
+// 相似度检测弹窗
+.similarity-popup {
+  min-width: 560rpx;
+  max-width: 90vw;
+
+  .similarity-title {
+    margin-bottom: 24rpx;
+    font-size: 36rpx;
+    font-weight: bold;
+    color: $text-primary;
+  }
+
+  .similarity-content {
+    padding-bottom: 32rpx;
+    margin-bottom: 32rpx;
+    font-size: 28rpx;
+    color: $text-secondary;
+    border-bottom: 2rpx solid $border-color;
+
+    .similarity-warning {
+      display: block;
+      margin-bottom: 20rpx;
+      font-weight: 500;
+      color: $warning-color;
+    }
+  }
+
+  .similar-list {
+    max-height: 400rpx;
+    overflow-y: auto;
+
+    .similar-item {
+      padding: 16rpx;
+      margin-bottom: 16rpx;
+      background-color: $background-color;
+      border-radius: 8rpx;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .similar-title {
+        margin-bottom: 8rpx;
+        font-size: 28rpx;
+        font-weight: 500;
+        color: $text-primary;
+      }
+
+      .similar-info {
+        display: flex;
+        justify-content: space-between;
+
+        .similar-date {
+          font-size: 24rpx;
+          color: $text-tertiary;
+        }
+
+        .similar-percent {
+          font-size: 24rpx;
+          font-weight: 500;
+          color: $error-color;
+        }
+      }
+    }
+  }
+
+  .similarity-footer {
+    display: flex;
+    gap: 16rpx;
+    justify-content: flex-end;
+
+    .cancel-btn,
+    .confirm-btn {
+      min-width: 180rpx;
+    }
   }
 }
 </style>

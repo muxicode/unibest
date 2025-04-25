@@ -169,6 +169,27 @@ export const downloadArticle = (params: { articleId: string; accountId: string }
 }
 /** 下载文章内容 */
 
+/** 相似度检测 */
+export interface SimilarityTitle {
+  title: string
+  similarity: string
+  date: string
+}
+
+export interface SimilarityResult {
+  similarityTitleNum: number
+  similarityTitles: SimilarityTitle[]
+}
+
+export const checkTitleSimilarity = (params: {
+  accountId: string
+  title: string
+  threshold?: number
+}) => {
+  return http.get<SimilarityResult>('/agency/account/article/similarity/title', params)
+}
+/** 相似度检测 */
+
 /** 未发布任务项 */
 export interface UnpublishedTask {
   id: string
