@@ -336,6 +336,11 @@ $card-background: #ffffff;
     border-color: #a3d899;
   }
 
+  &.theme-orange-heart {
+    background: #fff9f9;
+    border-color: #ef7060;
+  }
+
   :deep(.article-content) {
     // 精确控制文本区域
     display: block;

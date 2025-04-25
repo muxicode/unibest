@@ -101,7 +101,7 @@ function parseHTMLFallback(html: string): any[] {
 
     if (char === '<') {
       if (currentText) {
-        nodes.push({ type: 'text', text: currext })
+        nodes.push({ type: 'text', text: currentText })
         currentText = ''
       }
       inTag = true
@@ -112,7 +112,7 @@ function parseHTMLFallback(html: string): any[] {
       // 处理标签
       if (tagContent.startsWith('/')) {
         // 结束标签，不处理
-      } else if (tagContent.eh('/')) {
+      } else if (tagContent.endsWith('/')) {
         // 自闭合标签
         const tagName = tagContent.split(' ')[0]
         const attrs = parseAttrs(tagContent.substring(tagName.length))
@@ -147,7 +147,7 @@ function parseAttrs(attrsStr: string): Record<string, any> {
       const [key, value] = match.split('=')
       if (value) {
         // 移除引号
-        ars[key.trim()] = value.replace(/["']/g, '')
+        attrs[key.trim()] = value.replace(/["']/g, '')
       } else {
         attrs[key.trim()] = true
       }

@@ -1,5 +1,11 @@
 // 导入姹紫主题
 import { defaultThemeParser } from './default'
+// 导入丘比特主题
+import { cupidThemeParser } from './cupid'
+// 导入橙心主题
+import { orangeHeartThemeParser } from './orange_heart'
+// 导入姹紫主题
+import { purplesThemeParser } from './purples'
 
 // 主题解析器接口
 export interface ThemeParser {
@@ -14,6 +20,9 @@ export interface ThemeParser {
 // 所有可用主题的映射
 const themeParsers: Record<string, ThemeParser> = {
   'theme-default': defaultThemeParser,
+  'theme-cupid': cupidThemeParser,
+  'theme-orange-heart': orangeHeartThemeParser,
+  'theme-purples': purplesThemeParser,
 }
 
 /**
