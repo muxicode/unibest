@@ -48,7 +48,19 @@
         <view v-for="item in articles" :key="item.id" class="article-item">
           <!-- 文章内容区 -->
           <view class="article-content">
-            <text class="article-title">{{ item.title }}</text>
+            <view class="title-wrapper">
+              <text
+                class="article-title"
+                :class="{
+                  'title-expanded': expandedIds.includes(item.id),
+                }"
+              >
+                {{ item.title }}
+              </text>
+              <text class="expand-toggle" @click="toggleExpand(item.id)">
+                {{ expandedIds.includes(item.id) ? '收起' : '展开' }}
+              </text>
+            </view>
           </view>
 
           <!-- 操作按钮区 -->
@@ -168,6 +180,18 @@ const keyword = ref('')
 const showSimilarityPopup = ref(false)
 const similarityResult = ref<SimilarityResult | null>(null)
 const currentArticle = ref<ArticleItem | null>(null)
+
+// 标题展开收起功能
+const expandedIds = ref<string[]>([])
+
+// 切换标题展开/收起状态
+const toggleExpand = (id: string) => {
+  if (expandedIds.value.includes(id)) {
+    expandedIds.value = expandedIds.value.filter((itemId) => itemId !== id)
+  } else {
+    expandedIds.value.push(id)
+  }
+}
 
 // 页面加载
 onLoad((options: any) => {
@@ -459,8 +483,16 @@ $border-radius: 20rpx;
   overflow: hidden;
 }
 
+.title-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+
 .article-title {
   display: -webkit-box;
+  width: 100%;
   overflow: hidden;
   font-size: 30rpx;
   line-height: 1.5;
@@ -468,6 +500,28 @@ $border-radius: 20rpx;
   text-overflow: ellipsis;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+
+  &.title-expanded {
+    display: block;
+    -webkit-line-clamp: unset;
+    white-space: normal;
+  }
+}
+
+.expand-toggle {
+  display: inline-block;
+  padding: 4rpx 16rpx;
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: $primary-color;
+  cursor: pointer;
+  background-color: rgba($primary-color, 0.05);
+  border-radius: 8rpx;
+  transition: all 0.2s ease;
+
+  &:active {
+    background-color: rgba($primary-color, 0.1);
+  }
 }
 
 .action-btns {

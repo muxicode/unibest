@@ -183,6 +183,13 @@ const menuList = [
       type: 'settlement',
       icon: 'chart',
     },
+    {
+      title: '邀请结算',
+      tit: '',
+      url: '',
+      type: 'inviteSettlement',
+      icon: 'share',
+    },
   ],
   [
     {
@@ -250,6 +257,9 @@ const handleMenuClick = (item: MenuItem) => {
   }
   if (item.type === 'settlementReview') {
     uni.navigateTo({ url: '/pages/settlementreview/settlementreview' })
+  }
+  if (item.type === 'inviteSettlement') {
+    uni.navigateTo({ url: '/pages/settlementsinvite/settlementsinvite' })
   }
   if (item.type === 'logout') {
     userStore.userInfo.token = ''

@@ -30,6 +30,7 @@ interface NavigateToOptions {
        "/pages/settlementprogress/settlementprogress" |
        "/pages/settlementreview/settlementreview" |
        "/pages/settlements/settlements" |
+       "/pages/settlementsinvite/settlementsinvite" |
        "/pages/task/task" |
        "/pages/taskReview/taskReview" |
        "/pages/unpublishtasks/unpublishtasks" |

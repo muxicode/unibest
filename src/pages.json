@@ -225,6 +225,14 @@
       }
     },
     {
+      "path": "pages/settlementsinvite/settlementsinvite",
+      "type": "page",
+      "layout": "page",
+      "style": {
+        "navigationBarTitleText": "邀请结算"
+      }
+    },
+    {
       "path": "pages/task/task",
       "type": "page",
       "layout": "tabbar",

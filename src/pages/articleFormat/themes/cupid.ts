@@ -63,6 +63,11 @@ export const cupidThemeParser: ThemeParser = {
 
       suffix:
         'align-items: unset; background-attachment: scroll; background-clip: border-box; background-color: transparent; background-image: url("https://files.mdnice.com/pic/4e116911-86c9-40c7-80ec-bd05e65efa5b.png"); background-origin: padding-box; background-position-x: 0%; background-position-y: 0%; background-repeat: no-repeat; background-size: 100% 100%; border-top-style: none; border-bottom-style: none; border-left-style: none; border-right-style: none; border-top-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-right-width: 1px; border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-left-radius: 0px; border-top-right-radius: 0px; border-bottom-left-radius: 0px; border-bottom-right-radius: 0px; box-shadow: none; color: rgb(0, 0, 0); display: block; font-size: 22px; font-weight: bold; flex-direction: unset; float: unset; height: 15px; justify-content: unset; letter-spacing: 0px; line-height: 1.5em; margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; overflow-x: unset; overflow-y: unset; padding-top: 0px; padding-bottom: 0px; padding-left: 0px; padding-right: 0px; position: relative; text-align: left; text-indent: 0em; text-shadow: none; transform: none; width: 15px; -webkit-box-reflect: unset;',
+
+      img_figure:
+        'margin-top: 8px; margin-bottom: 8px; margin-left: 0px; margin-right: 0px; padding-top: 0px; padding-bottom: 0px; padding-left: 0px; padding-right: 0px; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%;',
+      img_inline:
+        'display: block; margin-top: 0px; margin-right: auto; margin-bottom: 0px; margin-left: auto; max-width: 100%; width: auto; height: auto; border-radius: 4px; object-fit: contain; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);',
     }
 
     // 使用 markdown-it 库创建渲染器
@@ -138,7 +143,7 @@ export const cupidThemeParser: ThemeParser = {
     md.renderer.rules.image = (tokens, idx) => {
       const src = tokens[idx].attrs.find((attr) => attr[0] === 'src')?.[1] || ''
       const alt = tokens[idx].attrs.find((attr) => attr[0] === 'alt')?.[1] || ''
-      return `<figure data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; margin-left: 0px; margin-right: 0px; padding-top: 0px; padding-bottom: 0px; padding-left: 0px; padding-right: 0px; display: flex; flex-direction: column; justify-content: center; align-items: center;"><img src="${src}" alt="${alt}" style="display: block; margin-top: 0px; margin-right: auto; margin-bottom: 0px; margin-left: auto; max-width: 100%; border-top-style: none; border-bottom-style: none; border-left-style: none; border-right-style: none; border-top-width: 2px; border-bottom-width: 2px; border-left-width: 2px; border-right-width: 2px; border-top-color: rgba(0, 0, 0, 0.4); border-bottom-color: rgba(0, 0, 0, 0.4); border-left-color: rgba(0, 0, 0, 0.4); border-right-color: rgba(0, 0, 0, 0.4); border-top-left-radius: 0px; border-top-right-radius: 0px; border-bottom-right-radius: 0px; border-bottom-left-radius: 0px; object-fit: fill; box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px;"></figure>`
+      return `<figure data-tool="mdnice编辑器" style="${themeStyles.img_figure}"><img src="${src}" alt="${alt}" style="${themeStyles.img_inline}"></figure>`
     }
 
     // 覆盖无序列表渲染规则
@@ -219,7 +224,15 @@ export const cupidThemeParser: ThemeParser = {
     // 处理HTML标签
     html = html.replace(/<image([^>]*)>/gi, (match, attrs) => {
       const src = attrs.match(/src="([^"]*)"/)?.[1] || ''
-      return `<img src="${src}" data-tool="mdnice编辑器" style="display: block; margin-top: 0px; margin-right: auto; margin-bottom: 0px; margin-left: auto; max-width: 100%;">`
+      return `<img src="${src}" data-tool="mdnice编辑器" style="${themeStyles.img_inline}">`
+    })
+
+    // 处理图片标签样式
+    html = html.replace(/<img([^>]*)>/gi, (match, attrs) => {
+      if (match.includes('style=')) {
+        return match
+      }
+      return `<img${attrs} style="${themeStyles.img_inline}">`
     })
 
     // 处理带有颜色属性的font标签

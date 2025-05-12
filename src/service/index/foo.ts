@@ -620,3 +620,62 @@ export const getAdminSettlements = (params?: GetAdminSettlementsParams) => {
 export const reviewSettlement = (params: ReviewSettlementParams) => {
   return http.post<null>('/agency/admin/account/settlement/review', params)
 }
+
+/** 获取邀请结算单列表 */
+export interface InviteUserIncome {
+  userId: string
+  income: number
+  note: string
+  accountIncomes: Array<{
+    userId: string
+    accountId: string
+    accountName: string
+    sp: string
+    settlementStatus: string
+    userStatus: string
+    isLock: boolean
+    lockDetail: string
+  }>
+}
+
+export interface NoFinishAccountStatus {
+  noFinishAccountNum: number
+  noFinishAccounts: Array<{
+    userId: string
+    accountId: string
+    accountName: string
+    sp: string
+    settlementStatus: string
+    userStatus: string
+    isLock: boolean
+    lockDetail: string
+  }>
+  compensateFinishAccounts: Array<any>
+  isAllAccountCompensate: boolean
+}
+
+export interface InviteSettlement {
+  id: string
+  settlementStatus: SettlementStatus
+  userId: string
+  sp: string
+  createTime: string
+  reviewTime: string
+  reviewer: string
+  totalInviteUserInCome: number
+  inviteProportion: number
+  payment: number
+  paymentImg: string
+  settlementType: string
+  transferOrder: string
+  userPublicBankCard: string
+  userPublicBankCardType: string
+  userIncomes: InviteUserIncome[]
+  isNeedComposite: boolean
+  noFinishAccountStatus: NoFinishAccountStatus
+  note: string
+}
+
+export const getUserInviteSettlements = (status?: SettlementStatus) => {
+  return http.get<InviteSettlement[]>('/agency/user/invite/settlements', status ? { status } : {})
+}
