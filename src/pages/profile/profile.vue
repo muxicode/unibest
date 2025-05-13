@@ -154,6 +154,14 @@ const menuList = [
       adminOnly: true,
     },
     {
+      title: '邀请审核',
+      tit: '',
+      url: '',
+      type: 'settlementsinvitereview',
+      icon: 'check-circle',
+      adminOnly: true,
+    },
+    {
       title: '文章数据',
       tit: '',
       url: '',
@@ -175,13 +183,6 @@ const menuList = [
       url: '',
       type: 'todayData',
       icon: 'list',
-    },
-    {
-      title: '收益结算',
-      tit: '',
-      url: '',
-      type: 'settlement',
-      icon: 'chart',
     },
     {
       title: '邀请结算',
@@ -257,6 +258,9 @@ const handleMenuClick = (item: MenuItem) => {
   }
   if (item.type === 'settlementReview') {
     uni.navigateTo({ url: '/pages/settlementreview/settlementreview' })
+  }
+  if (item.type === 'settlementsinvitereview') {
+    uni.navigateTo({ url: '/pages/settlementsinvitereview/settlementsinvitereview' })
   }
   if (item.type === 'inviteSettlement') {
     uni.navigateTo({ url: '/pages/settlementsinvite/settlementsinvite' })

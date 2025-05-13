@@ -233,6 +233,14 @@
       }
     },
     {
+      "path": "pages/settlementsinvitereview/settlementsinvitereview",
+      "type": "page",
+      "layout": "page",
+      "style": {
+        "navigationBarTitleText": "邀请结算审核"
+      }
+    },
+    {
       "path": "pages/task/task",
       "type": "page",
       "layout": "tabbar",

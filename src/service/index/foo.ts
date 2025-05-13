@@ -679,3 +679,22 @@ export interface InviteSettlement {
 export const getUserInviteSettlements = (status?: SettlementStatus) => {
   return http.get<InviteSettlement[]>('/agency/user/invite/settlements', status ? { status } : {})
 }
+
+/** 管理员获取邀请结算单列表 */
+export const getAdminInviteSettlements = (status?: SettlementStatus) => {
+  return http.get<InviteSettlement[]>('/agency/admin/invite/settlements', status ? { status } : {})
+}
+
+/** 管理员结算邀请单参数 */
+export interface ReviewInviteSettlementParams {
+  id: string
+  payment: number
+  paymentImg: string
+  settlementType: 'ALI_PAY' | 'WECHAT' | 'OTHER' | 'NO_NEED_PAY'
+  transferOrder: string
+}
+
+/** 管理员结算邀请单 */
+export const reviewInviteSettlement = (params: ReviewInviteSettlementParams) => {
+  return http.post<null>('/agency/admin/invite/settlement/review', params)
+}

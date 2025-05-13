@@ -31,6 +31,7 @@ interface NavigateToOptions {
        "/pages/settlementreview/settlementreview" |
        "/pages/settlements/settlements" |
        "/pages/settlementsinvite/settlementsinvite" |
+       "/pages/settlementsinvitereview/settlementsinvitereview" |
        "/pages/task/task" |
        "/pages/taskReview/taskReview" |
        "/pages/unpublishtasks/unpublishtasks" |
