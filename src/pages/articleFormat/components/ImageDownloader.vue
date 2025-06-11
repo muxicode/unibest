@@ -39,10 +39,6 @@
           </view>
         </view>
       </scroll-view>
-
-      <view class="usage-tip">
-        <text>💡 点击图片可预览，预览时长按可保存到相册</text>
-      </view>
     </view>
 
     <!-- Toast提示 -->

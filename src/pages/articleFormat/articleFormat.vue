@@ -39,7 +39,17 @@
 
       <!-- 操作提示 -->
       <view v-if="content" class="operation-tips">
-        <text class="tip-text">选择主题，长按文章全选复制去发布吧~</text>
+        <text class="tip-text">安卓手机长按下方文章全选复制去发布吧~</text>
+        <text class="tip-text">苹果手机，点击按钮（复制全文）发布吧~</text>
+      </view>
+
+      <!-- 操作按钮 -->
+      <view v-if="content" class="action-btns">
+        <wd-button class="btn" type="warning" @click="handleReset">重新选择</wd-button>
+        <wd-button class="btn" type="info" @click="copyTitle">复制标题</wd-button>
+        <wd-button v-if="isIOS" class="btn" type="primary" @click="copyFullContent">
+          复制全文
+        </wd-button>
       </view>
 
       <!-- 文件导入区域 -->
@@ -60,14 +70,6 @@
           space="nbsp"
         />
       </view>
-
-      <!-- 操作按钮 -->
-      <view v-if="content" class="action-btns">
-        <wd-button class="btn" type="warning" @click="handleReset">重新选择</wd-button>
-        <wd-button v-if="isIOS" class="btn" type="primary" @click="copyFullContent">
-          复制全文
-        </wd-button>
-      </view>
     </view>
 
     <!-- Toast提示 -->
@@ -87,6 +89,7 @@ const toast = useToast()
 // 状态
 const content = ref('')
 const currentTheme = ref('theme-default')
+const articleTitle = ref('')
 
 // 获取主题列表
 const themes = getAllThemes()
@@ -135,6 +138,9 @@ const handleFileSuccess = (res: any) => {
   const file = res.tempFiles[0]
   console.log('Selected file:', JSON.stringify(file))
 
+  // 保存文件名作为文章标题（去掉扩展名）
+  articleTitle.value = file.name.replace(/\.(txt|md)$/i, '')
+
   // 读取文件内容
   uni.getFileSystemManager().readFile({
     filePath: file.path,
@@ -171,11 +177,32 @@ const handleReset = () => {
 
 // 添加复制全文功能
 const copyFullContent = () => {
-  // 使用 uni.setClipboardData 复制原始内容
+  // 获取格式化后的HTML内容
+  const html = convertMarkdownToHtml(content.value, currentTheme.value)
+
+  // 使用 uni.setClipboardData 复制格式化后的内容
   uni.setClipboardData({
-    data: content.value,
+    data: html,
     success: () => {
       toast.success('已复制全文到剪贴板')
+    },
+    fail: () => {
+      toast.error('复制失败')
+    },
+  })
+}
+
+// 新增：复制标题功能
+const copyTitle = () => {
+  if (!articleTitle.value) {
+    toast.error('没有可复制的标题')
+    return
+  }
+
+  uni.setClipboardData({
+    data: articleTitle.value,
+    success: () => {
+      toast.success('已复制标题到剪贴板')
     },
     fail: () => {
       toast.error('复制失败')
@@ -494,7 +521,7 @@ $card-background: #ffffff;
 
   .tip-text {
     display: block;
-    font-size: 26rpx;
+    font-size: 18rpx;
     line-height: 1.5;
     color: $text-secondary;
     text-align: center;
