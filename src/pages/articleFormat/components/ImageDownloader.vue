@@ -19,14 +19,7 @@
       <view class="preview-header">
         <text class="preview-title">已下载 {{ downloadedImages.length }} 张图片</text>
         <view class="preview-actions">
-          <wd-button
-            type="primary"
-            size="small"
-            :disabled="!selectedImages.length"
-            @click="handleShare"
-          >
-            分享选中图片
-          </wd-button>
+          <wd-button type="primary" size="small" @click="handlePreviewAll">预览所有图片</wd-button>
           <wd-button type="warning" size="small" @click="handleReset">重新下载</wd-button>
         </view>
       </view>
@@ -37,20 +30,19 @@
             v-for="(image, index) in downloadedImages"
             :key="index"
             class="image-item"
-            :class="{ selected: selectedImages.includes(image.path) }"
-            @click="toggleImageSelection(image.path)"
+            @click="handleImagePreview(index)"
           >
             <image :src="image.path" mode="aspectFill" />
-            <view class="image-checkbox">
-              <wd-icon
-                :name="selectedImages.includes(image.path) ? 'check-circle-fill' : 'circle'"
-                size="36rpx"
-                :color="selectedImages.includes(image.path) ? '#1989fa' : '#999'"
-              />
+            <view class="image-tip">
+              <text>点击预览</text>
             </view>
           </view>
         </view>
       </scroll-view>
+
+      <view class="usage-tip">
+        <text>💡 点击图片可预览，预览时长按可保存到相册</text>
+      </view>
     </view>
 
     <!-- Toast提示 -->
@@ -74,8 +66,6 @@ export default defineComponent({
     const toast = useToast()
     const isDownloading = ref(false)
     const downloadedImages = ref<{ url: string; path: string }[]>([])
-    const selectedImages = ref<string[]>([])
-    const currentIndex = ref(0)
 
     // 提取图片URL
     const extractImageUrls = (content: string): string[] => {
@@ -116,24 +106,44 @@ export default defineComponent({
       })
     }
 
-    // 分享单个文件
-    const shareFile = (filePath: string): Promise<void> => {
-      return new Promise((resolve, reject) => {
-        uni.shareFileMessage({
-          filePath,
-          success: () => resolve(),
-          fail: reject,
-        })
+    // 预览单张图片
+    const handleImagePreview = (index: number) => {
+      const imagePaths = downloadedImages.value.map((img) => img.path)
+      uni.previewImage({
+        current: index,
+        urls: imagePaths,
+        success: () => {
+          toast.info('长按图片可保存到相册')
+        },
+        fail: (error) => {
+          console.error('Preview error:', error)
+          toast.error('预览失败')
+        },
       })
     }
 
-    // 切换图片选择状态
-    const toggleImageSelection = (path: string) => {
-      selectedImages.value = [path]
-      currentIndex.value = downloadedImages.value.findIndex((img) => img.path === path)
+    // 预览所有图片
+    const handlePreviewAll = () => {
+      if (downloadedImages.value.length === 0) {
+        toast.error('没有可预览的图片')
+        return
+      }
+
+      const imagePaths = downloadedImages.value.map((img) => img.path)
+      uni.previewImage({
+        current: 0,
+        urls: imagePaths,
+        success: () => {
+          toast.info('长按图片可保存到相册')
+        },
+        fail: (error) => {
+          console.error('Preview error:', error)
+          toast.error('预览失败')
+        },
+      })
     }
 
-    // 更新下载处理函数
+    // 下载处理函数
     const handleDownload = async () => {
       const imageUrls = extractImageUrls(props.content)
       console.log('Found image URLs:', imageUrls)
@@ -145,8 +155,6 @@ export default defineComponent({
 
       isDownloading.value = true
       downloadedImages.value = []
-      selectedImages.value = []
-      currentIndex.value = 0 // 重置索引
 
       try {
         // 下载所有图片
@@ -160,8 +168,6 @@ export default defineComponent({
         }
 
         if (downloadedImages.value.length > 0) {
-          // 只默认选中第一张图片
-          selectedImages.value = [downloadedImages.value[0].path]
           toast.success(`成功下载 ${downloadedImages.value.length} 张图片`)
         } else {
           toast.error('所有图片下载失败')
@@ -174,52 +180,18 @@ export default defineComponent({
       }
     }
 
-    // 更新分享处理函数
-    const handleShare = async () => {
-      if (selectedImages.value.length === 0) {
-        toast.error('请选择要分享的图片')
-        return
-      }
-
-      try {
-        // 分享当前选中的图片
-        await shareFile(selectedImages.value[0])
-        toast.success('分享成功')
-
-        // 更新选中状态到下一张图片
-        currentIndex.value++
-        if (currentIndex.value < downloadedImages.value.length) {
-          // 还有下一张图片，更新选中
-          selectedImages.value = [downloadedImages.value[currentIndex.value].path]
-          toast.info(`请继续分享第 ${currentIndex.value + 1} 张图片`)
-        } else {
-          // 已经分享完所有图片
-          selectedImages.value = []
-          currentIndex.value = 0
-          toast.success('已分享完所有图片')
-        }
-      } catch (error) {
-        console.error('Share error:', error)
-        toast.error('分享失败')
-      }
-    }
-
-    // 更新重置函数
+    // 重置函数
     const handleReset = () => {
       downloadedImages.value = []
-      selectedImages.value = []
-      currentIndex.value = 0
     }
 
     return {
       isDownloading,
       downloadedImages,
-      selectedImages,
-      currentIndex,
       handleDownload,
-      handleShare,
+      handleImagePreview,
+      handlePreviewAll,
       handleReset,
-      toggleImageSelection,
     }
   },
 })
@@ -280,9 +252,11 @@ export default defineComponent({
       overflow: hidden;
       border: 1px solid #eee;
       border-radius: 6rpx;
+      transition: all 0.2s ease;
 
-      &.selected {
-        border: 2px solid #1989fa;
+      &:active {
+        opacity: 0.8;
+        transform: scale(0.95);
       }
 
       image {
@@ -291,14 +265,34 @@ export default defineComponent({
         object-fit: cover;
       }
 
-      .image-checkbox {
+      .image-tip {
         position: absolute;
-        top: 8rpx;
-        right: 8rpx;
-        background: rgba(255, 255, 255, 0.9);
-        border-radius: 50%;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        padding: 8rpx 4rpx 4rpx;
+        font-size: 20rpx;
+        color: white;
+        text-align: center;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.6));
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+
+      &:hover .image-tip {
+        opacity: 1;
       }
     }
+  }
+
+  .usage-tip {
+    padding: 20rpx;
+    margin: 20rpx;
+    font-size: 24rpx;
+    color: #666;
+    text-align: center;
+    background: #f8f9fa;
+    border-radius: 8rpx;
   }
 }
 </style>
