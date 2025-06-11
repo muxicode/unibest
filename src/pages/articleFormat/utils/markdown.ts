@@ -31,18 +31,31 @@ export const md = new MarkdownIt({
   linkify: true,
 })
 
+// 处理Markdown中的图片语法，确保能正确解析
+function preprocessMarkdown(markdown: string): string {
+  // 处理Markdown图片语法: ![alt](src)
+  return markdown.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, url) => {
+    // 确保图片URL被正确处理
+    return `<img src="${url}" alt="${alt || ''}" />`
+  })
+}
+
 // 转换markdown为HTML，应用主题样式
 export function convertMarkdownToHtml(
   markdown: string,
   themeName: string = 'theme-default',
+  fontSize: string = '14',
 ): string {
   console.log('Input markdown:', JSON.stringify(markdown))
+
+  // 预处理Markdown中的图片
+  const processedMarkdown = preprocessMarkdown(markdown)
 
   // 获取对应主题的解析器
   const themeParser = getThemeParser(themeName)
 
   // 使用主题特定的解析器来处理Markdown
-  const html = themeParser.parse(markdown)
+  const html = themeParser.parse(processedMarkdown, undefined, undefined, fontSize)
 
   console.log('Final HTML preview:', JSON.stringify(html.substring(0, 200)) + '...')
   return html
@@ -140,16 +153,26 @@ function parseHTMLFallback(html: string): any[] {
 // 解析HTML属性
 function parseAttrs(attrsStr: string): Record<string, any> {
   const attrs: Record<string, any> = {}
+
+  if (!attrsStr) {
+    return attrs
+  }
+
   const matches = attrsStr.match(/([a-z0-9-]+)(?:=["']([^"']*)["'])?/gi)
 
   if (matches) {
     for (const match of matches) {
-      const [key, value] = match.split('=')
-      if (value) {
+      const parts = match.split('=')
+      const key = parts[0].trim()
+      if (parts.length > 1) {
         // 移除引号
-        attrs[key.trim()] = value.replace(/["']/g, '')
+        const value = parts
+          .slice(1)
+          .join('=')
+          .replace(/^["'](.*)["']$/, '$1')
+        attrs[key] = value
       } else {
-        attrs[key.trim()] = true
+        attrs[key] = true
       }
     }
   }

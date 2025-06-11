@@ -10,7 +10,7 @@ import { purplesThemeParser } from './purples'
 // 主题解析器接口
 export interface ThemeParser {
   // 解析函数：接收markdown内容和md实例，返回解析后的HTML
-  parse: (markdown: string, md?: any, hljs?: any) => string
+  parse: (markdown: string, md?: any, hljs?: any, fontSize?: string) => string
   // 主题名称
   name: string
   // 主题描述

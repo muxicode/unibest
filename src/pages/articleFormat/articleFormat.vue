@@ -32,6 +32,19 @@
               {{ themes.find((t) => t.value === currentTheme)?.label }}
             </text>
           </wd-picker>
+          <text class="theme-label">&nbsp;</text>
+          <text class="theme-label">字体：</text>
+          <wd-picker
+            v-model="fontSize"
+            :columns="fontSizeOptions"
+            :label-key="'label'"
+            :value-key="'value'"
+            @confirm="handleFontSizeChange"
+          >
+            <text class="picker-text">
+              {{ fontSizeOptions.find((o) => o.value === fontSize)?.label }}
+            </text>
+          </wd-picker>
         </view>
 
         <image-downloader v-if="content" :content="content" />
@@ -67,6 +80,7 @@
           :selectable="true"
           :user-select="true"
           class="article-content"
+          :style="{ fontSize: `${fontSize}px` }"
           space="nbsp"
         />
       </view>
@@ -90,6 +104,17 @@ const toast = useToast()
 const content = ref('')
 const currentTheme = ref('theme-default')
 const articleTitle = ref('')
+const fontSize = ref('16')
+
+// 字体大小选项
+const fontSizeOptions = [
+  { label: '8', value: '8' },
+  { label: '10', value: '10' },
+  { label: '12', value: '12' },
+  { label: '14', value: '14' },
+  { label: '16', value: '16' },
+  { label: '18', value: '18' },
+]
 
 // 获取主题列表
 const themes = getAllThemes()
@@ -101,7 +126,7 @@ const isIOS = computed(() => uni.getSystemInfoSync().platform === 'ios')
 const formattedContent = computed(() => {
   if (!content.value) return []
   console.log('Original content:', JSON.stringify(content.value, null, 2))
-  const html = convertMarkdownToHtml(content.value, currentTheme.value)
+  const html = convertMarkdownToHtml(content.value, currentTheme.value, fontSize.value)
   console.log('Converted HTML:', JSON.stringify(html, null, 2))
   return html
 })
@@ -169,16 +194,22 @@ const handleThemeChange = () => {
   // 主题切换时会自动重新计算 formattedContent
 }
 
+// 字体大小切换
+const handleFontSizeChange = () => {
+  // 字体大小切换时会自动重新计算 formattedContent
+}
+
 // 重置
 const handleReset = () => {
   content.value = ''
   currentTheme.value = 'theme-default'
+  fontSize.value = '14'
 }
 
 // 添加复制全文功能
 const copyFullContent = () => {
   // 获取格式化后的HTML内容
-  const html = convertMarkdownToHtml(content.value, currentTheme.value)
+  const html = convertMarkdownToHtml(content.value, currentTheme.value, fontSize.value)
 
   // 使用 uni.setClipboardData 复制格式化后的内容
   uni.setClipboardData({
