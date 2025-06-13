@@ -44,6 +44,14 @@
           <text class="label">结算单：</text>
           <text class="value">{{ item.settlementStatement || '暂无' }}</text>
         </view>
+        <view class="info-row">
+          <text class="label">评审状态：</text>
+          <text class="value">{{ getReviewStatusText(item.reviewStatus) }}</text>
+        </view>
+        <view class="info-row" v-if="item.suggestion">
+          <text class="label">评审建议：</text>
+          <text class="value">{{ item.suggestion }}</text>
+        </view>
         <view class="button-row" v-if="item.settlementStatus === 'INIT'">
           <wd-button type="primary" size="small" @click="handleSettle(item)">去结算</wd-button>
         </view>
@@ -75,6 +83,18 @@ const getStatusText = (status: SettlementStatus) => {
     FINISH: '已完成',
   }
   return statusMap[status]
+}
+
+const getReviewStatusText = (status: string | undefined) => {
+  if (!status) return '暂无评审'
+
+  const reviewStatusMap: Record<string, string> = {
+    SUCCESS: '通过',
+    FAIL: '驳回',
+    NO_REVIEW: '未评审',
+  }
+
+  return reviewStatusMap[status] || status
 }
 
 const getStatusClass = (status: SettlementStatus) => {
