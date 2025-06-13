@@ -122,6 +122,16 @@ const themes = getAllThemes()
 // 判断是否为 iOS 平台
 const isIOS = computed(() => uni.getSystemInfoSync().platform === 'ios')
 
+// 从URL参数加载文章内容
+onLoad((options: any) => {
+  if (options.title && options.content) {
+    // 从URL参数获取文章标题和内容
+    articleTitle.value = decodeURIComponent(options.title)
+    content.value = decodeURIComponent(options.content)
+    toast.success('文章已加载')
+  }
+})
+
 // 格式化后的内容
 const formattedContent = computed(() => {
   if (!content.value) return []

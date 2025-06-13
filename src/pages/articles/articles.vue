@@ -65,7 +65,6 @@
 
           <!-- 操作按钮区 -->
           <view class="action-btns">
-            <button class="btn secondary-btn" @click="copyTitle(item.title)">复制</button>
             <button
               class="btn primary-btn"
               :class="{ 'is-loading': downloading === item.id }"
@@ -74,6 +73,13 @@
             >
               <text v-if="downloading === item.id">下载中...</text>
               <text v-else>{{ item.isDownload ? '重新下载' : '下载' }}</text>
+            </button>
+            <button
+              class="btn publish-btn"
+              :disabled="downloading === item.id"
+              @click="handleFastPublish(item)"
+            >
+              发布
             </button>
           </view>
         </view>
@@ -180,6 +186,7 @@ const keyword = ref('')
 const showSimilarityPopup = ref(false)
 const similarityResult = ref<SimilarityResult | null>(null)
 const currentArticle = ref<ArticleItem | null>(null)
+const currentAction = ref<'download' | 'publish'>('download')
 
 // 标题展开收起功能
 const expandedIds = ref<string[]>([])
@@ -264,6 +271,7 @@ const handleDownload = async (article: ArticleItem) => {
   try {
     downloading.value = article.id
     currentArticle.value = article
+    currentAction.value = 'download'
 
     const res = await checkTitleSimilarity({
       accountId: accountId.value,
@@ -317,7 +325,11 @@ const confirmDownloadSimilar = async () => {
   showSimilarityPopup.value = false
 
   if (currentArticle.value) {
-    await downloadArticleFile(currentArticle.value)
+    if (currentAction.value === 'download') {
+      await downloadArticleFile(currentArticle.value)
+    } else {
+      await fastPublishArticle(currentArticle.value)
+    }
   }
 }
 
@@ -391,6 +403,75 @@ onUnmounted(() => {
     clearTimeout(searchTimer)
   }
 })
+
+// 处理快速发布
+const handleFastPublish = async (article: ArticleItem) => {
+  if (downloading.value) {
+    toast.warning('有文件正在下载中')
+    return
+  }
+
+  // 先检查标题相似度
+  try {
+    downloading.value = article.id
+    currentArticle.value = article
+    currentAction.value = 'publish'
+
+    const res = await checkTitleSimilarity({
+      accountId: accountId.value,
+      title: article.title,
+    })
+
+    // 如果存在相似标题
+    if (res.data.similarityTitleNum > 0) {
+      similarityResult.value = res.data
+      showSimilarityPopup.value = true
+      downloading.value = '' // 重置下载状态
+      return
+    }
+
+    // 如果没有相似标题，直接发布
+    await fastPublishArticle(article)
+  } catch (err) {
+    console.error('检查标题相似度失败:', err)
+    toast.error('检查失败')
+    downloading.value = ''
+  }
+}
+
+// 实际发布文章的方法
+const fastPublishArticle = async (article: ArticleItem) => {
+  downloading.value = article.id
+
+  try {
+    const res = await downloadArticle({
+      articleId: article.id,
+      accountId: accountId.value,
+    })
+
+    // 检查响应码
+    if (res.code === 1) {
+      // 跳转到文章格式化页面，并传递文章数据
+      uni.navigateTo({
+        url: `/pages/articleFormat/articleFormat?title=${encodeURIComponent(res.data.title)}&content=${encodeURIComponent(res.data.content)}`,
+        success: () => {
+          toast.success('准备发布')
+        },
+        fail: (err) => {
+          console.error('跳转失败:', err)
+          toast.error('跳转失败')
+        },
+      })
+    }
+    // 不需要在这里处理 code === 0 的情况，因为拦截器已经显示了错误提示
+  } catch (err) {
+    console.error('下载失败:', err)
+    toast.error('下载失败')
+  } finally {
+    // 确保在所有情况下都重置下载状态
+    downloading.value = ''
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -557,6 +638,11 @@ $border-radius: 20rpx;
   &.secondary-btn {
     color: $text-secondary;
     background: #f5f5f5;
+  }
+
+  &.publish-btn {
+    color: $card-background;
+    background: $success-color;
   }
 }
 

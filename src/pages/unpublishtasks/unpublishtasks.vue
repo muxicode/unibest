@@ -34,7 +34,6 @@
 
           <!-- 操作按钮区 -->
           <view class="action-btns">
-            <button class="btn secondary-btn" @click="copyTitle(item.title)">复制</button>
             <button
               class="btn primary-btn"
               :class="{ 'is-loading': downloading === item.id }"
@@ -43,6 +42,14 @@
             >
               <text v-if="downloading === item.id">下载中...</text>
               <text v-else>下载</text>
+            </button>
+            <button
+              class="btn publish-btn"
+              :disabled="publishing === item.id"
+              @click="handlePublish(item)"
+            >
+              <text v-if="publishing === item.id">发布中...</text>
+              <text v-else>发布</text>
             </button>
             <button
               class="btn publish-btn"
@@ -139,6 +146,7 @@ const tasks = ref<UnpublishedTask[]>([])
 const loading = ref(false)
 const error = ref(false)
 const downloading = ref('') // 记录正在下载的任务ID
+const publishing = ref('') // 记录正在发布的任务ID
 const submitting = ref('') // 记录正在提交的任务ID
 const showSharePopup = ref(false)
 const downloadFilePath = ref('')
@@ -171,24 +179,6 @@ const loadTasks = async () => {
   } finally {
     loading.value = false
   }
-}
-
-// 复制文章标题
-const copyTitle = (title: string) => {
-  uni.hideToast()
-
-  setTimeout(() => {
-    uni.setClipboardData({
-      data: title,
-      success: () => {
-        uni.hideToast()
-        toast.success('复制成功')
-      },
-      fail: () => {
-        toast.error('复制失败')
-      },
-    })
-  }, 50)
 }
 
 // 处理下载
@@ -270,15 +260,15 @@ const showPublishDialog = (task: UnpublishedTask) => {
       cancelButtonText: '取消',
     })
     .then(() => {
-      handlePublish()
+      handleSubmitAddress()
     })
     .catch(() => {
       currentTask.value = null
     })
 }
 
-// 处理发表文章
-const handlePublish = async () => {
+// 处理提交文章地址
+const handleSubmitAddress = async () => {
   if (!currentTask.value || !articleAddress.value.trim()) {
     toast.error('请输入文章地址')
     return
@@ -307,6 +297,43 @@ const handlePublish = async () => {
     submitting.value = ''
     currentTask.value = null
     articleAddress.value = ''
+  }
+}
+
+// 处理发布
+const handlePublish = async (task: UnpublishedTask) => {
+  if (publishing.value) {
+    toast.warning('有文章正在发布中')
+    return
+  }
+  publishing.value = task.id
+
+  try {
+    const res = await downloadArticle({
+      articleId: task.articleId,
+      accountId: task.accountId,
+    })
+
+    if (res.code === 1) {
+      // 跳转到文章格式化页面，并传递文章数据
+      uni.navigateTo({
+        url: `/pages/articleFormat/articleFormat?title=${encodeURIComponent(res.data.title)}&content=${encodeURIComponent(res.data.content)}`,
+        success: () => {
+          toast.success('准备发布')
+        },
+        fail: (err) => {
+          console.error('跳转失败:', err)
+          toast.error('跳转失败')
+        },
+      })
+    } else {
+      toast.error(res.msg || '下载失败')
+    }
+  } catch (err) {
+    console.error('发布失败:', err)
+    toast.error('发布失败')
+  } finally {
+    publishing.value = ''
   }
 }
 
