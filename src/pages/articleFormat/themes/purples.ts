@@ -29,7 +29,7 @@ export const purplesThemeParser: ThemeParser = {
       h3: 'font-size: 16px; margin-top: 15px; margin-bottom: 8px; margin-left: 0px; margin-right: 0px; padding-top: 0px; padding-bottom: 0px; padding-left: 0px; padding-right: 0px; display: block;',
       h3Content:
         'font-size: 16px; color: rgb(119, 48, 152); line-height: 1.5em; letter-spacing: 0em; font-weight: bold; display: block;',
-      p: 'color: rgb(89, 89, 89); font-size: 16px; line-height: 1.8em; letter-spacing: 0.02em; text-align: left; text-indent: 0em; margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; padding-top: 4px; padding-bottom: 4px; padding-left: 0px; padding-right: 0px;',
+      p: 'color: rgb(89, 89, 89); font-size: 16px; line-height: 1.8em; letter-spacing: 0.02em; text-align: left; text-indent: 0em; margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; padding-top: 12px; padding-bottom: 12px; padding-left: 0px; padding-right: 0px;',
       ul: 'list-style-type: circle; margin-top: 4px; margin-bottom: 4px; margin-left: 0px; margin-right: 0px; padding-top: 0px; padding-bottom: 0px; padding-left: 12px; padding-right: 0px; color: rgb(0, 0, 0);',
       ol: 'list-style-type: decimal; margin-top: 4px; margin-bottom: 4px; margin-left: 0px; margin-right: 0px; padding-top: 0px; padding-bottom: 0px; padding-left: 12px; padding-right: 0px; color: rgb(0, 0, 0);',
       li: 'margin-top: 3px; margin-bottom: 3px; color: rgb(90, 90, 90); font-size: 14px; line-height: 1.8em; letter-spacing: 0.02em; text-align: left; font-weight: normal;',

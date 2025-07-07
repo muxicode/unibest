@@ -36,7 +36,7 @@ export const cupidThemeParser: ThemeParser = {
       h3Content:
         'color: rgb(0, 0, 0); line-height: 1.4em; letter-spacing: 0em; text-align: left; font-weight: bold; display: block; font-size: 16px;',
 
-      p: 'color: rgb(89, 89, 89); font-size: 16px; line-height: 1.8em; letter-spacing: 0.02em; text-align: left; text-indent: 0em; margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; padding-top: 4px; padding-bottom: 4px; padding-left: 0px; padding-right: 0px;',
+      p: 'color: rgb(89, 89, 89); font-size: 16px; line-height: 1.8em; letter-spacing: 0.02em; text-align: left; text-indent: 0em; margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; padding-top: 12px; padding-bottom: 12px; padding-left: 0px; padding-right: 0px;',
 
       ul: 'list-style-type: circle; margin-top: 4px; margin-bottom: 4px; margin-left: 0px; margin-right: 0px; padding-top: 0px; padding-bottom: 0px; padding-left: 12px; padding-right: 0px; color: rgb(0, 0, 0);',
 
