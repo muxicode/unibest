@@ -420,6 +420,11 @@ export function getRejectionTasks() {
   return http.get<RejectionTask[]>('/agency/task/rejection')
 }
 
+// 管理员获取文章详情
+export const getArticleDetail = (articleId: string) => {
+  return http.get<ArticleInfo>('/agency/admin/article/get', { articleId })
+}
+
 /** 文章统计信息 */
 export interface ArticleStats {
   accountCount: number

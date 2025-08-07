@@ -46,8 +46,8 @@
       <!-- 文章列表 -->
       <view v-else class="article-list">
         <view v-for="item in articles" :key="item.id" class="article-item">
-          <!-- 文章内容区 -->
-          <view class="article-content">
+          <!-- 文章标题区 -->
+          <view class="article-header">
             <view class="title-wrapper">
               <text
                 class="article-title"
@@ -65,6 +65,7 @@
 
           <!-- 操作按钮区 -->
           <view class="action-btns">
+            <button class="btn copy-btn" @click="copyTitle(item.title)">复制标题</button>
             <button
               class="btn primary-btn"
               :class="{ 'is-loading': downloading === item.id }"
@@ -545,9 +546,7 @@ $border-radius: 20rpx;
   .article-item {
     position: relative;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 88rpx;
+    flex-direction: column;
     padding: $spacing-base;
     background: $card-background;
     border-bottom: 2rpx solid $border-color;
@@ -558,10 +557,9 @@ $border-radius: 20rpx;
   }
 }
 
-.article-content {
-  flex: 1;
-  margin-right: 16rpx;
-  overflow: hidden;
+.article-header {
+  width: 100%;
+  margin-bottom: 16rpx;
 }
 
 .title-wrapper {
@@ -607,18 +605,21 @@ $border-radius: 20rpx;
 
 .action-btns {
   display: flex;
-  gap: 12rpx;
+  gap: 8rpx;
   align-items: center;
+  justify-content: flex-end;
+  width: fit-content;
+  margin-left: auto;
   white-space: nowrap;
 }
 
 .btn {
-  min-width: 112rpx;
-  height: 64rpx;
-  padding: 0 20rpx;
+  min-width: 100rpx;
+  height: 60rpx;
+  padding: 0 16rpx;
   font-size: 26rpx;
   font-weight: 500;
-  line-height: 64rpx;
+  line-height: 60rpx;
   text-align: center;
   border: none;
   border-radius: 8rpx;
@@ -643,6 +644,16 @@ $border-radius: 20rpx;
   &.publish-btn {
     color: $card-background;
     background: $success-color;
+  }
+
+  &.copy-btn {
+    color: $text-secondary;
+    background: #f5f5f5;
+    border: 2rpx solid $border-color;
+
+    &:active {
+      background: #e8e8e8;
+    }
   }
 }
 

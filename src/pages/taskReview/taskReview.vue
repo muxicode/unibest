@@ -37,6 +37,10 @@
                   <text class="detail-value">{{ item.accountId }}</text>
                 </view>
                 <view class="detail-item">
+                  <text class="detail-label">用户ID</text>
+                  <text class="detail-value">{{ item.userId }}</text>
+                </view>
+                <view class="detail-item">
                   <text class="detail-label">账号名称</text>
                   <text class="detail-value">{{ item.accountName }}</text>
                 </view>
@@ -55,6 +59,18 @@
               </view>
 
               <view class="action-group">
+                <button class="action-btn view-btn" @click="handleViewArticle(item)">
+                  <text>查看原文</text>
+                </button>
+                <button
+                  class="action-btn download-btn"
+                  :class="{ 'is-loading': downloading === item.id }"
+                  :disabled="downloading === item.id"
+                  @click="handleDownloadArticle(item)"
+                >
+                  <text v-if="downloading === item.id">下载中...</text>
+                  <text v-else>下载</text>
+                </button>
                 <button
                   class="action-btn approve-btn"
                   :class="{ 'is-loading': loadingMap[`${item.id}-approve`] }"
@@ -79,12 +95,35 @@
         </view>
       </view>
     </view>
+
+    <!-- 下载成功弹窗 -->
+    <wd-popup
+      v-model="showSharePopup"
+      custom-style="padding: 30px 40px; border-radius: 16px;"
+      @close="handleClose"
+    >
+      <view class="share-popup">
+        <view class="share-title">下载成功</view>
+        <view class="share-content">
+          <text>文件已下载成功,是否立即分享到微信?</text>
+        </view>
+        <view class="share-footer">
+          <button class="share-btn cancel-btn" @click="handleClose">取消</button>
+          <button class="share-btn confirm-btn" @click="shareFile">立即分享</button>
+        </view>
+      </view>
+    </wd-popup>
   </view>
 </template>
 
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
-import { getTaskReviewSheets, reviewTask, type TaskReviewSheet } from '@/service/index/foo'
+import {
+  getTaskReviewSheets,
+  reviewTask,
+  getArticleDetail,
+  type TaskReviewSheet,
+} from '@/service/index/foo'
 
 const STATUS_TEXT_MAP: Record<string, string> = {
   UN_REVIEW: '待审核',
@@ -100,6 +139,11 @@ const STATUS_CLASS_MAP: Record<string, string> = {
 
 const reviewSheets = ref<TaskReviewSheet[]>([])
 const loadingMap = ref<Record<string, boolean>>({})
+
+// 下载相关状态
+const downloading = ref('') // 记录正在下载的文章ID
+const showSharePopup = ref(false)
+const downloadFilePath = ref('')
 
 const getStatusClass = (status: string) => STATUS_CLASS_MAP[status] || ''
 
@@ -169,6 +213,117 @@ const handleReject = async (item: TaskReviewSheet) => {
     },
     'reject',
   )
+}
+
+// 查看原文
+const handleViewArticle = async (item: TaskReviewSheet) => {
+  try {
+    const res = await getArticleDetail(item.articleId)
+    if (res.code === 1) {
+      // 跳转到文章展示页面
+      uni.navigateTo({
+        url: `/pages/articleFormat/articleFormat?title=${encodeURIComponent(res.data.title)}&content=${encodeURIComponent(res.data.content)}`,
+        success: () => {
+          uni.showToast({
+            title: '正在查看原文',
+            icon: 'success',
+          })
+        },
+        fail: (err) => {
+          console.error('跳转失败:', err)
+          uni.showToast({
+            title: '跳转失败',
+            icon: 'none',
+          })
+        },
+      })
+    } else {
+      throw new Error(res.msg || '获取文章失败')
+    }
+  } catch (error) {
+    console.error('获取文章详情失败:', error)
+    uni.showToast({
+      title: '获取文章失败',
+      icon: 'none',
+    })
+  }
+}
+
+// 下载文章
+const handleDownloadArticle = async (item: TaskReviewSheet) => {
+  if (downloading.value) {
+    uni.showToast({
+      title: '有文件正在下载中',
+      icon: 'none',
+    })
+    return
+  }
+
+  downloading.value = item.id
+
+  try {
+    const res = await getArticleDetail(item.articleId)
+    if (res.code === 1) {
+      await prepareFileToShare(res.data)
+      showSharePopup.value = true
+    } else {
+      throw new Error(res.msg || '下载失败')
+    }
+  } catch (error) {
+    console.error('下载失败:', error)
+    uni.showToast({
+      title: '下载失败',
+      icon: 'none',
+    })
+  } finally {
+    downloading.value = ''
+  }
+}
+
+// 准备文件分享
+const prepareFileToShare = (articleInfo: any): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    downloadFilePath.value = `${wx.env.USER_DATA_PATH}/${articleInfo.title}.txt`
+
+    uni.getFileSystemManager().writeFile({
+      filePath: downloadFilePath.value,
+      data: articleInfo.content,
+      encoding: 'utf8',
+      success: () => {
+        resolve()
+      },
+      fail: (err) => {
+        console.error('文件保存失败:', err)
+        reject(new Error('文件保存失败'))
+      },
+    })
+  })
+}
+
+// 分享文件
+const shareFile = () => {
+  uni.shareFileMessage({
+    filePath: downloadFilePath.value,
+    success: () => {
+      showSharePopup.value = false
+      uni.showToast({
+        title: '分享成功',
+        icon: 'success',
+      })
+    },
+    fail: (err) => {
+      console.error('分享失败:', err)
+      uni.showToast({
+        title: '分享失败',
+        icon: 'none',
+      })
+    },
+  })
+}
+
+// 关闭弹窗
+const handleClose = () => {
+  showSharePopup.value = false
 }
 
 const fetchData = async () => {
@@ -366,6 +521,14 @@ $border-radius: 12rpx;
     background: $error-color;
   }
 
+  &.view-btn {
+    background: $primary-color;
+  }
+
+  &.download-btn {
+    background: $warning-color;
+  }
+
   &:active {
     transform: translateY(1rpx);
   }
@@ -395,6 +558,57 @@ $border-radius: 12rpx;
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+
+// 分享弹窗样式
+.share-popup {
+  min-width: 560rpx;
+
+  .share-title {
+    margin-bottom: 24rpx;
+    font-size: 36rpx;
+    font-weight: bold;
+    color: $text-primary;
+  }
+
+  .share-content {
+    padding-bottom: 32rpx;
+    margin-bottom: 32rpx;
+    font-size: 28rpx;
+    color: $text-secondary;
+    border-bottom: 2rpx solid $border-color;
+  }
+
+  .share-footer {
+    display: flex;
+    gap: 16rpx;
+    justify-content: flex-end;
+
+    .share-btn {
+      min-width: 180rpx;
+      height: 64rpx;
+      padding: 0 24rpx;
+      font-size: 28rpx;
+      font-weight: 500;
+      border: none;
+      border-radius: 8rpx;
+      transition: all 0.3s ease;
+
+      &.cancel-btn {
+        color: $text-secondary;
+        background: #f5f5f5;
+      }
+
+      &.confirm-btn {
+        color: #ffffff;
+        background: $primary-color;
+      }
+
+      &:active {
+        transform: translateY(1rpx);
+      }
+    }
   }
 }
 </style>
